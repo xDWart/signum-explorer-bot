@@ -19,7 +19,9 @@ func (p *PriceManager) GetActualPrices() string {
 
 	var signaSign string
 	if prices["SIGNA"].PercentChange24h > 0 {
-		signaSign = "+"
+		signaSign = "\U0001F7E2 +"
+	} else {
+		signaSign = "🔴 "
 	}
 
 	var btcSign string
