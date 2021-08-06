@@ -1,7 +1,7 @@
 package config
 
 const NAME = "<b>🚀 Signum Explorer Telegram Bot</b>"
-const VERSION = "<i>v.0.5.0</i>"
+const VERSION = "<i>v.0.5.1</i>"
 
 const INSTRUCTION_TEXT = `
 Text any <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) to explore it once.
@@ -13,7 +13,7 @@ Send /info for information.
 
 const AUTHOR_TEXT = `
 👦 <i>Author:</i> @AnatoliyB
-📒 <i>GitHub:</i> https://github.com/xDWart/signum-explorer-bot
+📒 <i>GitHub:</i> <code>https://github.com/xDWart/signum-explorer-bot</code>
 💰 <i>Donate:</i> <code>S-8N2F-TDD7-4LY6-64FZ7</code>`
 
 const (
