@@ -3,7 +3,7 @@ package calculator
 import (
 	"gorm.io/gorm"
 	"math"
-	"signum_explorer_bot/internal/api/signum_api"
+	"signum-explorer-bot/internal/api/signum_api"
 	"sync"
 )
 

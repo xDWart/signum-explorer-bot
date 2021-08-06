@@ -7,9 +7,9 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/golang/protobuf/proto"
 	"log"
-	"signum_explorer_bot/internal/common"
-	"signum_explorer_bot/internal/config"
-	"signum_explorer_bot/internal/users/callback_data"
+	"signum-explorer-bot/internal/common"
+	"signum-explorer-bot/internal/config"
+	"signum-explorer-bot/internal/users/callback_data"
 	"time"
 )
 

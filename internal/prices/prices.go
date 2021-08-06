@@ -2,8 +2,8 @@ package prices
 
 import (
 	"fmt"
-	"signum_explorer_bot/internal/api/cmc_api"
-	"signum_explorer_bot/internal/common"
+	"signum-explorer-bot/internal/api/cmc_api"
+	"signum-explorer-bot/internal/common"
 )
 
 type PriceManager struct {

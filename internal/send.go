@@ -3,7 +3,7 @@ package internal
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
-	"signum_explorer_bot/internal/common"
+	"signum-explorer-bot/internal/common"
 )
 
 func (bot *TelegramBot) SendAnswer(chatID int64, answer *common.BotMessage) {

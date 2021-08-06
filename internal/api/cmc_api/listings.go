@@ -3,7 +3,7 @@ package cmc_api
 import (
 	"fmt"
 	"log"
-	"signum_explorer_bot/internal/config"
+	"signum-explorer-bot/internal/config"
 	"time"
 )
 

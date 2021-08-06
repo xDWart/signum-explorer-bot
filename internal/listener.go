@@ -2,8 +2,8 @@ package internal
 
 import (
 	"log"
-	"signum_explorer_bot/internal/common"
-	"signum_explorer_bot/internal/config"
+	"signum-explorer-bot/internal/common"
+	"signum-explorer-bot/internal/config"
 	"strings"
 )
 

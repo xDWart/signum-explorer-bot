@@ -3,10 +3,10 @@ package notifier
 import (
 	"fmt"
 	"log"
-	"signum_explorer_bot/internal/api/signum_api"
-	"signum_explorer_bot/internal/common"
-	"signum_explorer_bot/internal/config"
-	"signum_explorer_bot/internal/database/models"
+	"signum-explorer-bot/internal/api/signum_api"
+	"signum-explorer-bot/internal/common"
+	"signum-explorer-bot/internal/config"
+	"signum-explorer-bot/internal/database/models"
 	"sync"
 	"time"
 )
@@ -71,7 +71,7 @@ func (n *Notifier) checkTransactions(account *MonitoredAccount) {
 		return
 	}
 
-	msg := fmt.Sprintf("💸 New transactions on account %v:", account.AccountRS)
+	msg := fmt.Sprintf("💸 New transactions on account <code>%v</code>:", account.AccountRS)
 	for _, transaction := range userTransactions.Transactions {
 		// until not LastTransactionID
 		if transaction.TransactionID == account.LastTransactionID {
@@ -80,26 +80,26 @@ func (n *Notifier) checkTransactions(account *MonitoredAccount) {
 		switch transaction.Subtype {
 		case signum_api.ORDINARY_PAYMENT:
 			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("\nOutgoing ordinary payment to %v: -%v SIGNA",
+				msg += fmt.Sprintf("\nOutgoing ordinary payment to <code>%v</code>: <i>-%v SIGNA</i>",
 					transaction.RecipientRS, common.FormatNumber(transaction.AmountNQT/1e8, 2))
 			} else {
-				msg += fmt.Sprintf("\nIncoming ordinary payment from %v: +%v SIGNA",
+				msg += fmt.Sprintf("\nIncoming ordinary payment from <code>%v</code>: <i>+%v SIGNA</i>",
 					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8, 2))
 			}
 		case signum_api.MULTI_OUT_PAYMENT:
 			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("\nOutgoing multi-out payment: -%v SIGNA",
+				msg += fmt.Sprintf("\nOutgoing multi-out payment: <i>-%v SIGNA",
 					common.FormatNumber(transaction.AmountNQT/1e8, 2))
 			} else {
-				msg += fmt.Sprintf("\nIncoming multi-out payment from %v: +%v SIGNA",
+				msg += fmt.Sprintf("\nIncoming multi-out payment from <code>%v</code>: <i>+%v SIGNA</i>",
 					transaction.SenderRS, common.FormatNumber(transaction.Attachment.Recipients.FoundMyAmount(account.Account), 2))
 			}
 		case signum_api.MULTI_OUT_SAME_PAYMENT:
 			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("\nOutgoing multi-out same payment: -%v SIGNA",
+				msg += fmt.Sprintf("\nOutgoing multi-out same payment: <i>-%v SIGNA</i>",
 					common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
 			} else {
-				msg += fmt.Sprintf("\nIncoming multi-out same payment: +%v SIGNA",
+				msg += fmt.Sprintf("\nIncoming multi-out same payment: <i>+%v SIGNA</i>",
 					common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
 			}
 		default:
@@ -112,7 +112,7 @@ func (n *Notifier) checkTransactions(account *MonitoredAccount) {
 
 	newAccount, err := n.signumClient.InvalidateCacheAndGetAccount(account.Account)
 	if err == nil {
-		msg += fmt.Sprintf("\nNew total balance: %v SIGNA", common.FormatNumber(newAccount.TotalBalance, 2))
+		msg += fmt.Sprintf("\n<b>Total balance: %v SIGNA</b>", common.FormatNumber(newAccount.TotalBalance, 2))
 	}
 
 	n.notifierCh <- NotifierMessage{
@@ -136,7 +136,7 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 		return
 	}
 
-	msg := fmt.Sprintf("📃 New block on account %v:", account.AccountRS)
+	msg := fmt.Sprintf("📃 New block on account <code>%v</code>:", account.AccountRS)
 
 	for _, block := range userBlocks.Blocks {
 		msg += fmt.Sprintf("\n[<i>%v</i>]  #<code>%v</code>  <i>+%v SIGNA</i>\n",

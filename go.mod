@@ -1,4 +1,4 @@
-module signum_explorer_bot
+module signum-explorer-bot
 
 // +heroku goVersion go1.16
 go 1.16

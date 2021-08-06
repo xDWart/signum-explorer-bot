@@ -1,6 +1,6 @@
 package signum_api
 
-import "signum_explorer_bot/internal/config"
+import "signum-explorer-bot/internal/config"
 
 type MiningInfo struct {
 	Height               uint32  `json:"height,string"`

@@ -2,8 +2,8 @@ package users
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"signum_explorer_bot/internal/config"
-	"signum_explorer_bot/internal/users/callback_data"
+	"signum-explorer-bot/internal/config"
+	"signum-explorer-bot/internal/users/callback_data"
 )
 
 func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMarkup {

@@ -1,11 +1,11 @@
-<img align="right" src="https://github.com/xDWart/signum_explorer_bot/raw/master/assets/big_logo.png" height="200">
+<img align="right" src="https://github.com/xDWart/signum-explorer-bot/raw/master/assets/big_logo.png" height="200">
 
-# 🚀 Signum Explorer Telegram Bot [@signum_explorer_bot](https://telegram.me/signum_explorer_bot)
+# 🚀 Signum Explorer Telegram Bot [@signum_explorer_bot](https://telegram.me/signum-explorer-bot)
 
-[![Build Status](https://github.com/xDWart/signum_explorer_bot/workflows/Build/badge.svg)](https://github.com/xDWart/signum_explorer_bot/actions?query=workflow%3ABuild)
-[![Go Report Card](https://goreportcard.com/badge/github.com/xDWart/signum_explorer_bot)](https://goreportcard.com/report/github.com/xDWart/signum_explorer_bot)
-[![Version](https://img.shields.io/github/go-mod/go-version/xDWart/signum_explorer_bot)](go.mod)
-[![License](https://img.shields.io/github/license/xDWart/signum_explorer_bot)](LICENSE)
+[![Build Status](https://github.com/xDWart/signum-explorer-bot/workflows/Build/badge.svg)](https://github.com/xDWart/signum-explorer-bot/actions?query=workflow%3ABuild)
+[![Go Report Card](https://goreportcard.com/badge/github.com/xDWart/signum-explorer-bot)](https://goreportcard.com/report/github.com/xDWart/signum-explorer-bot)
+[![Version](https://img.shields.io/github/go-mod/go-version/xDWart/signum-explorer-bot)](go.mod)
+[![License](https://img.shields.io/github/license/xDWart/signum-explorer-bot)](LICENSE)
 
 ## Annotation
 
@@ -37,13 +37,13 @@ Signum Explorer Telegram Bot - it's a simplified version of the [web Signum Expl
 
 ## Contribution
 
-- Do you have an idea to improve signum_explorer_bot? -> [Create an issue](https://github.com/xDWart/signum_explorer_bot/issues/new/choose)
-- Have you discovered a bug? -> [Create an issue](https://github.com/xDWart/signum_explorer_bot/issues/new/choose)
-- Have you already coded something for signum_explorer_bot? -> [Create a pull request](https://github.com/xDWart/signum_explorer_bot/compare)
+- Do you have an idea to improve signum-explorer-bot? -> [Create an issue](https://github.com/xDWart/signum-explorer-bot/issues/new/choose)
+- Have you discovered a bug? -> [Create an issue](https://github.com/xDWart/signum-explorer-bot/issues/new/choose)
+- Have you already coded something for signum-explorer-bot? -> [Create a pull request](https://github.com/xDWart/signum-explorer-bot/compare)
 
 ## Licence
 
-- signum_explorer_bot is licensed under the GPLv3
+- signum-explorer-bot is licensed under the GPLv3
 - See [LICENSE](LICENSE) for the full license text
 - Copyright (c) [Anatoliy Bezgubenko](https://t.me/AnatoliyB)
 

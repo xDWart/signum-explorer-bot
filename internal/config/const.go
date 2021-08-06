@@ -13,7 +13,7 @@ Send /info for information.
 
 const AUTHOR_TEXT = `
 👦 <i>Author:</i> @AnatoliyB
-📒 <i>GitHub:</i> https://github.com/xDWart/signum_explorer_bot
+📒 <i>GitHub:</i> https://github.com/xDWart/signum-explorer-bot
 💰 <i>Donate:</i> <code>S-8N2F-TDD7-4LY6-64FZ7</code>`
 
 const (

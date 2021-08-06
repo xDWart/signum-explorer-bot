@@ -3,11 +3,11 @@ package users
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"gorm.io/gorm"
-	"signum_explorer_bot/internal/api/cmc_api"
-	"signum_explorer_bot/internal/api/signum_api"
-	"signum_explorer_bot/internal/config"
-	"signum_explorer_bot/internal/database/models"
-	"signum_explorer_bot/internal/users/calculator"
+	"signum-explorer-bot/internal/api/cmc_api"
+	"signum-explorer-bot/internal/api/signum_api"
+	"signum-explorer-bot/internal/config"
+	"signum-explorer-bot/internal/database/models"
+	"signum-explorer-bot/internal/users/calculator"
 	"sync"
 	"time"
 )

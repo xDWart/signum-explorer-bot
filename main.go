@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"signum_explorer_bot/internal"
+	"signum-explorer-bot/internal"
 	"syscall"
 )
 

@@ -2,7 +2,7 @@ package users
 
 import (
 	"fmt"
-	"signum_explorer_bot/internal/common"
+	"signum-explorer-bot/internal/common"
 )
 
 func (user *User) getAccountInfoMessage(accountS string) (*common.BotMessage, error) {

@@ -2,8 +2,8 @@ package cmc_api
 
 import (
 	"os"
-	abstract_api_client "signum_explorer_bot/internal/api/abstract-client"
-	"signum_explorer_bot/internal/config"
+	abstract_api_client "signum-explorer-bot/internal/api/abstract-client"
+	"signum-explorer-bot/internal/config"
 	"sync"
 	"time"
 )

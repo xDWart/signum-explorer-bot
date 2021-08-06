@@ -2,9 +2,9 @@ package calculator
 
 import (
 	"log"
-	"signum_explorer_bot/internal/api/signum_api"
-	"signum_explorer_bot/internal/config"
-	"signum_explorer_bot/internal/database/models"
+	"signum-explorer-bot/internal/api/signum_api"
+	"signum-explorer-bot/internal/config"
+	"signum-explorer-bot/internal/database/models"
 	"sync"
 	"time"
 )

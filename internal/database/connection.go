@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"signum_explorer_bot/internal/database/models"
+	"signum-explorer-bot/internal/database/models"
 	"strings"
 )
 

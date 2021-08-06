@@ -3,9 +3,9 @@ package users
 import (
 	"fmt"
 	"regexp"
-	"signum_explorer_bot/internal/common"
-	"signum_explorer_bot/internal/config"
-	"signum_explorer_bot/internal/database/models"
+	"signum-explorer-bot/internal/common"
+	"signum-explorer-bot/internal/config"
+	"signum-explorer-bot/internal/database/models"
 	"strings"
 )
 
