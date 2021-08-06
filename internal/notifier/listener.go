@@ -92,7 +92,7 @@ func (n *Notifier) checkTransactions(account *MonitoredAccount) {
 			}
 		case signum_api.MULTI_OUT_PAYMENT:
 			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("\nOutgoing multi-out payment: <i>-%v SIGNA",
+				msg += fmt.Sprintf("\nOutgoing multi-out payment: <i>-%v SIGNA</i>",
 					common.FormatNumber(transaction.AmountNQT/1e8, 2))
 			} else {
 				msg += fmt.Sprintf("\nIncoming multi-out payment from <b>%v</b>: <i>+%v SIGNA</i>",
@@ -103,8 +103,8 @@ func (n *Notifier) checkTransactions(account *MonitoredAccount) {
 				msg += fmt.Sprintf("\nOutgoing multi-out same payment: <i>-%v SIGNA</i>",
 					common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
 			} else {
-				msg += fmt.Sprintf("\nIncoming multi-out same payment: <i>+%v SIGNA</i>",
-					common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
+				msg += fmt.Sprintf("\nIncoming multi-out same payment from <b>%v</b>: <i>+%v SIGNA</i>",
+					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
 			}
 		default:
 			log.Printf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
@@ -141,9 +141,8 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 	}
 
 	msg := fmt.Sprintf("📃 New block on account <b>%v</b>:", account.AccountRS)
-
 	for _, block := range userBlocks.Blocks {
-		msg += fmt.Sprintf("\n[<i>%v</i>]  #<b>%v</b>  <i>+%v SIGNA</i>\n",
+		msg += fmt.Sprintf("\n<i>%v</i>  <b>#%v</b>  <i>+%v SIGNA</i>\n",
 			common.FormatChainTimeToStringDatetimeUTC(block.Timestamp), block.Height, block.BlockReward)
 	}
 
