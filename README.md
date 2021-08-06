@@ -9,7 +9,7 @@
 
 ## Annotation
 
-**Signum Explorer Telegram Bot** - it's a simplified version of the [web Signum Explorer](https://explorer.signum.network). Bot allows you to easily monitor the status of your account and to receive notifications about new transactions and blocks.
+Signum Explorer Telegram Bot - it's a simplified version of the [web Signum Explorer](https://explorer.signum.network). Bot allows you to easily monitor the status of your account and to receive notifications about new transactions and blocks.
 
 [@signum_explorer_bot](https://t.me/signum_explorer_bot) - message `/start` to him and send any Signum Account to explore it
 

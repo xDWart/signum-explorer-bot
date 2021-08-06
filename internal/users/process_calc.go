@@ -15,7 +15,7 @@ func (user *User) ProcessCalc(message string) string {
 	}
 
 	splittedMessage := strings.Split(message, " ")
-	if len(splittedMessage) != 3 || splittedMessage[0] != config.BUTTON_CALC {
+	if len(splittedMessage) != 3 || splittedMessage[0] != config.COMMAND_CALC {
 		return "🚫 Incorrect command format, please send just /calc and follow the instructions " +
 			"or <b>/calc TiB COMMITMENT</b> to calculate your expected mining rewards"
 	}
