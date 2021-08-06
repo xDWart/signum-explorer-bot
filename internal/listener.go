@@ -5,6 +5,7 @@ import (
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
 	"strings"
+	"time"
 )
 
 func (bot *TelegramBot) StartBotListener() {
@@ -69,6 +70,7 @@ func (bot *TelegramBot) StartBotListener() {
 				userAnswer = user.ProcessCallback(update.CallbackQuery)
 			}
 
+			time.Sleep(500 * time.Millisecond)
 			user.Unlock()
 
 			bot.SendAnswer(message.Chat.ID, userAnswer)

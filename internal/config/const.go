@@ -1,7 +1,7 @@
 package config
 
 const NAME = "<b>🚀 Signum Explorer Bot</b>"
-const VERSION = "<i>v.0.5.3</i>"
+const VERSION = "<i>v.0.5.4</i>"
 
 const INSTRUCTION_TEXT = `
 Text any <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) to explore it once.
