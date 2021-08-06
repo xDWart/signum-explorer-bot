@@ -1,6 +1,6 @@
 <img align="right" src="https://github.com/xDWart/signum-explorer-bot/raw/master/assets/big_logo.png" height="200">
 
-# 🚀 Signum Explorer Telegram Bot [@signum_explorer_bot](https://telegram.me/signum-explorer-bot)
+# 🚀 Signum Explorer Telegram Bot [@signum_explorer_bot](https://t.me/signum_explorer_bot)
 
 [![Build Status](https://github.com/xDWart/signum-explorer-bot/workflows/Build/badge.svg)](https://github.com/xDWart/signum-explorer-bot/actions?query=workflow%3ABuild)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xDWart/signum-explorer-bot)](https://goreportcard.com/report/github.com/xDWart/signum-explorer-bot)
@@ -12,6 +12,8 @@
 Signum Explorer Telegram Bot - it's a simplified version of the [web Signum Explorer](https://explorer.signum.network). Bot allows you to easily monitor the status of your account and to receive notifications about new transactions and blocks.
 
 [@signum_explorer_bot](https://t.me/signum_explorer_bot) - message `/start` to him and send any Signum Account to explore it
+
+![Account Menu Screenshot](https://github.com/xDWart/signum-explorer-bot/raw/master/assets/account_menu_screenshot.png)
 
 ## Features
 
