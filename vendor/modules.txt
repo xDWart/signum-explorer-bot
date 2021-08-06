@@ -1,5 +1,3 @@
-# github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
-## explicit
 # github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.0.0-rc1
 ## explicit
 github.com/go-telegram-bot-api/telegram-bot-api/v5
@@ -34,10 +32,7 @@ github.com/jinzhu/now
 # github.com/joho/godotenv v1.3.0
 ## explicit
 github.com/joho/godotenv
-# github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852
-## explicit
 # github.com/technoweenie/multipartstreamer v1.0.1
-## explicit
 github.com/technoweenie/multipartstreamer
 # golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 golang.org/x/crypto/pbkdf2
@@ -91,8 +86,6 @@ google.golang.org/protobuf/reflect/protoregistry
 google.golang.org/protobuf/runtime/protoiface
 google.golang.org/protobuf/runtime/protoimpl
 google.golang.org/protobuf/types/descriptorpb
-# gopkg.in/yaml.v2 v2.4.0
-## explicit
 # gorm.io/driver/postgres v1.1.0
 ## explicit
 gorm.io/driver/postgres
