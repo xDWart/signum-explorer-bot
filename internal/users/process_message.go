@@ -25,7 +25,7 @@ func (user *User) ProcessMessage(message string) *common.BotMessage {
 		}
 		user.state = CALC_COMMIT_STATE
 		user.lastTib = tib
-		return &common.BotMessage{MainText: "💵 Please send me a <code>commitment</code> (number of SIGNA coins frozen on the account):"}
+		return &common.BotMessage{MainText: "💵 Please send me a <b>commitment</b> (number of SIGNA coins frozen on the account):"}
 	case CALC_COMMIT_STATE:
 		commit, err := parseCommit(message)
 		if err != nil {
@@ -50,7 +50,7 @@ func (user *User) ProcessMessage(message string) *common.BotMessage {
 func (user *User) ProcessAdd(message string) string {
 	if message == config.COMMAND_ADD {
 		user.state = ADD_STATE
-		return "📌 Please send me a <code>Signum Account</code> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) which you want to add into your main menu:"
+		return "📌 Please send me a <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) which you want to add into your main menu:"
 	}
 
 	splittedMessage := strings.Split(message, " ")
@@ -65,7 +65,7 @@ func (user *User) ProcessAdd(message string) string {
 
 func (user *User) addAccount(newAccount string) (*models.DbAccount, string) {
 	if !validAccountRS.MatchString(newAccount) && !validAccount.MatchString(newAccount) {
-		return nil, "🚫 Incorrect account format, please use the <code>S-XXXX-XXXX-XXXX-XXXXX</code> or <code>numeric AccountID</code>"
+		return nil, "🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>"
 	}
 	userAccount := user.GetDbAccount(newAccount)
 	if userAccount != nil {
@@ -84,13 +84,13 @@ func (user *User) addAccount(newAccount string) (*models.DbAccount, string) {
 	user.db.Save(&newDbAccount)
 	user.Accounts = append(user.Accounts, &newDbAccount)
 	user.ResetState()
-	return &newDbAccount, fmt.Sprintf("✅ New account <code>%v</code> has been successfully added to the menu", newAccount)
+	return &newDbAccount, fmt.Sprintf("✅ New account <b>%v</b> has been successfully added to the menu", newAccount)
 }
 
 func (user *User) ProcessDel(message string) string {
 	if message == config.COMMAND_DEL {
 		user.state = DEL_STATE
-		return "📌 Please send me a <code>Signum Account</code> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) which you want to del from your main menu:"
+		return "📌 Please send me a <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) which you want to del from your main menu:"
 	}
 
 	splittedMessage := strings.Split(message, " ")
@@ -104,7 +104,7 @@ func (user *User) ProcessDel(message string) string {
 
 func (user *User) delAccount(newAccount string) string {
 	if !validAccountRS.MatchString(newAccount) && !validAccount.MatchString(newAccount) {
-		return "🚫 Incorrect account format, please use the <code>S-XXXX-XXXX-XXXX-XXXXX</code> or <code>numeric AccountID</code>"
+		return "🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>"
 	}
 	var foundAccount *models.DbAccount
 	var foundAccountIndex int
@@ -122,5 +122,5 @@ func (user *User) delAccount(newAccount string) string {
 	user.db.Unscoped().Delete(foundAccount)
 	user.Accounts = append(user.Accounts[:foundAccountIndex], user.Accounts[foundAccountIndex+1:]...)
 	user.ResetState()
-	return fmt.Sprintf("✅ Account <code>%v</code> has been successfully deleted from the menu", newAccount)
+	return fmt.Sprintf("✅ Account <b>%v</b> has been successfully deleted from the menu", newAccount)
 }

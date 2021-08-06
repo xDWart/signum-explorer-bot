@@ -7,7 +7,7 @@ import (
 
 func (user *User) getAccountInfoMessage(accountS string) (*common.BotMessage, error) {
 	if !validAccountRS.MatchString(accountS) && !validAccount.MatchString(accountS) {
-		return nil, fmt.Errorf("🚫 Incorrect account format, please use the <code>S-XXXX-XXXX-XXXX-XXXXX</code> or <code>numeric AccountID</code>")
+		return nil, fmt.Errorf("🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>")
 	}
 	account, err := user.signumClient.GetAccount(accountS)
 	if err != nil {
@@ -23,7 +23,7 @@ func (user *User) getAccountInfoMessage(accountS string) (*common.BotMessage, er
 		accountName = "\nName: " + account.Name
 	}
 
-	inlineText := fmt.Sprintf("💳 <code>%v</code>:\n"+
+	inlineText := fmt.Sprintf("💳 <b>%v</b>:\n"+
 		"%v"+
 		"\nCommitment: %v SIGNA <i>($%v | %v BTC)</i>"+
 		"\nAvailable: %v SIGNA <i>($%v | %v BTC)</i>"+

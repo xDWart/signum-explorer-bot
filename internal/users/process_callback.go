@@ -77,14 +77,15 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
 
-		var newInlineText = fmt.Sprintf("💳 <code>%v</code> last Ordinary Payment transactions:\n\n", account.AccountRS)
+		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last Ordinary Payment transactions:\n\n", account.AccountRS)
 		for _, transaction := range accountTransactions.Transactions {
-			sign := "+"
 			if account.Account == transaction.Sender {
-				sign = "-"
+				newInlineText += fmt.Sprintf("<i>%v</i>  Sent to <b>%v</b>  <i>-%v SIGNA</i>\n",
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.RecipientRS, common.FormatNumber(transaction.AmountNQT/1e8, 2))
+			} else {
+				newInlineText += fmt.Sprintf("<i>%v</i>  Received from <b>%v</b>  <i>+%v SIGNA</i>\n",
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8, 2))
 			}
-			newInlineText += fmt.Sprintf("[<i>%v</i>]  <code>%v</code> <b>></b> <code>%v</code>  <i>%v%v SIGNA</i>\n",
-				common.FormatChainTimeToStringUTC(transaction.Timestamp), transaction.SenderRS, transaction.RecipientRS, sign, common.FormatNumber(transaction.AmountNQT/1e8, 2))
 		}
 
 		return &common.BotMessage{
@@ -98,7 +99,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
 
-		var newInlineText = fmt.Sprintf("💳 <code>%v</code> last Blocks:\n\n", account.AccountRS)
+		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last blocks:\n\n", account.AccountRS)
 		for _, block := range accountBlocks.Blocks {
 			timeSince := time.Since(common.ChainTimeToTime(block.Timestamp))
 			var timeSinceStr string
@@ -112,9 +113,8 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			}
 			timeSinceStr += fmt.Sprintf("%vm %vs ago", int(timeSince.Minutes())%60, int(timeSince.Seconds())%60)
 
-			newInlineText += fmt.Sprintf("[<i>%v</i>]  #<code>%v</code>  %v  <i>+%v SIGNA</i>\n",
-				common.FormatChainTimeToStringUTC(block.Timestamp), block.Height,
-				timeSinceStr, block.BlockReward)
+			newInlineText += fmt.Sprintf("%v  <b>#%v</b>  <i>+%v SIGNA</i>\n",
+				timeSinceStr, block.Height, block.BlockReward)
 		}
 
 		return &common.BotMessage{
@@ -128,18 +128,17 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
 
-		var newInlineText = fmt.Sprintf("💳 <code>%v</code> last Multi-Out Payment transactions:\n\n", account.AccountRS)
+		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last Multi-Out Payment transactions:\n\n", account.AccountRS)
 		for _, transaction := range accountTransactions.Transactions {
-			sign := "-"
-			recipient := ""
-			amount := transaction.AmountNQT / 1e8
 			if account.Account != transaction.Sender {
-				sign = "+"
-				recipient = account.AccountRS
-				amount = transaction.Attachment.Recipients.FoundMyAmount(account.Account)
+				amount := transaction.Attachment.Recipients.FoundMyAmount(account.Account)
+				newInlineText += fmt.Sprintf("<i>%v</i>  Received from <b>%v</b>  <i>+%v SIGNA</i>\n",
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.SenderRS, common.FormatNumber(amount, 2))
+			} else {
+				amount := transaction.AmountNQT / 1e8
+				newInlineText += fmt.Sprintf("<i>%v</i>  Sent to %v recipients  <i>-%v SIGNA</i>\n",
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), len(transaction.Attachment.Recipients), common.FormatNumber(amount, 2))
 			}
-			newInlineText += fmt.Sprintf("[<i>%v</i>]  <code>%v</code> <b>></b> <code>%v</code>  <i>%v%v SIGNA</i>\n",
-				common.FormatChainTimeToStringUTC(transaction.Timestamp), transaction.SenderRS, recipient, sign, common.FormatNumber(amount, 2))
 		}
 
 		return &common.BotMessage{
@@ -153,15 +152,18 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
 
-		var newInlineText = fmt.Sprintf("💳 <code>%v</code> last Multi-Out Same Payment transactions:\n\n", account.AccountRS)
+		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last Multi-Out Same Payment transactions:\n\n", account.AccountRS)
 		for _, transaction := range accountTransactions.Transactions {
-			sign := "+"
-			if account.Account == transaction.Sender {
-				sign = "-"
+			if account.Account != transaction.Sender {
+				newInlineText += fmt.Sprintf("<i>%v</i>  Received from <b>%v</b>  <i>+%v SIGNA</i>\n",
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.SenderRS,
+					common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
+			} else {
+				newInlineText += fmt.Sprintf("<i>%v</i>  Sent to %v recipients  <i>-%v SIGNA</i>\n",
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), len(transaction.Attachment.Recipients),
+					common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
 			}
-			newInlineText += fmt.Sprintf("[<i>%v</i>]  <code>%v</code> <b>></b>  <i>%v%v SIGNA</i>\n",
-				common.FormatChainTimeToStringUTC(transaction.Timestamp), transaction.SenderRS, sign,
-				common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
+
 		}
 
 		return &common.BotMessage{
@@ -195,7 +197,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("💸 New transaction alerts for <code>%v</code> enabled", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("💸 New transaction alerts for <b>%v</b> enabled", userAccount.AccountRS),
 			MainMenu:       user.GetMainMenu(),
 		}, nil
 
@@ -209,7 +211,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("💸 New transaction alerts for <code>%v</code> disabled", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("💸 New transaction alerts for <b>%v</b> disabled", userAccount.AccountRS),
 		}, nil
 
 	case callback_data.ActionType_AT_ENABLE_BLOCK_NOTIFY:
@@ -232,7 +234,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("📃 New block alerts for <code>%v</code> enabled", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("📃 New block alerts for <b>%v</b> enabled", userAccount.AccountRS),
 			MainMenu:       user.GetMainMenu(),
 		}, nil
 
@@ -246,7 +248,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("📃 New block alerts for <code>%v</code> disabled", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("📃 New block alerts for <b>%v</b> disabled", userAccount.AccountRS),
 		}, nil
 
 	default:

@@ -11,7 +11,7 @@ import (
 func (user *User) ProcessCalc(message string) string {
 	if message == config.COMMAND_CALC || message == config.BUTTON_CALC {
 		user.state = CALC_TIB_STATE
-		return "💻 Please send me a <code>plot size in TiB</code> for calculation:"
+		return "💻 Please send me a <b>plot size in TiB</b> for calculation:"
 	}
 
 	splittedMessage := strings.Split(message, " ")
@@ -36,7 +36,7 @@ func (user *User) ProcessCalc(message string) string {
 func parseTib(message string) (float64, error) {
 	tib, err := strconv.ParseFloat(message, 64)
 	if err != nil {
-		return tib, fmt.Errorf("🚫 Couldn't parse <code>%v</code> to number: %v", message, err)
+		return tib, fmt.Errorf("🚫 Couldn't parse <b>%v</b> to number: %v", message, err)
 	}
 	return tib, err
 }
@@ -44,7 +44,7 @@ func parseTib(message string) (float64, error) {
 func parseCommit(message string) (float64, error) {
 	commit, err := strconv.ParseFloat(message, 64)
 	if err != nil {
-		return commit, fmt.Errorf("🚫 Couldn't parse <code>%v</code> to number: %v", message, err)
+		return commit, fmt.Errorf("🚫 Couldn't parse <b>%v</b> to number: %v", message, err)
 	}
 	return commit, err
 }
@@ -54,7 +54,7 @@ func (user *User) calculate(tib, commit float64) string {
 	calcResult := user.calculator.Calculate(tib, commit)
 	reinvestmentCalcResult := user.calculator.CalculateReinvestment(calcResult)
 
-	return fmt.Sprintf("<b>📃 Calculation of mining rewards for  <code>%v TiB</code>  with  <code>%v SIGNA ($%v)</code> commitment:</b>"+
+	return fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB with %v SIGNA ($%v) commitment:</b>"+
 		"\nAverage Network Commitment per TiB: %v SIGNA"+
 		"\nYour Commitment per TiB: %v SIGNA"+
 		"\nYour Capacity Multiplier: %v"+

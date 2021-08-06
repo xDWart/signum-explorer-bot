@@ -17,7 +17,9 @@ func (n *Notifier) startListener(wg *sync.WaitGroup, shutdownChannel chan interf
 	log.Printf("Start Notifier")
 	ticker := time.NewTicker(config.SIGNUM_API.NOTIFIER_PERIOD)
 
-	n.checkAccounts()
+	var counter uint
+
+	n.checkAccounts(true)
 	for {
 		select {
 		case <-shutdownChannel:
@@ -26,12 +28,14 @@ func (n *Notifier) startListener(wg *sync.WaitGroup, shutdownChannel chan interf
 			return
 
 		case <-ticker.C:
-			n.checkAccounts()
+			counter++
+			checkBlocks := counter%config.SIGNUM_API.NOTIFIER_CHECK_BLOCKS_PER == 0
+			n.checkAccounts(checkBlocks)
 		}
 	}
 }
 
-func (n *Notifier) checkAccounts() {
+func (n *Notifier) checkAccounts(checkBlocks bool) {
 	var monitoredAccounts []MonitoredAccount
 
 	err := n.db.Model(&models.DbUser{}).Select("*").
@@ -50,7 +54,7 @@ func (n *Notifier) checkAccounts() {
 			n.checkTransactions(&account)
 		}
 
-		if account.NotifyNewBlocks {
+		if checkBlocks && account.NotifyNewBlocks {
 			n.checkBlocks(&account)
 		}
 	}
@@ -71,7 +75,7 @@ func (n *Notifier) checkTransactions(account *MonitoredAccount) {
 		return
 	}
 
-	msg := fmt.Sprintf("💸 New transactions on account <code>%v</code>:", account.AccountRS)
+	msg := fmt.Sprintf("💸 New transactions on account <b>%v</b>:", account.AccountRS)
 	for _, transaction := range userTransactions.Transactions {
 		// until not LastTransactionID
 		if transaction.TransactionID == account.LastTransactionID {
@@ -80,10 +84,10 @@ func (n *Notifier) checkTransactions(account *MonitoredAccount) {
 		switch transaction.Subtype {
 		case signum_api.ORDINARY_PAYMENT:
 			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("\nOutgoing ordinary payment to <code>%v</code>: <i>-%v SIGNA</i>",
+				msg += fmt.Sprintf("\nOutgoing ordinary payment to <b>%v</b>: <i>-%v SIGNA</i>",
 					transaction.RecipientRS, common.FormatNumber(transaction.AmountNQT/1e8, 2))
 			} else {
-				msg += fmt.Sprintf("\nIncoming ordinary payment from <code>%v</code>: <i>+%v SIGNA</i>",
+				msg += fmt.Sprintf("\nIncoming ordinary payment from <b>%v</b>: <i>+%v SIGNA</i>",
 					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8, 2))
 			}
 		case signum_api.MULTI_OUT_PAYMENT:
@@ -91,7 +95,7 @@ func (n *Notifier) checkTransactions(account *MonitoredAccount) {
 				msg += fmt.Sprintf("\nOutgoing multi-out payment: <i>-%v SIGNA",
 					common.FormatNumber(transaction.AmountNQT/1e8, 2))
 			} else {
-				msg += fmt.Sprintf("\nIncoming multi-out payment from <code>%v</code>: <i>+%v SIGNA</i>",
+				msg += fmt.Sprintf("\nIncoming multi-out payment from <b>%v</b>: <i>+%v SIGNA</i>",
 					transaction.SenderRS, common.FormatNumber(transaction.Attachment.Recipients.FoundMyAmount(account.Account), 2))
 			}
 		case signum_api.MULTI_OUT_SAME_PAYMENT:
@@ -136,11 +140,11 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 		return
 	}
 
-	msg := fmt.Sprintf("📃 New block on account <code>%v</code>:", account.AccountRS)
+	msg := fmt.Sprintf("📃 New block on account <b>%v</b>:", account.AccountRS)
 
 	for _, block := range userBlocks.Blocks {
-		msg += fmt.Sprintf("\n[<i>%v</i>]  #<code>%v</code>  <i>+%v SIGNA</i>\n",
-			common.FormatChainTimeToStringUTC(block.Timestamp), block.Height, block.BlockReward)
+		msg += fmt.Sprintf("\n[<i>%v</i>]  #<b>%v</b>  <i>+%v SIGNA</i>\n",
+			common.FormatChainTimeToStringDatetimeUTC(block.Timestamp), block.Height, block.BlockReward)
 	}
 
 	account.DbAccount.LastBlockID = userBlocks.Blocks[0].Block
