@@ -1,0 +1,36 @@
+// protoc --go_out=plugins=grpc:. internal/users/callback_data/*.proto
+syntax = "proto3";
+
+package callback_data;
+
+message QueryDataType {
+    int64 message_id = 1;
+    string account = 2;
+    KeyboardType  keyboard = 3;
+    ActionType action     = 4;
+}
+
+enum KeyboardType {
+    KT_NULL = 0;
+    KT_ACCOUNT = 1;
+    KT_TRANSACTIONS = 2;
+    KT_MULTI_OUT = 3;
+    KT_MULTI_OUT_SAME = 4;
+    KT_BLOCKS = 5;
+}
+
+enum ActionType {
+    AT_NULL = 0;
+    AT_REFRESH = 1;
+    AT_TRANSACTIONS = 2;
+    AT_MULTI_OUT = 3;
+    AT_MULTI_OUT_SAME = 4;
+    AT_BLOCKS = 5;
+    AT_BACK = 6;
+    AT_NEXT = 7;
+    AT_PREV = 8;
+    AT_ENABLE_TX_NOTIFY = 9;
+    AT_DISABLE_TX_NOTIFY = 10;
+    AT_ENABLE_BLOCK_NOTIFY = 11;
+    AT_DISABLE_BLOCK_NOTIFY = 12;
+}

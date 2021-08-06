@@ -1,0 +1,26 @@
+package signum_api
+
+import "signum_explorer_bot/internal/config"
+
+type MiningInfo struct {
+	Height               uint32  `json:"height,string"`
+	BaseTarget           float64 `json:"baseTarget,string"`
+	LastBlockReward      float64 `json:"lastBlockReward,string"`
+	AverageCommitmentNQT float64 `json:"averageCommitmentNQT,string"`
+	Timestamp            uint64  `json:"timestamp,string"`
+}
+
+var DEFAULT_MINING_INFO = MiningInfo{
+	AverageCommitmentNQT: config.SIGNUM_API.DEFAULT_AVG_COMMIT,
+	BaseTarget:           config.SIGNUM_API.DEFAULT_BASE_TARGET,
+	LastBlockReward:      config.SIGNUM_API.DEFAULT_BLOCK_REWARD,
+}
+
+func (c *Client) GetMiningInfo() (*MiningInfo, error) {
+	var miningInfo = DEFAULT_MINING_INFO
+	err := c.DoGetJsonReq("/burst",
+		map[string]string{"requestType": "getMiningInfo"},
+		nil,
+		&miningInfo)
+	return &miningInfo, err
+}

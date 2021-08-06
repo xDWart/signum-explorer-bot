@@ -1,0 +1,73 @@
+package abstract_client
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
+)
+
+type Client struct {
+	http          *http.Client
+	apiHosts      []string
+	staticHeaders map[string]string
+}
+
+func NewClient(apiHosts []string, staticHeaders map[string]string) *Client {
+	return &Client{
+		http:          &http.Client{},
+		apiHosts:      apiHosts,
+		staticHeaders: staticHeaders,
+	}
+}
+
+func (c *Client) DoGetJsonReq(method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
+	for _, host := range c.apiHosts {
+		req, err := http.NewRequest("GET", host+method, nil)
+		if err != nil {
+			log.Printf("Error create req %v", host+method)
+			continue
+		}
+
+		req.Header.Set("Accepts", "application/json")
+		for key, value := range c.staticHeaders {
+			req.Header.Add(key, value)
+		}
+		for key, value := range additionalHeaders {
+			req.Header.Add(key, value)
+		}
+
+		q := url.Values{}
+		for key, value := range urlParams {
+			q.Add(key, value)
+		}
+		req.URL.RawQuery = q.Encode()
+
+		resp, err := c.http.Do(req)
+		if err != nil {
+			log.Printf("Error perform GET %v", host+method)
+			continue
+		}
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Printf("Couldn't read body of %v: %v", host+method, err)
+			continue
+		}
+
+		if resp.StatusCode != 200 {
+			log.Printf("Error StatusCode %v for %v: %v", resp.StatusCode, host+method, string(body))
+			continue
+		}
+
+		err = json.Unmarshal(body, output)
+		if err != nil {
+			log.Printf("Couldn't unmarshal body of %v: %v", host+method, err)
+			continue
+		}
+		return nil
+	}
+	return fmt.Errorf("couldn't get `%v` method", method)
+}
