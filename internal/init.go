@@ -17,7 +17,7 @@ import (
 )
 
 type TelegramBot struct {
-	*tgbotapi.BotAPI
+	*AbstractTelegramBot
 	db      *gorm.DB
 	updates tgbotapi.UpdatesChannel
 
@@ -42,16 +42,19 @@ func InitTelegramBot() *TelegramBot {
 
 	db := database.NewDatabaseConnection()
 	cmcClient := api_cmc.NewClient()
+	priceManager := prices.NewPricesManager(cmcClient)
 	signumClient := signum_api.NewClient()
 	notifierCh := make(chan notifier.NotifierMessage)
 	wg := &sync.WaitGroup{}
 	shutdownChannel := make(chan interface{})
 
 	bot := &TelegramBot{
-		BotAPI:          botApi,
+		AbstractTelegramBot: &AbstractTelegramBot{
+			BotAPI: botApi,
+		},
 		db:              db,
 		usersManager:    users.InitManager(db, cmcClient, signumClient, wg, shutdownChannel),
-		priceManager:    prices.NewPricesManager(cmcClient),
+		priceManager:    priceManager,
 		notifierCh:      notifierCh,
 		wg:              wg,
 		shutdownChannel: shutdownChannel,
@@ -86,8 +89,10 @@ func InitTelegramBot() *TelegramBot {
 	log.Printf("Running %v listeners", numListenGoroutines)
 	for i := 0; i < numListenGoroutines; i++ {
 		bot.wg.Add(1)
-		go bot.StartBotListener()
+		go bot.startBotListener()
 	}
+
+	initTelegramPriceBot(priceManager, wg, shutdownChannel)
 
 	return bot
 }

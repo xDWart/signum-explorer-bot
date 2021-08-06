@@ -6,7 +6,11 @@ import (
 	"signum-explorer-bot/internal/common"
 )
 
-func (bot *TelegramBot) SendAnswer(chatID int64, answer *common.BotMessage) {
+type AbstractTelegramBot struct {
+	*tgbotapi.BotAPI
+}
+
+func (bot *AbstractTelegramBot) SendAnswer(chatID int64, answer *common.BotMessage) {
 	if answer == nil {
 		return
 	}
@@ -29,7 +33,7 @@ func (bot *TelegramBot) SendAnswer(chatID int64, answer *common.BotMessage) {
 	}
 }
 
-func (bot *TelegramBot) EditMessageText(chatID int64, messageID int, text string) {
+func (bot *AbstractTelegramBot) EditMessageText(chatID int64, messageID int, text string) {
 	msg := tgbotapi.NewEditMessageText(
 		chatID,
 		messageID,
@@ -38,7 +42,7 @@ func (bot *TelegramBot) EditMessageText(chatID int64, messageID int, text string
 	bot.ConfigureAndSend(msg)
 }
 
-func (bot *TelegramBot) EditInlineKeyboard(chatID int64, messageID int, newInlineKeyboard *tgbotapi.InlineKeyboardMarkup) {
+func (bot *AbstractTelegramBot) EditInlineKeyboard(chatID int64, messageID int, newInlineKeyboard *tgbotapi.InlineKeyboardMarkup) {
 	msg := tgbotapi.NewEditMessageReplyMarkup(
 		chatID,
 		messageID,
@@ -47,7 +51,7 @@ func (bot *TelegramBot) EditInlineKeyboard(chatID int64, messageID int, newInlin
 	bot.ConfigureAndSend(msg)
 }
 
-func (bot *TelegramBot) SendMessage(chatID int64, text string, replyMarkup interface{}) {
+func (bot *AbstractTelegramBot) SendMessage(chatID int64, text string, replyMarkup interface{}) {
 	msg := tgbotapi.NewMessage(chatID, text)
 	inlineKeyboard, ok := replyMarkup.(*tgbotapi.InlineKeyboardMarkup)
 	if ok {
@@ -60,7 +64,7 @@ func (bot *TelegramBot) SendMessage(chatID int64, text string, replyMarkup inter
 	bot.ConfigureAndSend(msg)
 }
 
-func (bot *TelegramBot) ConfigureAndSend(msg tgbotapi.Chattable) {
+func (bot *AbstractTelegramBot) ConfigureAndSend(msg tgbotapi.Chattable) {
 	emtc, ok := msg.(tgbotapi.EditMessageTextConfig)
 	if ok {
 		emtc.ParseMode = tgbotapi.ModeHTML
@@ -78,7 +82,7 @@ func (bot *TelegramBot) ConfigureAndSend(msg tgbotapi.Chattable) {
 	bot.Send(msg)
 }
 
-func (bot *TelegramBot) Send(msg tgbotapi.Chattable) {
+func (bot *AbstractTelegramBot) Send(msg tgbotapi.Chattable) {
 	_, err := bot.BotAPI.Send(msg)
 	if err != nil {
 		log.Printf("Send error: %v. Msg: %#v", err, msg)

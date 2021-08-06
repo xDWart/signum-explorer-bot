@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (bot *TelegramBot) StartBotListener() {
+func (bot *TelegramBot) startBotListener() {
 	defer bot.wg.Done()
 
 	log.Printf("Start Telegram Bot Listener")
@@ -51,7 +51,7 @@ func (bot *TelegramBot) StartBotListener() {
 					userAnswer.MainText = user.ProcessDel(message)
 				case strings.HasPrefix(message, config.COMMAND_PRICE) || message == config.BUTTON_PRICES:
 					user.ResetState()
-					userAnswer.MainText = bot.priceManager.GetActualPrices()
+					userAnswer.MainText = "<b>💵 Actual prices:</b>" + bot.priceManager.GetActualPrices()
 				case strings.HasPrefix(message, config.COMMAND_CALC) || message == config.BUTTON_CALC:
 					user.ResetState()
 					userAnswer.MainText = user.ProcessCalc(message)
