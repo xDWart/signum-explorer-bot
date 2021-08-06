@@ -13,6 +13,10 @@ var validAccount = regexp.MustCompile(`[0-9]{1,}`)
 var validAccountRS = regexp.MustCompile(`^(S|BURST)-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{5}$`)
 
 func (user *User) ProcessMessage(message string) *common.BotMessage {
+	if (user.state == CALC_TIB_STATE || user.state == CALC_COMMIT_STATE) && validAccountRS.MatchString(message) {
+		user.ResetState()
+	}
+
 	switch user.state {
 	case CALC_TIB_STATE:
 		tib, err := parseTib(message)

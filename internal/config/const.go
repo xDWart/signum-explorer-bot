@@ -1,7 +1,7 @@
 package config
 
 const NAME = "<b>🚀 Signum Explorer Telegram Bot</b>"
-const VERSION = "<i>v.0.5.1</i>"
+const VERSION = "<i>v.0.5.2</i>"
 
 const INSTRUCTION_TEXT = `
 Text any <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) to explore it once.
