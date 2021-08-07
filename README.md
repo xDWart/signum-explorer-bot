@@ -40,6 +40,7 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
   - BTC/USD (+ daily percentage change)
 - Mining rewards calculator
   - Basic rewards
+  - Rewards for the entire commitment range
   - Reinvestment calc
 
 ## Contribution
