@@ -77,7 +77,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
 
-		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last Ordinary Payment transactions:\n\n", account.AccountRS)
+		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last ordinary payment transactions:\n\n", account.AccountRS)
 		for _, transaction := range accountTransactions.Transactions {
 			if account.Account == transaction.Sender {
 				newInlineText += fmt.Sprintf("<i>%v</i>  Sent to <b>%v</b>  <i>-%v SIGNA</i>\n",
@@ -128,7 +128,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
 
-		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last Multi-Out Payment transactions:\n\n", account.AccountRS)
+		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last multi-out payment transactions:\n\n", account.AccountRS)
 		for _, transaction := range accountTransactions.Transactions {
 			if account.Account != transaction.Sender {
 				amount := transaction.Attachment.Recipients.FoundMyAmount(account.Account)
@@ -152,7 +152,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
 
-		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last Multi-Out Same Payment transactions:\n\n", account.AccountRS)
+		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last multi-out same payment transactions:\n\n", account.AccountRS)
 		for _, transaction := range accountTransactions.Transactions {
 			if account.Account != transaction.Sender {
 				newInlineText += fmt.Sprintf("<i>%v</i>  Received from <b>%v</b>  <i>+%v SIGNA</i>\n",
@@ -197,7 +197,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("💸 New transaction alerts for <b>%v</b> enabled", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("💸 Enabled new transaction alerts for <b>%v</b>", userAccount.AccountRS),
 			MainMenu:       user.GetMainMenu(),
 		}, nil
 
@@ -211,7 +211,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("💸 New transaction alerts for <b>%v</b> disabled", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("💸 Disabled new transaction alerts for <b>%v</b>", userAccount.AccountRS),
 		}, nil
 
 	case callback_data.ActionType_AT_ENABLE_BLOCK_NOTIFY:
@@ -234,7 +234,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("📃 New block alerts for <b>%v</b> enabled", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("📃 Enabled new block alerts for <b>%v</b>", userAccount.AccountRS),
 			MainMenu:       user.GetMainMenu(),
 		}, nil
 
@@ -248,7 +248,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("📃 New block alerts for <b>%v</b> disabled", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("📃 Disabled new block alerts for <b>%v</b>", userAccount.AccountRS),
 		}, nil
 
 	default:

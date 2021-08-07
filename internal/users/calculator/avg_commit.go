@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (c *Calculator) GetLastMiningIngo() signum_api.MiningInfo {
+func (c *Calculator) GetLastMiningInfo() signum_api.MiningInfo {
 	c.RLock()
 	lastMiningInfo := c.lastMiningInfo
 	c.RUnlock()

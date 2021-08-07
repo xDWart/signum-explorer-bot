@@ -25,7 +25,8 @@ func (user *User) ProcessMessage(message string) *common.BotMessage {
 		}
 		user.state = CALC_COMMIT_STATE
 		user.lastTib = tib
-		return &common.BotMessage{MainText: "💵 Please send me a <b>commitment</b> (number of SIGNA coins frozen on the account):"}
+		return &common.BotMessage{MainText: "💵 Please send me a <b>commitment</b> (number of SIGNA coins frozen on the account) " +
+			"or submit <b>0</b> if you want to calculate the entire possible commitment range:"}
 	case CALC_COMMIT_STATE:
 		commit, err := parseCommit(message)
 		if err != nil {
