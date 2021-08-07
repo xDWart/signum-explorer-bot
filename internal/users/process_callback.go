@@ -111,7 +111,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			if hours > 0 {
 				timeSinceStr += fmt.Sprintf("%vh ", hours)
 			}
-			timeSinceStr += fmt.Sprintf("%vm %vs ago", int(timeSince.Minutes())%60, int(timeSince.Seconds())%60)
+			timeSinceStr += fmt.Sprintf("%vm ago", int(timeSince.Minutes())%60)
 
 			newInlineText += fmt.Sprintf("%v  <b>#%v</b>  <i>+%v SIGNA</i>\n",
 				timeSinceStr, block.Height, block.BlockReward)

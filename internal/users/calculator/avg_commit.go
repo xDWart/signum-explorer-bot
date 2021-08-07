@@ -40,8 +40,9 @@ func (c *Calculator) saveNewCommitment(newCommitment float64) {
 	log.Printf("Have got and saved new Average Commitment %v", newCommitment)
 
 	// delete irrelevant data
-	if config.SIGNUM_API.AVERAGING_QUANTITY < dbCommit.ID {
-		c.db.Unscoped().Delete(models.AverageCommitment{}, "id <= ?", dbCommit.ID-config.SIGNUM_API.AVERAGING_QUANTITY)
+	if config.SIGNUM_API.AVERAGING_DAYS_QUANTITY < dbCommit.ID {
+		quantity := 24 * config.SIGNUM_API.AVERAGING_DAYS_QUANTITY * uint(time.Hour/config.SIGNUM_API.GET_AVG_COMMIT_TIME)
+		c.db.Unscoped().Delete(models.AverageCommitment{}, "id <= ?", dbCommit.ID-quantity)
 	}
 }
 

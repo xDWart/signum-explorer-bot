@@ -55,7 +55,7 @@ func (user *User) calculate(tib, commit float64) string {
 	reinvestmentCalcResult := user.calculator.CalculateReinvestment(calcResult)
 
 	return fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB with %v SIGNA ($%v) commitment:</b>"+
-		"\nAverage Network Commitment per TiB: %v SIGNA"+
+		"\nAverage Network Commitment per TiB during the last %v days: %v SIGNA"+
 		"\nYour Commitment per TiB: %v SIGNA"+
 		"\nYour Capacity Multiplier: %v"+
 		"\nYour Effective Capacity: %v TiB"+
@@ -63,22 +63,23 @@ func (user *User) calculate(tib, commit float64) string {
 		"\nDaily: %v SIGNA ($%v)"+
 		"\nMonthly: %v SIGNA ($%v)"+
 		"\nYearly: %v SIGNA ($%v)"+
-		"\n\n<b>💵 Rewards after a year of reinvestment into commitment:</b>"+
-		"\nAccumulated Commitment: %v SIGNA ($%v)"+
-		"\nDaily: %v SIGNA ($%v)"+
-		"\nMonthly: %v SIGNA ($%v)"+
-		"\nYearly: %v SIGNA ($%v)",
+		"\n\n<b>💵 Rewards after a year of reinvestment (every %v days) into a commitment:</b>"+
+		"\nAccumulated Commitment: %v SIGNA (+%v%%)"+
+		"\nDaily: %v SIGNA (+%v%%)"+
+		"\nMonthly: %v SIGNA (+%v%%)"+
+		"\nYearly: %v SIGNA (+%v%%)",
 		calcResult.TiB, common.FormatNumber(calcResult.Commitment, 0), common.FormatNumber(calcResult.Commitment*signaPrice, 0),
-		common.FormatNumber(calcResult.AverageCommitment, 0),
+		config.SIGNUM_API.AVERAGING_DAYS_QUANTITY, common.FormatNumber(calcResult.AverageCommitment, 0),
 		common.FormatNumber(calcResult.MyCommitmentPerTiB, 0),
 		common.FormatNumber(calcResult.CapacityMultiplier, 3),
 		common.FormatNumber(calcResult.EffectiveCapacity, 2),
 		common.FormatNumber(calcResult.MyDaily, 2), common.FormatNumber(calcResult.MyDaily*signaPrice, 2),
 		common.FormatNumber(calcResult.MyMonthly, 0), common.FormatNumber(calcResult.MyMonthly*signaPrice, 1),
 		common.FormatNumber(calcResult.MyYearly, 0), common.FormatNumber(calcResult.MyYearly*signaPrice, 0),
-		common.FormatNumber(reinvestmentCalcResult.AccumulatedCommitment, 0), common.FormatNumber(reinvestmentCalcResult.AccumulatedCommitment*signaPrice, 0),
-		common.FormatNumber(reinvestmentCalcResult.DailyAfterYear, 2), common.FormatNumber(reinvestmentCalcResult.DailyAfterYear*signaPrice, 2),
-		common.FormatNumber(reinvestmentCalcResult.MonthlyAfterYear, 0), common.FormatNumber(reinvestmentCalcResult.MonthlyAfterYear*signaPrice, 1),
-		common.FormatNumber(reinvestmentCalcResult.YearlyAfterYear, 0), common.FormatNumber(reinvestmentCalcResult.YearlyAfterYear*signaPrice, 0),
+		reinvestmentCalcResult.ReinvestEveryDays,
+		common.FormatNumber(reinvestmentCalcResult.AccumulatedCommitment, 0), reinvestmentCalcResult.AccumulatedCommitmentPercent,
+		common.FormatNumber(reinvestmentCalcResult.DailyAfterYear, 2), reinvestmentCalcResult.DailyAfterYearPercent,
+		common.FormatNumber(reinvestmentCalcResult.MonthlyAfterYear, 0), reinvestmentCalcResult.DailyAfterYearPercent,
+		common.FormatNumber(reinvestmentCalcResult.YearlyAfterYear, 0), reinvestmentCalcResult.DailyAfterYearPercent,
 	)
 }

@@ -71,6 +71,10 @@ func (user *User) addAccount(newAccount string) (*models.DbAccount, string) {
 	if userAccount != nil {
 		return userAccount, "🚫 This account already exists in menu"
 	}
+	if len(user.Accounts) >= config.COMMON.MAX_NUM_OF_ACCOUNTS {
+		return nil, "🚫 The maximum number of accounts has been exceeded"
+	}
+
 	signumAccount, err := user.signumClient.GetAccount(newAccount)
 	if err != nil {
 		return nil, fmt.Sprintf("🚫 Error: %v", err)

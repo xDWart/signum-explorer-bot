@@ -39,6 +39,7 @@ type AccountTransactions struct {
 		Timestamp     int64              `json:"timestamp"`
 		RecipientRS   string             `json:"recipientRS"`
 		AmountNQT     float64            `json:"amountNQT,string"`
+		FeeNQT        float64            `json:"feeNQT,string"`
 		Sender        string             `json:"sender"`
 		SenderRS      string             `json:"senderRS"`
 		Attachment    struct {
@@ -53,7 +54,6 @@ type AccountTransactions struct {
 			// RecipientPublicKey               string         `json:"recipientPublicKey"`
 			// MessageIsText                    bool           `json:"messageIsText"`
 		} `json:"attachment"`
-		// FeeNQT          uint64             `json:"feeNQT,string"`
 		// Signature       string             `json:"signature"`
 		// SignatureHash   string             `json:"signatureHash"`
 		// FullHash        string             `json:"fullHash"`

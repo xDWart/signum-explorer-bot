@@ -84,27 +84,27 @@ func (n *Notifier) checkTransactions(account *MonitoredAccount) {
 		switch transaction.Subtype {
 		case signum_api.ORDINARY_PAYMENT:
 			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("\nOutgoing ordinary payment to <b>%v</b>: <i>-%v SIGNA</i>",
-					transaction.RecipientRS, common.FormatNumber(transaction.AmountNQT/1e8, 2))
+				msg += fmt.Sprintf("\nOutgoing ordinary payment to <b>%v</b>: <i>-%v SIGNA</i> (fee %v)",
+					transaction.RecipientRS, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
 			} else {
-				msg += fmt.Sprintf("\nIncoming ordinary payment from <b>%v</b>: <i>+%v SIGNA</i>",
-					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8, 2))
+				msg += fmt.Sprintf("\nIncoming ordinary payment from <b>%v</b>: <i>+%v SIGNA</i> (fee %v)",
+					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
 			}
 		case signum_api.MULTI_OUT_PAYMENT:
 			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("\nOutgoing multi-out payment: <i>-%v SIGNA</i>",
-					common.FormatNumber(transaction.AmountNQT/1e8, 2))
+				msg += fmt.Sprintf("\nOutgoing multi-out payment: <i>-%v SIGNA</i> (fee %v)",
+					common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
 			} else {
-				msg += fmt.Sprintf("\nIncoming multi-out payment from <b>%v</b>: <i>+%v SIGNA</i>",
-					transaction.SenderRS, common.FormatNumber(transaction.Attachment.Recipients.FoundMyAmount(account.Account), 2))
+				msg += fmt.Sprintf("\nIncoming multi-out payment from <b>%v</b>: <i>+%v SIGNA</i> (fee %v)",
+					transaction.SenderRS, common.FormatNumber(transaction.Attachment.Recipients.FoundMyAmount(account.Account), 2), transaction.FeeNQT/1e8)
 			}
 		case signum_api.MULTI_OUT_SAME_PAYMENT:
 			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("\nOutgoing multi-out same payment: <i>-%v SIGNA</i>",
-					common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
+				msg += fmt.Sprintf("\nOutgoing multi-out same payment: <i>-%v SIGNA</i> (fee %v)",
+					common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2), transaction.FeeNQT/1e8)
 			} else {
-				msg += fmt.Sprintf("\nIncoming multi-out same payment from <b>%v</b>: <i>+%v SIGNA</i>",
-					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
+				msg += fmt.Sprintf("\nIncoming multi-out same payment from <b>%v</b>: <i>+%v SIGNA</i> (fee %v)",
+					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2), transaction.FeeNQT/1e8)
 			}
 		default:
 			log.Printf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
