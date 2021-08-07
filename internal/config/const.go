@@ -25,10 +25,10 @@ const (
 
 const INSTRUCTION_TEXT = `
 Text any <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) to explore it once.
-Type ` + COMMAND_ADD + ` <b>ACCOUNT</b> to constantly add an account into your main menu and ` + COMMAND_DEL + ` <b>ACCOUNT</b> to remove it from there.
-Send ` + COMMAND_CALC + ` <b>TiB COMMITMENT</b> (or just <b>` + COMMAND_CALC + ` TiB</b>) to calculate your expected mining rewards.
-Send ` + COMMAND_PRICE + ` to get up-to-date currency quotes.
-Send ` + COMMAND_INFO + ` for information.
+Type <b>` + COMMAND_ADD + ` ACCOUNT</b> to constantly add an account into your main menu and <b>` + COMMAND_DEL + ` ACCOUNT</b> to remove it from there.
+Send <b>` + COMMAND_CALC + ` TiB COMMITMENT</b> (or just <b>` + COMMAND_CALC + ` TiB</b>) to calculate your expected mining rewards.
+Send <b>` + COMMAND_PRICE + `</b> to get up-to-date currency quotes.
+Send <b>` + COMMAND_INFO + `</b> for information.
 `
 
 const AUTHOR_TEXT = `
