@@ -1,6 +1,7 @@
 add - Constantly add a Signum Account to your main menu /add ACCOUNT
 del - Remove an account from the menu /del ACCOUNT
 calc - Calculation expected mining rewards /calc TiB COMMITMENT
+crossing - Check your plots crossing
 price - Actual currency quotes of SIGNA and BTC
 network - Show Signum Network statistic
 info - Information about bot

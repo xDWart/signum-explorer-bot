@@ -4,14 +4,15 @@ const NAME = "<b>🚀 Signum Explorer Bot</b>"
 const VERSION = "<i>v.0.5.8</i>"
 
 const (
-	COMMAND_START   = "/start"
-	COMMAND_ADD     = "/add"
-	COMMAND_DEL     = "/del"
-	COMMAND_PRICE   = "/price"
-	COMMAND_CALC    = "/calc"
-	COMMAND_NETWORK = "/network"
-	COMMAND_INFO    = "/info"
-	COMMAND_P       = "/p"
+	COMMAND_START    = "/start"
+	COMMAND_ADD      = "/add"
+	COMMAND_DEL      = "/del"
+	COMMAND_PRICE    = "/price"
+	COMMAND_CALC     = "/calc"
+	COMMAND_NETWORK  = "/network"
+	COMMAND_CROSSING = "/crossing"
+	COMMAND_INFO     = "/info"
+	COMMAND_P        = "/p"
 )
 
 const (
