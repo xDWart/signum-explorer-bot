@@ -28,9 +28,9 @@ func CalculateReinvestment(miningInfo *signum_api.MiningInfo, calcResult *CalcRe
 	return &CalcReinvestmentResult{
 		ReinvestEveryDays:            reinvestEveryDays,
 		AccumulatedCommitment:        localCalcResult.Commitment,
-		AccumulatedCommitmentPercent: int((localCalcResult.Commitment - calcResult.Commitment) * 100 / localCalcResult.Commitment),
+		AccumulatedCommitmentPercent: int((localCalcResult.Commitment - calcResult.Commitment) * 100 / calcResult.Commitment),
 		DailyAfterYear:               localCalcResult.MyDaily,
-		DailyAfterYearPercent:        int((localCalcResult.MyDaily - calcResult.MyDaily) * 100 / localCalcResult.MyDaily),
+		DailyAfterYearPercent:        int((localCalcResult.MyDaily - calcResult.MyDaily) * 100 / calcResult.MyDaily),
 		MonthlyAfterYear:             localCalcResult.MyMonthly,
 		YearlyAfterYear:              localCalcResult.MyYearly,
 	}
