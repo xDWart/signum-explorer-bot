@@ -66,7 +66,7 @@ func (c *Calculator) Calculate(miningInfo *signum_api.MiningInfo, tib float64, c
 	return &calcResult
 }
 
-var MultipliersList = [...]float64{0.125, 0.5, 1, 2, 4, 8}
+var MultipliersList = [...]float64{0.125, 0.25, 0.5, 1, 2, 4, 8}
 
 type EntireRangeCommitment map[float64]CalcResult
 

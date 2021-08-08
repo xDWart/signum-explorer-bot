@@ -108,10 +108,15 @@ func (user *User) calculate(tib, commit float64) string {
 		}
 
 		calcResult := entireRangeCalculation[multiplier]
-		result += fmt.Sprintf("\n<i>x%v%v</i> having <b>%v SIGNA</b> ($%v) to earn monthly <i>%v SIGNA ($%v)</i>",
+		var yearlyProfit string
+		if calcResult.Commitment > 0 {
+			yearlyProfit = fmt.Sprintf(" yearly <i>+%.f%%</i>", calcResult.MyMonthly*12*100/calcResult.Commitment)
+		}
+		result += fmt.Sprintf("\n<i>x%v%v</i> having <b>%v SIGNA</b> ($%v) to earn monthly <i>%v SIGNA ($%v)</i>%v",
 			multiplier, minMax,
 			common.FormatNumber(calcResult.Commitment, 0), common.FormatNumber(calcResult.Commitment*signaPrice, 0),
-			common.FormatNumber(calcResult.MyMonthly, 1), common.FormatNumber(calcResult.MyMonthly*signaPrice, 1))
+			common.FormatNumber(calcResult.MyMonthly, 1), common.FormatNumber(calcResult.MyMonthly*signaPrice, 1),
+			yearlyProfit)
 	}
 	return result
 }
