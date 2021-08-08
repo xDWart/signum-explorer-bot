@@ -118,7 +118,7 @@ func (ni *NetworkInfoListener) updateMiningInfo() {
 
 func (ni *NetworkInfoListener) GetNetworkInfo() string {
 	miningInfo := ni.GetLastMiningInfo()
-	return fmt.Sprintf("💻 <b>Actual network info:</b>"+
+	return fmt.Sprintf("💻 <b>Network info at the moment:</b>"+
 		"\nDifficulty: %.2f PiB"+
 		"\nCommitment: %v SIGNA / TiB"+
 		"\n\n<b>Average values during the last %v days:</b>"+
