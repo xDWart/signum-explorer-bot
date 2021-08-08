@@ -9,6 +9,7 @@ import (
 	api_cmc "signum-explorer-bot/internal/api/cmc_api"
 	"signum-explorer-bot/internal/api/signum_api"
 	"signum-explorer-bot/internal/database"
+	"signum-explorer-bot/internal/network_info"
 	"signum-explorer-bot/internal/notifier"
 	"signum-explorer-bot/internal/prices"
 	users "signum-explorer-bot/internal/users"
@@ -21,9 +22,10 @@ type TelegramBot struct {
 	db      *gorm.DB
 	updates tgbotapi.UpdatesChannel
 
-	usersManager *users.Manager
-	priceManager *prices.PriceManager
-	notifierCh   chan notifier.NotifierMessage
+	usersManager        *users.Manager
+	priceManager        *prices.PriceManager
+	networkInfoListener *network_info.NetworkInfoListener
+	notifierCh          chan notifier.NotifierMessage
 
 	wg              *sync.WaitGroup
 	shutdownChannel chan interface{}
@@ -47,17 +49,19 @@ func InitTelegramBot() *TelegramBot {
 	notifierCh := make(chan notifier.NotifierMessage)
 	wg := &sync.WaitGroup{}
 	shutdownChannel := make(chan interface{})
+	networkInfoListener := network_info.NewNetworkInfoListener(db, signumClient, wg, shutdownChannel)
 
 	bot := &TelegramBot{
 		AbstractTelegramBot: &AbstractTelegramBot{
 			BotAPI: botApi,
 		},
-		db:              db,
-		usersManager:    users.InitManager(db, cmcClient, signumClient, wg, shutdownChannel),
-		priceManager:    priceManager,
-		notifierCh:      notifierCh,
-		wg:              wg,
-		shutdownChannel: shutdownChannel,
+		db:                  db,
+		usersManager:        users.InitManager(db, cmcClient, signumClient, networkInfoListener, wg, shutdownChannel),
+		priceManager:        priceManager,
+		networkInfoListener: networkInfoListener,
+		notifierCh:          notifierCh,
+		wg:                  wg,
+		shutdownChannel:     shutdownChannel,
 	}
 
 	notifier.NewNotifier(db, signumClient, notifierCh, wg, shutdownChannel)

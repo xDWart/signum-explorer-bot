@@ -95,26 +95,26 @@ func (n *Notifier) checkTransactions(account *MonitoredAccount) {
 		switch transaction.Subtype {
 		case signum_api.ORDINARY_PAYMENT:
 			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("%v outgoing ordinary payment to <b>%v</b>: <i>-%v SIGNA</i> (fee %v)",
+				msg += fmt.Sprintf("%v outgoing ordinary payment to <b>%v</b>  <i>-%v SIGNA</i> (fee %v)",
 					startLineString, transaction.RecipientRS, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
 			} else {
-				msg += fmt.Sprintf("%v incoming ordinary payment from <b>%v</b>: <i>+%v SIGNA</i> (fee %v)",
+				msg += fmt.Sprintf("%v incoming ordinary payment from <b>%v</b>  <i>+%v SIGNA</i> (fee %v)",
 					startLineString, transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
 			}
 		case signum_api.MULTI_OUT_PAYMENT:
 			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("%v outgoing multi-out payment: <i>-%v SIGNA</i> (fee %v)",
+				msg += fmt.Sprintf("%v outgoing multi-out payment  <i>-%v SIGNA</i> (fee %v)",
 					startLineString, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
 			} else {
-				msg += fmt.Sprintf("%v incoming multi-out payment from <b>%v</b>: <i>+%v SIGNA</i> (fee %v)",
+				msg += fmt.Sprintf("%v incoming multi-out payment from <b>%v</b>  <i>+%v SIGNA</i> (fee %v)",
 					startLineString, transaction.SenderRS, common.FormatNumber(transaction.Attachment.Recipients.FoundMyAmount(account.Account), 2), transaction.FeeNQT/1e8)
 			}
 		case signum_api.MULTI_OUT_SAME_PAYMENT:
 			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("%v outgoing multi-out same payment: <i>-%v SIGNA</i> (fee %v)",
+				msg += fmt.Sprintf("%v outgoing multi-out same payment  <i>-%v SIGNA</i> (fee %v)",
 					startLineString, common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2), transaction.FeeNQT/1e8)
 			} else {
-				msg += fmt.Sprintf("%v incoming multi-out same payment from <b>%v</b>: <i>+%v SIGNA</i> (fee %v)",
+				msg += fmt.Sprintf("%v incoming multi-out same payment from <b>%v</b>  <i>+%v SIGNA</i> (fee %v)",
 					startLineString, transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2), transaction.FeeNQT/1e8)
 			}
 		default:
@@ -152,8 +152,8 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 		return
 	}
 
-	msg := fmt.Sprintf("📃 <b>%v</b> new block: <i>%v</i>  <b>#%v</b>  <i>+%v SIGNA</i>",
-		account.AccountRS, common.FormatChainTimeToStringDatetimeUTC(foundBlock.Timestamp), foundBlock.Height, foundBlock.BlockReward)
+	msg := fmt.Sprintf("📃 <b>%v</b> new block <b>#%v</b>  <i>%v  +%v SIGNA</i>",
+		account.AccountRS, foundBlock.Height, common.FormatChainTimeToStringDatetimeUTC(foundBlock.Timestamp), foundBlock.BlockReward)
 
 	account.DbAccount.LastBlockID = foundBlock.Block
 	n.db.Save(&account.DbAccount)

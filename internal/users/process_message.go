@@ -127,5 +127,5 @@ func (user *User) delAccount(newAccount string) string {
 	user.db.Unscoped().Delete(foundAccount)
 	user.Accounts = append(user.Accounts[:foundAccountIndex], user.Accounts[foundAccountIndex+1:]...)
 	user.ResetState()
-	return fmt.Sprintf("✅ Account <b>%v</b> has been successfully deleted from the menu", newAccount)
+	return fmt.Sprintf("❎ Account <b>%v</b> has been deleted from the menu", newAccount)
 }

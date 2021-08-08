@@ -29,7 +29,7 @@ var SIGNUM_API = struct {
 	DEFAULT_AVG_COMMIT        float64
 	DEFAULT_BASE_TARGET       float64
 	DEFAULT_BLOCK_REWARD      float64
-	GET_AVG_COMMIT_TIME       time.Duration
+	GET_NETWORK_INFO_TIME     time.Duration
 	AVERAGING_DAYS_QUANTITY   uint
 	CACHE_TTL                 time.Duration
 	NOTIFIER_PERIOD           time.Duration
@@ -49,7 +49,7 @@ var SIGNUM_API = struct {
 	DEFAULT_AVG_COMMIT:        2500,
 	DEFAULT_BASE_TARGET:       280000,
 	DEFAULT_BLOCK_REWARD:      134,
-	GET_AVG_COMMIT_TIME:       time.Hour, // per hour
+	GET_NETWORK_INFO_TIME:     time.Hour, // per hour
 	AVERAGING_DAYS_QUANTITY:   7,         // during 7 days
 	CACHE_TTL:                 5 * time.Minute,
 	NOTIFIER_PERIOD:           5 * time.Minute,

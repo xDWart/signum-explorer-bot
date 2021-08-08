@@ -49,6 +49,6 @@ func autoMigrate(db *gorm.DB) {
 	db.AutoMigrate(
 		&models.DbUser{},
 		&models.DbAccount{},
-		&models.AverageCommitment{},
+		&models.NetworkInfo{},
 	)
 }

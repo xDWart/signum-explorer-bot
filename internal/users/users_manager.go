@@ -6,26 +6,26 @@ import (
 	"signum-explorer-bot/internal/api/cmc_api"
 	"signum-explorer-bot/internal/api/signum_api"
 	"signum-explorer-bot/internal/database/models"
-	"signum-explorer-bot/internal/users/calculator"
+	"signum-explorer-bot/internal/network_info"
 	"sync"
 )
 
 type Manager struct {
 	sync.RWMutex
-	db           *gorm.DB
-	users        map[int64]*User
-	cmcClient    *cmc_api.Client
-	signumClient *signum_api.Client
-	calculator   *calculator.Calculator
+	db                  *gorm.DB
+	users               map[int64]*User
+	cmcClient           *cmc_api.Client
+	signumClient        *signum_api.Client
+	networkInfoListener *network_info.NetworkInfoListener
 }
 
-func InitManager(db *gorm.DB, cmcClient *cmc_api.Client, signumClient *signum_api.Client, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Manager {
+func InitManager(db *gorm.DB, cmcClient *cmc_api.Client, signumClient *signum_api.Client, networkInfoListener *network_info.NetworkInfoListener, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Manager {
 	return &Manager{
-		db:           db,
-		users:        make(map[int64]*User),
-		cmcClient:    cmcClient,
-		signumClient: signumClient,
-		calculator:   calculator.NewCalculator(db, signumClient, wg, shutdownChannel),
+		db:                  db,
+		users:               make(map[int64]*User),
+		cmcClient:           cmcClient,
+		signumClient:        signumClient,
+		networkInfoListener: networkInfoListener,
 	}
 }
 
@@ -58,11 +58,11 @@ func (um *Manager) GetUserByChatIdFromUpdate(update *tgbotapi.Update) *User {
 		}
 
 		botUser = &User{
-			DbUser:       &dbUser,
-			db:           um.db,
-			cmcClient:    um.cmcClient,
-			signumClient: um.signumClient,
-			calculator:   um.calculator,
+			DbUser:              &dbUser,
+			db:                  um.db,
+			cmcClient:           um.cmcClient,
+			signumClient:        um.signumClient,
+			networkInfoListener: um.networkInfoListener,
 		}
 
 		um.Lock()

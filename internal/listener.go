@@ -51,10 +51,13 @@ func (bot *TelegramBot) startBotListener() {
 					userAnswer.MainText = user.ProcessDel(message)
 				case strings.HasPrefix(message, config.COMMAND_PRICE) || message == config.BUTTON_PRICES:
 					user.ResetState()
-					userAnswer.MainText = "<b>💵 Actual prices:</b>" + bot.priceManager.GetActualPrices()
+					userAnswer.MainText = "💵 <b>Actual prices:</b>" + bot.priceManager.GetActualPrices()
 				case strings.HasPrefix(message, config.COMMAND_CALC) || message == config.BUTTON_CALC:
 					user.ResetState()
 					userAnswer.MainText = user.ProcessCalc(message)
+				case strings.HasPrefix(message, config.COMMAND_NETWORK) || message == config.BUTTON_NETWORK:
+					user.ResetState()
+					userAnswer.MainText = bot.networkInfoListener.GetNetworkInfo()
 				case strings.HasPrefix(message, config.COMMAND_INFO) || message == config.BUTTON_INFO:
 					user.ResetState()
 					userAnswer.MainText = config.NAME + " " + config.VERSION + "\n" +

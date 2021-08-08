@@ -4,7 +4,8 @@ import (
 	"gorm.io/gorm"
 )
 
-type AverageCommitment struct {
+type NetworkInfo struct {
 	gorm.Model
 	AverageCommitment float64
+	NetworkDifficulty float64
 }

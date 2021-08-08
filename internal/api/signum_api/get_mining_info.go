@@ -3,11 +3,15 @@ package signum_api
 import "signum-explorer-bot/internal/config"
 
 type MiningInfo struct {
-	Height               uint32  `json:"height,string"`
-	BaseTarget           float64 `json:"baseTarget,string"`
-	LastBlockReward      float64 `json:"lastBlockReward,string"`
-	AverageCommitmentNQT float64 `json:"averageCommitmentNQT,string"`
-	Timestamp            uint64  `json:"timestamp,string"`
+	Height                   uint32  `json:"height,string"`
+	BaseTarget               float64 `json:"baseTarget,string"`
+	LastBlockReward          float64 `json:"lastBlockReward,string"`
+	AverageCommitmentNQT     float64 `json:"averageCommitmentNQT,string"`
+	Timestamp                uint64  `json:"timestamp,string"`
+	ActualNetworkDifficulty  float64 `json:"-"`
+	ActualCommitment         float64 `json:"-"`
+	AverageNetworkDifficulty float64 `json:"-"`
+	AverageCommitment        float64 `json:"-"`
 }
 
 var DEFAULT_MINING_INFO = MiningInfo{

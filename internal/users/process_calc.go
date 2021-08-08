@@ -56,15 +56,15 @@ func parseCommit(message string) (float64, error) {
 
 func (user *User) calculate(tib, commit float64) string {
 	signaPrice := user.cmcClient.GetPrices()["SIGNA"].Price
-	lastMiningInfo := user.calculator.GetLastMiningInfo()
+	lastMiningInfo := user.networkInfoListener.GetLastMiningInfo()
 
 	if commit > 0 {
-		calcResult := user.calculator.Calculate(&lastMiningInfo, tib, commit)
-		reinvestmentCalcResult := user.calculator.CalculateReinvestment(calcResult)
+		calcResult := calculator.Calculate(&lastMiningInfo, tib, commit)
+		reinvestmentCalcResult := calculator.CalculateReinvestment(&lastMiningInfo, calcResult)
 
 		return fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB with %v SIGNA ($%v) commitment:</b>"+
-			"\nAverage Network Commitment per TiB during the last %v days: %v SIGNA"+
-			"\nYour Commitment per TiB: %v SIGNA"+
+			"\nAverage Network Commitment during the last %v days: %v SIGNA / TiB"+
+			"\nYour Commitment: %v SIGNA / TiB"+
 			"\nYour Capacity Multiplier: %v"+
 			"\nYour Effective Capacity: %v TiB"+
 			"\n\n<b>💵 Basic Rewards:</b>"+
@@ -77,7 +77,7 @@ func (user *User) calculate(tib, commit float64) string {
 			"\nMonthly: %v SIGNA (+%v%%)"+
 			"\nYearly: %v SIGNA (+%v%%)",
 			calcResult.TiB, common.FormatNumber(calcResult.Commitment, 0), common.FormatNumber(calcResult.Commitment*signaPrice, 0),
-			config.SIGNUM_API.AVERAGING_DAYS_QUANTITY, common.FormatNumber(calcResult.AverageCommitment, 0),
+			config.SIGNUM_API.AVERAGING_DAYS_QUANTITY, common.FormatNumber(lastMiningInfo.AverageCommitment, 0),
 			common.FormatNumber(calcResult.MyCommitmentPerTiB, 0),
 			common.FormatNumber(calcResult.CapacityMultiplier, 3),
 			common.FormatNumber(calcResult.EffectiveCapacity, 2),
@@ -92,11 +92,11 @@ func (user *User) calculate(tib, commit float64) string {
 		)
 	}
 
-	entireRangeCalculation := user.calculator.CalculateEntireRange(&lastMiningInfo, tib)
+	entireRangeCalculation := calculator.CalculateEntireRange(&lastMiningInfo, tib)
 	result := fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB for the entire commitment range:</b>"+
-		"\nAverage Network Commitment per TiB during the last %v days: %v SIGNA"+
+		"\nAverage Network Commitment during the last %v days: %v SIGNA / TiB"+
 		"\n\n<b>Capacity multipliers, commitment and mining rewards:</b>", tib,
-		config.SIGNUM_API.AVERAGING_DAYS_QUANTITY, common.FormatNumber(lastMiningInfo.AverageCommitmentNQT, 0))
+		config.SIGNUM_API.AVERAGING_DAYS_QUANTITY, common.FormatNumber(lastMiningInfo.AverageCommitment, 0))
 
 	for _, multiplier := range calculator.MultipliersList {
 		var minMax string
