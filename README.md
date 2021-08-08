@@ -42,6 +42,9 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
   - Basic rewards
   - Rewards for the entire commitment range
   - Reinvestment calc
+- Network Info
+  - Current values
+  - Average values during the last 7 days
 
 ## Contribution
 

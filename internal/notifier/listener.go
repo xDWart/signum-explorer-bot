@@ -48,7 +48,7 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 	}
 
 	for _, account := range monitoredAccounts {
-		log.Printf("Notifier will request data for account %v (TXs %v, Blocks %v)", account.AccountRS, account.NotifyNewTransactions, account.NotifyNewBlocks)
+		log.Printf("Notifier will request data for account %v (tx %v, block %v)", account.AccountRS, account.NotifyNewTransactions, account.NotifyNewBlocks)
 
 		if account.NotifyNewTransactions {
 			n.checkTransactions(&account)
