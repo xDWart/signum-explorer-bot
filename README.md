@@ -45,6 +45,7 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
 - Show network info
   - Current values of difficulty and commitment
   - Average values during the last 7 days
+- Check plots for crossing
 
 ## Contribution
 
