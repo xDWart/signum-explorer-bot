@@ -3,10 +3,11 @@ package users
 import (
 	"fmt"
 	"signum-explorer-bot/internal/common"
+	"signum-explorer-bot/internal/config"
 )
 
 func (user *User) getAccountInfoMessage(accountS string) (*common.BotMessage, error) {
-	if !validAccountRS.MatchString(accountS) && !validAccount.MatchString(accountS) {
+	if !config.ValidAccountRS.MatchString(accountS) && !config.ValidAccount.MatchString(accountS) {
 		return nil, fmt.Errorf("🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>")
 	}
 	account, err := user.signumClient.GetAccount(accountS)

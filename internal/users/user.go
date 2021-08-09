@@ -34,6 +34,7 @@ const (
 	DEL_STATE
 	CALC_TIB_STATE
 	CALC_COMMIT_STATE
+	CROSSING_STATE
 )
 
 func (user *User) ResetState() {

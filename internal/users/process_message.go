@@ -2,18 +2,14 @@ package users
 
 import (
 	"fmt"
-	"regexp"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
 	"strings"
 )
 
-var validAccount = regexp.MustCompile(`[0-9]{1,}`)
-var validAccountRS = regexp.MustCompile(`^(S|BURST)-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{5}$`)
-
 func (user *User) ProcessMessage(message string) *common.BotMessage {
-	if (user.state == CALC_TIB_STATE || user.state == CALC_COMMIT_STATE) && validAccountRS.MatchString(message) {
+	if (user.state == CALC_TIB_STATE || user.state == CALC_COMMIT_STATE) && config.ValidAccountRS.MatchString(message) {
 		user.ResetState()
 	}
 
@@ -39,6 +35,9 @@ func (user *User) ProcessMessage(message string) *common.BotMessage {
 		return &common.BotMessage{MainText: msg}
 	case DEL_STATE:
 		return &common.BotMessage{MainText: user.delAccount(message)}
+	case CROSSING_STATE:
+		user.ResetState()
+		return &common.BotMessage{MainText: user.checkCrossing(message)}
 	default:
 		botMessage, err := user.getAccountInfoMessage(message)
 		if err != nil {
@@ -65,7 +64,7 @@ func (user *User) ProcessAdd(message string) string {
 }
 
 func (user *User) addAccount(newAccount string) (*models.DbAccount, string) {
-	if !validAccountRS.MatchString(newAccount) && !validAccount.MatchString(newAccount) {
+	if !config.ValidAccountRS.MatchString(newAccount) && !config.ValidAccount.MatchString(newAccount) {
 		return nil, "🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>"
 	}
 	userAccount := user.GetDbAccount(newAccount)
@@ -108,7 +107,7 @@ func (user *User) ProcessDel(message string) string {
 }
 
 func (user *User) delAccount(newAccount string) string {
-	if !validAccountRS.MatchString(newAccount) && !validAccount.MatchString(newAccount) {
+	if !config.ValidAccountRS.MatchString(newAccount) && !config.ValidAccount.MatchString(newAccount) {
 		return "🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>"
 	}
 	var foundAccount *models.DbAccount

@@ -1,6 +1,12 @@
 package config
 
-import "time"
+import (
+	"regexp"
+	"time"
+)
+
+var ValidAccount = regexp.MustCompile(`^[0-9]{1,}$`)
+var ValidAccountRS = regexp.MustCompile(`^(S|BURST)-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{5}$`)
 
 var COMMON = struct {
 	MAX_NUM_OF_ACCOUNTS int

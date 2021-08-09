@@ -58,6 +58,9 @@ func (bot *TelegramBot) startBotListener() {
 				case strings.HasPrefix(message, config.COMMAND_NETWORK) || message == config.BUTTON_NETWORK:
 					user.ResetState()
 					userAnswer.MainText = bot.networkInfoListener.GetNetworkInfo()
+				case strings.HasPrefix(message, config.COMMAND_CROSSING):
+					user.ResetState()
+					userAnswer.MainText = user.ProcessCrossing()
 				case strings.HasPrefix(message, config.COMMAND_INFO) || message == config.BUTTON_INFO:
 					user.ResetState()
 					userAnswer.MainText = config.NAME + " " + config.VERSION + "\n" +
