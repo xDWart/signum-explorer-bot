@@ -15,6 +15,7 @@ func (user *User) ProcessCrossing() string {
 func (user *User) checkCrossing(message string) string {
 	plotsList := cross_checker.CheckPlotsForCrossing(message)
 
+	var anyError bool
 	answer := "📃 <b>Results of cross checking your plots:</b>"
 	for account, nonces := range plotsList {
 		if account == cross_checker.INVALID_ACCOUNTS {
@@ -28,6 +29,7 @@ func (user *User) checkCrossing(message string) string {
 		icon := "✅"
 		if nonces.AnyError || nonces.SharedNonces > 0 {
 			icon = "❌"
+			anyError = true
 		}
 		answer += fmt.Sprintf("\n\n%v <b>%v:</b>  <i>%.3f / %.3f</i> TiB",
 			icon, account, nonces.PhysicalCapacity-nonces.SharedCapacity, nonces.PhysicalCapacity)
@@ -50,10 +52,15 @@ func (user *User) checkCrossing(message string) string {
 
 	invalidAccounts := plotsList[cross_checker.INVALID_ACCOUNTS]
 	if invalidAccounts != nil {
+		anyError = true
 		answer += "\n\n❌ <b>Invalid AccountID:</b>"
 		for _, nonce := range invalidAccounts.ListOfNonces {
 			answer += "\n" + nonce.Filename
 		}
+	}
+
+	if anyError {
+		answer += "\n\n🚫 <b>Attention: your plots should not overlap to maximize mining profit, remove duplicates and plot them again!</b>"
 	}
 
 	return answer

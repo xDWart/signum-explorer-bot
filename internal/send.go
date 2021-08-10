@@ -17,6 +17,9 @@ func (bot *AbstractTelegramBot) SendAnswer(chatID int64, answer *common.BotMessa
 	if answer.MainText != "" {
 		bot.SendMessage(chatID, answer.MainText, answer.MainMenu)
 	}
+	if len(answer.Chart) > 0 {
+		bot.NewPhotoUpload(chatID, "", answer.Chart, answer.InlineKeyboard)
+	}
 	if answer.MessageID == 0 {
 		if answer.InlineText != "" {
 			bot.SendMessage(chatID, answer.InlineText, answer.InlineKeyboard)
@@ -31,6 +34,17 @@ func (bot *AbstractTelegramBot) SendAnswer(chatID int64, answer *common.BotMessa
 			bot.EditInlineKeyboard(chatID, answer.MessageID, newInlineKeyboard)
 		}
 	}
+}
+
+func (bot *AbstractTelegramBot) NewPhotoUpload(chatID int64, text string, payload []byte, replyMarkup interface{}) {
+	fileBytes := tgbotapi.FileBytes{
+		Bytes: payload,
+	}
+	photoConfig := tgbotapi.NewPhotoUpload(chatID, fileBytes)
+	photoConfig.Caption = text
+	photoConfig.ReplyMarkup = replyMarkup
+	photoConfig.ParseMode = tgbotapi.ModeHTML
+	bot.ConfigureAndSend(photoConfig)
 }
 
 func (bot *AbstractTelegramBot) EditMessageText(chatID int64, messageID int, text string) {

@@ -15,12 +15,14 @@ type Notifier struct {
 }
 
 type NotifierMessage struct {
-	ChatID  int64
-	Message string
+	UserName string
+	ChatID   int64
+	Message  string
 }
 
 type MonitoredAccount struct {
-	ChatID int64
+	UserName string
+	ChatID   int64
 	models.DbAccount
 }
 

@@ -2,6 +2,7 @@ package cross_checker
 
 import (
 	"errors"
+	"math"
 	"signum-explorer-bot/internal/config"
 	"strconv"
 	"strings"
@@ -45,6 +46,9 @@ func max(a, b uint64) uint64 {
 	return b
 }
 
+var NONCE_SIZE = math.Pow(2, 18)
+var TIB_BYTES = math.Pow(2, 40)
+
 func CheckPlotsForCrossing(plots string) map[string]*NoncesType {
 	plotsList := parsePlots(plots)
 
@@ -67,8 +71,8 @@ func CheckPlotsForCrossing(plots string) map[string]*NoncesType {
 			}
 		}
 		nonces.SharedNonces /= 2
-		nonces.PhysicalCapacity = float64(nonces.TotalNonces) / 200000 * 48.8 / 1000
-		nonces.SharedCapacity = float64(nonces.SharedNonces) / 200000 * 48.8 / 1000
+		nonces.PhysicalCapacity = float64(nonces.TotalNonces) * NONCE_SIZE / TIB_BYTES
+		nonces.SharedCapacity = float64(nonces.SharedNonces) * NONCE_SIZE / TIB_BYTES
 	}
 
 	return plotsList

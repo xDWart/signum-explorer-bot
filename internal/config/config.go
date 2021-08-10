@@ -44,10 +44,10 @@ var SIGNUM_API = struct {
 	HOSTS: []string{
 		"https://europe1.signum.network",
 		"https://europe.signum.network",
-		"https://canada.signum.network",
-		"https://australia.signum.network",
 		"https://europe2.signum.network",
 		"https://europe3.signum.network",
+		"https://canada.signum.network",
+		"https://australia.signum.network",
 		"https://brazil.signum.network",
 		"https://uk.signum.network",
 		"https://wallet.burstcoin.ro",
@@ -57,7 +57,7 @@ var SIGNUM_API = struct {
 	DEFAULT_BLOCK_REWARD:      134,
 	GET_NETWORK_INFO_TIME:     time.Hour, // per hour
 	AVERAGING_DAYS_QUANTITY:   7,         // during 7 days
-	CACHE_TTL:                 5 * time.Minute,
-	NOTIFIER_PERIOD:           5 * time.Minute,
-	NOTIFIER_CHECK_BLOCKS_PER: 6, // 5 min * 6 = per 30 min
+	CACHE_TTL:                 3 * time.Minute,
+	NOTIFIER_PERIOD:           4 * time.Minute,
+	NOTIFIER_CHECK_BLOCKS_PER: 3, // 4 min * 3 = per 12 min
 }

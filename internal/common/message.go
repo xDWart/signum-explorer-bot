@@ -8,4 +8,6 @@ type BotMessage struct {
 
 	InlineText     string
 	InlineKeyboard interface{}
+
+	Chart []byte
 }

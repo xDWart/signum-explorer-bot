@@ -20,6 +20,7 @@ func (bot *TelegramBot) startBotListener() {
 			return
 
 		case notifierMessage := <-bot.notifierCh:
+			log.Printf("Send notification to user %v (Chat.ID %v): %v", notifierMessage.UserName, notifierMessage.ChatID, notifierMessage.Message)
 			bot.SendMessage(notifierMessage.ChatID, notifierMessage.Message, nil)
 
 		case update := <-bot.updates:
@@ -58,6 +59,7 @@ func (bot *TelegramBot) startBotListener() {
 				case strings.HasPrefix(message, config.COMMAND_NETWORK) || message == config.BUTTON_NETWORK:
 					user.ResetState()
 					userAnswer.MainText = bot.networkInfoListener.GetNetworkInfo()
+					userAnswer.Chart = bot.networkInfoListener.GetNetworkChart()
 				case strings.HasPrefix(message, config.COMMAND_CROSSING):
 					user.ResetState()
 					userAnswer.MainText = user.ProcessCrossing()

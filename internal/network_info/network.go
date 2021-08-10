@@ -34,8 +34,12 @@ func NewNetworkInfoListener(db *gorm.DB, signumClient *signum_api.Client, wg *sy
 func (ni *NetworkInfoListener) readAvgValueFromDB() {
 	var networkInfos []models.NetworkInfo
 	result := ni.db.Find(&networkInfos)
-	if result.Error != nil || result.RowsAffected == 0 {
+	if result.Error != nil {
 		log.Printf("Error getting Network Info from DB: %v", result.Error)
+		return
+	}
+
+	if len(networkInfos) == 0 {
 		return
 	}
 
