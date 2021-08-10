@@ -22,10 +22,10 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
 
 ## Features
 
-- Show balance:
-  - SIGNA
+- Show SIGNA balance:
   - Commitment
   - Available
+  - Total
   - USD / BTC equivalents
 - Show last transactions:
   - Ordinary Payments
@@ -38,6 +38,7 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
   - SIGNA/USD (+ daily percentage change)
   - SIGNA/BTC
   - BTC/USD (+ daily percentage change)
+  - Plot a chart
 - Mining rewards calculator
   - Basic rewards
   - Rewards for the entire commitment range
@@ -45,6 +46,7 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
 - Show network info
   - Current values of difficulty and commitment
   - Average values during the last 7 days
+  - Plot a chart
 - Check plots for crossing
 
 ## Contribution

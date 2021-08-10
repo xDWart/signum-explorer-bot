@@ -80,7 +80,7 @@ func (c *Client) GetPrices() map[string]Quote {
 	prices := map[string]Quote{}
 
 	c.RLock()
-	if time.Since(c.lastReqTimestamp) <= config.CMC_API.REQ_PER_MINUTES {
+	if time.Since(c.lastReqTimestamp) <= config.CMC_API.CACHE_TTL {
 		prices["BTC"] = c.cachedValues["BTC"]
 		prices["SIGNA"] = c.cachedValues["SIGNA"]
 		c.RUnlock()
@@ -90,7 +90,7 @@ func (c *Client) GetPrices() map[string]Quote {
 
 	c.Lock()
 	// cache may already be updated to this moment, need check it again
-	if time.Since(c.lastReqTimestamp) > config.CMC_API.REQ_PER_MINUTES {
+	if time.Since(c.lastReqTimestamp) > config.CMC_API.CACHE_TTL {
 		err := c.updateListings()
 		if err != nil {
 			log.Printf("Update CMC listenings error: %v", err)

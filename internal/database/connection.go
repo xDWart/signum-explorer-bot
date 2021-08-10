@@ -50,5 +50,6 @@ func autoMigrate(db *gorm.DB) {
 		&models.DbUser{},
 		&models.DbAccount{},
 		&models.NetworkInfo{},
+		&models.Price{},
 	)
 }

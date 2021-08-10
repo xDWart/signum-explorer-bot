@@ -2,29 +2,38 @@ package network_info
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/wcharczuk/go-chart/v2"
 	"log"
+	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
 	"time"
 )
 
 func (ni *NetworkInfoListener) GetNetworkChart() []byte {
 	var networkInfos []models.NetworkInfo
-	result := ni.db.Order("id desc").Find(&networkInfos)
+	result := ni.db.Order("id asc").Find(&networkInfos)
 	if result.Error != nil || len(networkInfos) == 0 {
 		log.Printf("Error getting Network Infos from DB for plotting chart: %v", result.Error)
 		return nil
 	}
 
 	graph := chart.Chart{
-		Title: "Network Statistic",
+		Title: fmt.Sprintf("Network Statistic (last %v days)", config.SIGNUM_API.AVERAGING_DAYS_QUANTITY),
 		Background: chart.Style{
 			Padding: chart.Box{
-				Top: 20,
+				Top:  50,
+				Left: 20,
 			},
 		},
 		XAxis: chart.XAxis{
 			ValueFormatter: chart.TimeMinuteValueFormatter,
+		},
+		YAxis: chart.YAxis{
+			Name: "Commitment, SIGNA / TiB",
+		},
+		YAxisSecondary: chart.YAxis{
+			Name: "Difficulty, PiB",
 		},
 		Series: []chart.Series{},
 	}
@@ -50,16 +59,25 @@ func (ni *NetworkInfoListener) GetNetworkChart() []byte {
 		YValues: []float64{},
 	}
 
-	for _, values := range networkInfos {
+	annotationSeries := chart.AnnotationSeries{
+		Annotations: []chart.Value2{},
+	}
+
+	for index, values := range networkInfos {
 		difficultyChartTimeSeries.XValues = append(difficultyChartTimeSeries.XValues, values.CreatedAt)
 		difficultyChartTimeSeries.YValues = append(difficultyChartTimeSeries.YValues, values.NetworkDifficulty/1024)
 
 		commitmentChartTimeSeries.XValues = append(commitmentChartTimeSeries.XValues, values.CreatedAt)
 		commitmentChartTimeSeries.YValues = append(commitmentChartTimeSeries.YValues, values.AverageCommitment)
+
+		if index == len(networkInfos)-1 {
+			// annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{XValue: chart.TimeToFloat64(values.CreatedAt), YValue: values.NetworkDifficulty / 1024, Label: fmt.Sprintf("%.1f", values.NetworkDifficulty/1024)})
+		}
 	}
 
 	graph.Series = append(graph.Series, commitmentChartTimeSeries)
 	graph.Series = append(graph.Series, difficultyChartTimeSeries)
+	graph.Series = append(graph.Series, annotationSeries)
 
 	graph.Elements = []chart.Renderable{
 		chart.Legend(&graph),

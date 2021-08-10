@@ -13,6 +13,8 @@ const (
 	COMMAND_CROSSING = "/crossing"
 	COMMAND_INFO     = "/info"
 	COMMAND_P        = "/p"
+	COMMAND_C        = "/c"
+	COMMAND_PC       = "/pc"
 )
 
 const (

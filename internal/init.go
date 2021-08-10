@@ -44,11 +44,11 @@ func InitTelegramBot() *TelegramBot {
 
 	db := database.NewDatabaseConnection()
 	cmcClient := api_cmc.NewClient()
-	priceManager := prices.NewPricesManager(cmcClient)
 	signumClient := signum_api.NewClient()
 	notifierCh := make(chan notifier.NotifierMessage)
 	wg := &sync.WaitGroup{}
 	shutdownChannel := make(chan interface{})
+	priceManager := prices.NewPricesManager(db, cmcClient, wg, shutdownChannel)
 	networkInfoListener := network_info.NewNetworkInfoListener(db, signumClient, wg, shutdownChannel)
 
 	bot := &TelegramBot{

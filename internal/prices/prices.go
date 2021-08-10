@@ -2,20 +2,30 @@ package prices
 
 import (
 	"fmt"
+	"gorm.io/gorm"
 	"signum-explorer-bot/internal/api/cmc_api"
 	"signum-explorer-bot/internal/common"
+	"sync"
 )
 
 type PriceManager struct {
+	db *gorm.DB
+	sync.RWMutex
 	cmcClient *cmc_api.Client
 }
 
-func NewPricesManager(cmcClient *cmc_api.Client) *PriceManager {
-	return &PriceManager{cmcClient}
+func NewPricesManager(db *gorm.DB, cmcClient *cmc_api.Client, wg *sync.WaitGroup, shutdownChannel chan interface{}) *PriceManager {
+	pm := PriceManager{
+		db:        db,
+		cmcClient: cmcClient,
+	}
+	wg.Add(1)
+	go pm.startListener(wg, shutdownChannel)
+	return &pm
 }
 
-func (p *PriceManager) GetActualPrices() string {
-	prices := p.cmcClient.GetPrices()
+func (pm *PriceManager) GetActualPrices() string {
+	prices := pm.cmcClient.GetPrices()
 
 	var signaSign string
 	if prices["SIGNA"].PercentChange24h > 0 {

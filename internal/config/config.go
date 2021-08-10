@@ -21,13 +21,17 @@ var CALCULATOR = struct {
 }
 
 var CMC_API = struct {
-	ADDRESS         string
-	FREE_LIMIT      string
-	REQ_PER_MINUTES time.Duration
+	ADDRESS                string
+	FREE_LIMIT             string
+	CACHE_TTL              time.Duration
+	LISTENER_PERIOD        time.Duration
+	LISTENER_DAYS_QUANTITY uint
 }{
-	ADDRESS:         "https://pro-api.coinmarketcap.com/v1",
-	FREE_LIMIT:      "200",
-	REQ_PER_MINUTES: 5 * time.Minute,
+	ADDRESS:                "https://pro-api.coinmarketcap.com/v1",
+	FREE_LIMIT:             "200",
+	CACHE_TTL:              5 * time.Minute,
+	LISTENER_PERIOD:        time.Hour,
+	LISTENER_DAYS_QUANTITY: 7,
 }
 
 var SIGNUM_API = struct {

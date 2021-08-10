@@ -68,7 +68,7 @@ func (ni *NetworkInfoListener) saveNewNetworkInfo(networkInfo *signum_api.Mining
 		NetworkDifficulty: networkInfo.ActualNetworkDifficulty,
 	}
 	ni.db.Save(dbCommit)
-	log.Printf("Have got and saved new Network Info %+v", networkInfo)
+	log.Printf("Have got and saved new Network Info: Commitment %v, Difficulry %v", dbCommit.AverageCommitment, dbCommit.NetworkDifficulty)
 
 	// delete irrelevant data
 	quantity := 24 * config.SIGNUM_API.AVERAGING_DAYS_QUANTITY * uint(time.Hour/config.SIGNUM_API.GET_NETWORK_INFO_TIME)
