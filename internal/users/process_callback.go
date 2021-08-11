@@ -171,7 +171,8 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
 
-	case callback_data.ActionType_AT_ENABLE_TX_NOTIFY:
+	case callback_data.ActionType_AT_ENABLE_INCOME_TX_NOTIFY,
+		callback_data.ActionType_AT_ENABLE_OUTGO_TX_NOTIFY:
 		userAccount := user.GetDbAccount(account.Account)
 		if userAccount == nil {
 			// needs to add it at first
@@ -182,36 +183,53 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			}
 		}
 
-		if !userAccount.NotifyNewTransactions { // needs to enable
-			userAccount.NotifyNewTransactions = true
-
-			// get last transaction
-			userTransactions, err := user.signumClient.GetAccountPaymentTransactions(account.Account)
-			if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
-				userAccount.LastTransactionID = userTransactions.Transactions[0].TransactionID
-			}
-
-			user.db.Save(userAccount)
+		// get last transaction
+		userTransactions, err := user.signumClient.GetAccountPaymentTransactions(account.Account)
+		if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
+			userAccount.LastTransactionID = userTransactions.Transactions[0].TransactionID
 		}
+
+		var txType string
+		switch callbackData.GetAction() {
+		case callback_data.ActionType_AT_ENABLE_INCOME_TX_NOTIFY:
+			userAccount.NotifyIncomeTransactions = true
+			txType = "income"
+		case callback_data.ActionType_AT_ENABLE_OUTGO_TX_NOTIFY:
+			userAccount.NotifyOutgoTransactions = true
+			txType = "outgo"
+		}
+
+		user.db.Save(userAccount)
 
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("💸 Enabled new transaction alerts for <b>%v</b>", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("💸 Enabled %v transaction alerts for <b>%v</b>", txType, userAccount.AccountRS),
 			MainMenu:       user.GetMainMenu(),
 		}, nil
 
-	case callback_data.ActionType_AT_DISABLE_TX_NOTIFY:
+	case callback_data.ActionType_AT_DISABLE_INCOME_TX_NOTIFY,
+		callback_data.ActionType_AT_DISABLE_OUTGO_TX_NOTIFY:
 		userAccount := user.GetDbAccount(account.Account)
-		if userAccount != nil && userAccount.NotifyNewTransactions { // needs to disable
-			userAccount.NotifyNewTransactions = false
-			user.db.Save(userAccount)
+		if userAccount == nil {
+			return nil, fmt.Errorf("could not get account for %v", account.Account)
 		}
+		var txType string
+
+		switch callbackData.GetAction() {
+		case callback_data.ActionType_AT_DISABLE_INCOME_TX_NOTIFY:
+			userAccount.NotifyIncomeTransactions = false
+			txType = "income"
+		case callback_data.ActionType_AT_DISABLE_OUTGO_TX_NOTIFY:
+			userAccount.NotifyOutgoTransactions = false
+			txType = "outgo"
+		}
+		user.db.Save(userAccount)
 
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("💸 Disabled new transaction alerts for <b>%v</b>", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("💸 Disabled %v transaction alerts for <b>%v</b>", txType, userAccount.AccountRS),
 		}, nil
 
 	case callback_data.ActionType_AT_ENABLE_BLOCK_NOTIFY:

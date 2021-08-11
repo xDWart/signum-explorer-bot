@@ -1,7 +1,7 @@
 package config
 
 const NAME = "<b>🚀 Signum Explorer Bot</b>"
-const VERSION = "<i>v.0.6.4</i>"
+const VERSION = "<i>v.0.6.5</i>"
 
 const (
 	COMMAND_START    = "/start"

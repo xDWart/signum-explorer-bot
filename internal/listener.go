@@ -20,7 +20,7 @@ func (bot *TelegramBot) startBotListener() {
 			return
 
 		case notifierMessage := <-bot.notifierCh:
-			log.Printf("Send notification to user %v (Chat.ID %v): %v", notifierMessage.UserName, notifierMessage.ChatID, notifierMessage.Message)
+			log.Printf("Send notification to user %v (Chat.ID %v): %v", notifierMessage.UserName, notifierMessage.ChatID, strings.Replace(notifierMessage.Message, "\n", " ", -1))
 			bot.SendMessage(notifierMessage.ChatID, notifierMessage.Message, nil)
 
 		case update := <-bot.updates:
@@ -34,7 +34,7 @@ func (bot *TelegramBot) startBotListener() {
 			userAnswer := &common.BotMessage{}
 
 			if message != nil && len(message.Text) > 0 {
-				log.Printf("Received message from user %v (Chat.ID %v): %v", message.From, message.Chat.ID, message.Text)
+				log.Printf("Received message from user %v (Chat.ID %v): %v", message.From, message.Chat.ID, strings.Replace(message.Text, "\n", " ", -1))
 
 				message := strings.TrimSpace(message.Text)
 				message = strings.Join(strings.Fields(message), " ")

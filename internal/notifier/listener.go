@@ -40,7 +40,8 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 
 	err := n.db.Model(&models.DbUser{}).Select("*").
 		Joins("join db_accounts on db_accounts.db_user_id = db_users.id").
-		Where("db_accounts.notify_new_transactions = true OR db_accounts.notify_new_blocks = true").
+		Where("db_accounts.notify_income_transactions = true OR db_accounts.notify_outgo_transactions = true " +
+			"OR db_accounts.notify_new_blocks = true").
 		Scan(&monitoredAccounts).Error
 	if err != nil {
 		log.Printf("Can't get monitored accounts: %v", err)
@@ -48,10 +49,11 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 	}
 
 	for _, account := range monitoredAccounts {
-		log.Printf("Notifier will request data for account %v (tx %v, block %v)", account.AccountRS, account.NotifyNewTransactions, account.NotifyNewBlocks)
+		log.Printf("Notifier will request data for account %v (intx %v, outtx %v, block %v)", account.AccountRS,
+			account.NotifyIncomeTransactions, account.NotifyOutgoTransactions, account.NotifyNewBlocks)
 
-		if account.NotifyNewTransactions {
-			n.checkTransactions(&account)
+		if account.NotifyIncomeTransactions || account.NotifyOutgoTransactions {
+			n.checkPaymentTransactions(&account)
 		}
 
 		if checkBlocks && account.NotifyNewBlocks {
@@ -60,7 +62,7 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 	}
 }
 
-func (n *Notifier) checkTransactions(account *MonitoredAccount) {
+func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 	userTransactions, err := n.signumClient.GetAccountPaymentTransactions(account.Account)
 	if err != nil {
 		log.Printf("Can't get last account %v transactions: %v", account.Account, err)
@@ -87,62 +89,69 @@ func (n *Notifier) checkTransactions(account *MonitoredAccount) {
 		}
 		msg := fmt.Sprintf("💸 <b>%v</b> ", account.AccountRS)
 
+		var incomeTransaction = transaction.Sender != account.Account
 		var senderName string
-		if transaction.Sender != account.Account {
+		if incomeTransaction {
+			if !account.NotifyIncomeTransactions {
+				continue
+			}
+
 			senderAccount, err := n.signumClient.GetAccount(transaction.SenderRS)
 			if err == nil && senderAccount.Name != "" {
 				senderName = fmt.Sprintf("\n<i>Sender Name:</i> %v", senderAccount.Name)
 			}
+		} else if !account.NotifyOutgoTransactions { // outgo
+			continue
 		}
 
 		switch transaction.Subtype {
 		case signum_api.ORDINARY_PAYMENT:
-			if transaction.Sender == account.Account {
-				msg += fmt.Sprintf("new outgo:"+
-					"\n<i>Payment:</i> Ordinary"+
-					"\n<i>Recipient:</i> %v"+
-					"\n<i>Amount:</i> -%v SIGNA"+
-					"\n<i>Fee:</i> %v SIGNA",
-					transaction.RecipientRS, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
-			} else {
+			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Ordinary"+
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Amount:</i> +%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
-			}
-		case signum_api.MULTI_OUT_PAYMENT:
-			if transaction.Sender == account.Account {
+			} else {
 				msg += fmt.Sprintf("new outgo:"+
-					"\n<i>Payment:</i> Multi-out"+
-					"\n<i>Recipients:</i> %v"+
+					"\n<i>Payment:</i> Ordinary"+
+					"\n<i>Recipient:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
-					len(transaction.Attachment.Recipients), common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
-			} else {
+					transaction.RecipientRS, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
+			}
+		case signum_api.MULTI_OUT_PAYMENT:
+			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out"+
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Amount:</i> +%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.FormatNumber(transaction.Attachment.Recipients.FoundMyAmount(account.Account), 2), transaction.FeeNQT/1e8)
-			}
-		case signum_api.MULTI_OUT_SAME_PAYMENT:
-			if transaction.Sender == account.Account {
+			} else {
 				msg += fmt.Sprintf("new outgo:"+
-					"\n<i>Payment:</i> Multi-out same"+
+					"\n<i>Payment:</i> Multi-out"+
 					"\n<i>Recipients:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
-					len(transaction.Attachment.Recipients), common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2), transaction.FeeNQT/1e8)
-			} else {
+					len(transaction.Attachment.Recipients), common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
+			}
+		case signum_api.MULTI_OUT_SAME_PAYMENT:
+			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out same"+
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Amount:</i> +%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2), transaction.FeeNQT/1e8)
+			} else {
+				msg += fmt.Sprintf("new outgo:"+
+					"\n<i>Payment:</i> Multi-out same"+
+					"\n<i>Recipients:</i> %v"+
+					"\n<i>Amount:</i> -%v SIGNA"+
+					"\n<i>Fee:</i> %v SIGNA",
+					len(transaction.Attachment.Recipients), common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2), transaction.FeeNQT/1e8)
 			}
 		default:
 			log.Printf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
