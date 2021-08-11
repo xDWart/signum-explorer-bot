@@ -18,6 +18,20 @@ func (pm *PriceManager) GetPriceChart() []byte {
 		return nil
 	}
 
+	var max float64
+	for _, value := range prices {
+		if max < value.SignaPrice {
+			max = value.SignaPrice
+		}
+	}
+
+	var signaSign = "¢"
+	var signaMultiplier float64 = 100
+	if max >= 1 {
+		signaSign = "$"
+		signaMultiplier = 1
+	}
+
 	graph := chart.Chart{
 		Title: fmt.Sprintf("SIGNA and BTC prices (last %v days)", config.CMC_API.LISTENER_DAYS_QUANTITY),
 		Background: chart.Style{
@@ -30,7 +44,7 @@ func (pm *PriceManager) GetPriceChart() []byte {
 			ValueFormatter: chart.TimeMinuteValueFormatter,
 		},
 		YAxis: chart.YAxis{
-			Name: "SIGNA, ¢",
+			Name: "SIGNA, " + signaSign,
 		},
 		YAxisSecondary: chart.YAxis{
 			Name: "BTC, $",
@@ -41,8 +55,8 @@ func (pm *PriceManager) GetPriceChart() []byte {
 	signaChartTimeSeries := chart.TimeSeries{
 		Name: "SIGNA",
 		Style: chart.Style{
-			StrokeColor: chart.GetDefaultColor(0),
-			FillColor:   chart.GetDefaultColor(0).WithAlpha(64),
+			StrokeColor: chart.GetDefaultColor(1),
+			FillColor:   chart.GetDefaultColor(1).WithAlpha(80),
 		},
 		XValues: []time.Time{},
 		YValues: []float64{},
@@ -51,8 +65,8 @@ func (pm *PriceManager) GetPriceChart() []byte {
 	btcChartTimeSeries := chart.TimeSeries{
 		Name: "BTC",
 		Style: chart.Style{
-			StrokeColor: chart.GetDefaultColor(1),
-			FillColor:   chart.GetDefaultColor(1).WithAlpha(64),
+			StrokeColor: chart.GetDefaultColor(0),
+			FillColor:   chart.GetDefaultColor(0).WithAlpha(20),
 		},
 		YAxis:   chart.YAxisSecondary,
 		XValues: []time.Time{},
@@ -65,7 +79,7 @@ func (pm *PriceManager) GetPriceChart() []byte {
 
 	for index, values := range prices {
 		signaChartTimeSeries.XValues = append(signaChartTimeSeries.XValues, values.CreatedAt)
-		signaChartTimeSeries.YValues = append(signaChartTimeSeries.YValues, values.SignaPrice*100)
+		signaChartTimeSeries.YValues = append(signaChartTimeSeries.YValues, values.SignaPrice*signaMultiplier)
 
 		btcChartTimeSeries.XValues = append(btcChartTimeSeries.XValues, values.CreatedAt)
 		btcChartTimeSeries.YValues = append(btcChartTimeSeries.YValues, values.BtcPrice)
