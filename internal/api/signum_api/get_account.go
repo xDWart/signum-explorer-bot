@@ -67,7 +67,7 @@ func (c *Client) GetAccount(accountS string) (*Account, error) {
 	}
 	log.Printf("Will request account %v", accountS)
 	account = &Account{}
-	err := c.DoGetJsonReq("/burst",
+	err := c.DoJsonReq("GET", "/burst",
 		map[string]string{"requestType": "getAccount", "getCommittedAmount": "true", "account": accountS},
 		nil,
 		account)

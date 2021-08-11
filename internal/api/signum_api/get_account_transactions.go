@@ -32,45 +32,10 @@ const (
 )
 
 type AccountTransactions struct {
-	Transactions []struct {
-		TransactionID string             `json:"transaction"`
-		Type          TransactionType    `json:"type"`
-		Subtype       TransactionSubType `json:"subtype"`
-		Timestamp     int64              `json:"timestamp"`
-		RecipientRS   string             `json:"recipientRS"`
-		AmountNQT     float64            `json:"amountNQT,string"`
-		FeeNQT        float64            `json:"feeNQT,string"`
-		Sender        string             `json:"sender"`
-		SenderRS      string             `json:"senderRS"`
-		Attachment    struct {
-			Recipients RecipientsType `json:"recipients"`
-			// VersionMultiOutCreation          byte           `json:"version.MultiOutCreation"`
-			// VersionCommitmentAdd             byte           `json:"version.CommitmentAdd"`
-			// VersionRewardRecipientAssignment byte           `json:"version.RewardRecipientAssignment"`
-			// VersionPublicKeyAnnouncement     byte           `json:"version.PublicKeyAnnouncement"`
-			// VersionMessage                   byte           `json:"version.Message"`
-			// AmountNQT                        uint64         `json:"amountNQT"`
-			// Message                          string         `json:"message"`
-			// RecipientPublicKey               string         `json:"recipientPublicKey"`
-			// MessageIsText                    bool           `json:"messageIsText"`
-		} `json:"attachment"`
-		// Signature       string             `json:"signature"`
-		// SignatureHash   string             `json:"signatureHash"`
-		// FullHash        string             `json:"fullHash"`
-		// Deadline        uint64             `json:"deadline"`
-		// SenderPublicKey string             `json:"senderPublicKey"`
-		// Recipient       string             `json:"recipient"`
-		// Height         uint64 `json:"height"`
-		// Version        uint64 `json:"version"`
-		// EcBlockId      uint64 `json:"ecBlockId,string"`
-		// EcBlockHeight  uint64 `json:"ecBlockHeight"`
-		// Block          uint64 `json:"block,string"`
-		// Confirmations  uint64 `json:"confirmations"`
-		// BlockTimestamp uint64 `json:"blockTimestamp"`
-	} `json:"transactions"`
+	Transactions     []Transaction `json:"transactions"`
+	ErrorDescription string        `json:"errorDescription"`
+	LastUpdateTime   time.Time     `json:"-"`
 	// RequestProcessingTime uint64    `json:"requestProcessingTime"`
-	ErrorDescription string    `json:"errorDescription"`
-	LastUpdateTime   time.Time `json:"-"`
 }
 
 type RecipientsType []interface{}
@@ -148,7 +113,7 @@ func (c *Client) getAccountTransactionsByType(account string, transactionSubType
 		urlParams["subtype"] = fmt.Sprint(transactionSubType)
 	}
 
-	err := c.DoGetJsonReq("/burst", urlParams, nil, accountTransactions)
+	err := c.DoJsonReq("GET", "/burst", urlParams, nil, accountTransactions)
 	if err == nil {
 		if accountTransactions.ErrorDescription == "" {
 			c.storeAccountTransactionsToCache(account, transactionSubType, accountTransactions)

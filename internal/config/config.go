@@ -44,6 +44,7 @@ var SIGNUM_API = struct {
 	CACHE_TTL                 time.Duration
 	NOTIFIER_PERIOD           time.Duration
 	NOTIFIER_CHECK_BLOCKS_PER uint
+	DEFAULT_DEADLINE          int
 }{
 	HOSTS: []string{
 		"https://europe1.signum.network",
@@ -64,4 +65,5 @@ var SIGNUM_API = struct {
 	CACHE_TTL:                 3 * time.Minute,
 	NOTIFIER_PERIOD:           4 * time.Minute,
 	NOTIFIER_CHECK_BLOCKS_PER: 3, // 4 min * 3 = per 12 min
+	DEFAULT_DEADLINE:          1440,
 }

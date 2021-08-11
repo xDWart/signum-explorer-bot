@@ -48,7 +48,7 @@ func (c *Client) GetAccountBlocks(account string) (*AccountBlocks, error) {
 	}
 	log.Printf("Will request blocks for account %v", account)
 	accountBlocks = &AccountBlocks{}
-	err := c.DoGetJsonReq("/burst",
+	err := c.DoJsonReq("GET", "/burst",
 		map[string]string{
 			"account":     account,
 			"requestType": "getAccountBlocks",

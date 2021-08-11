@@ -28,7 +28,7 @@ type Quote struct {
 
 func (c *Client) getListings(start string) (*Listings, error) {
 	var listings Listings
-	err := c.DoGetJsonReq("/cryptocurrency/listings/latest",
+	err := c.DoJsonReq("GET", "/cryptocurrency/listings/latest",
 		map[string]string{"start": start, "limit": config.CMC_API.FREE_LIMIT, "convert": "USD", "cryptocurrency_type": "coins"},
 		nil,
 		&listings)

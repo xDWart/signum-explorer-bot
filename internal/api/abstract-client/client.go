@@ -23,9 +23,9 @@ func NewClient(apiHosts []string, staticHeaders map[string]string) *Client {
 	}
 }
 
-func (c *Client) DoGetJsonReq(method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
+func (c *Client) DoJsonReq(httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
 	for _, host := range c.apiHosts {
-		req, err := http.NewRequest("GET", host+method, nil)
+		req, err := http.NewRequest(httpMethod, host+method, nil)
 		if err != nil {
 			log.Printf("Error create req %v", host+method)
 			continue
@@ -47,24 +47,37 @@ func (c *Client) DoGetJsonReq(method string, urlParams map[string]string, additi
 
 		resp, err := c.http.Do(req)
 		if err != nil {
-			log.Printf("Error perform GET %v", host+method)
+			log.Printf("Error perform %v %v: %v", httpMethod, host+method, err)
+			if httpMethod == "POST" {
+				return err
+			}
 			continue
 		}
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Printf("Couldn't read body of %v: %v", host+method, err)
+			if httpMethod == "POST" {
+				return err
+			}
 			continue
 		}
 
 		if resp.StatusCode != 200 {
-			log.Printf("Error StatusCode %v for %v: %v", resp.StatusCode, host+method, string(body))
+			err := fmt.Errorf("error StatusCode %v for %v: %v", resp.StatusCode, host+method, string(body))
+			log.Print(err)
+			if httpMethod == "POST" {
+				return err
+			}
 			continue
 		}
 
 		err = json.Unmarshal(body, output)
 		if err != nil {
 			log.Printf("Couldn't unmarshal body of %v: %v", host+method, err)
+			if httpMethod == "POST" {
+				return err
+			}
 			continue
 		}
 		return nil

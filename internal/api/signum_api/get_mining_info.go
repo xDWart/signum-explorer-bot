@@ -22,7 +22,7 @@ var DEFAULT_MINING_INFO = MiningInfo{
 
 func (c *Client) GetMiningInfo() (*MiningInfo, error) {
 	var miningInfo = DEFAULT_MINING_INFO
-	err := c.DoGetJsonReq("/burst",
+	err := c.DoJsonReq("GET", "/burst",
 		map[string]string{"requestType": "getMiningInfo"},
 		nil,
 		&miningInfo)

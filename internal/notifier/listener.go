@@ -151,7 +151,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Recipients:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
-					len(transaction.Attachment.Recipients), common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2), transaction.FeeNQT/1e8)
+					len(transaction.Attachment.Recipients), common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
 			}
 		default:
 			log.Printf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)

@@ -71,6 +71,11 @@ func (ni *NetworkInfoListener) GetNetworkChart() []byte {
 		commitmentChartTimeSeries.YValues = append(commitmentChartTimeSeries.YValues, values.AverageCommitment)
 
 		if index == len(networkInfos)-1 {
+			annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{
+				XValue: chart.TimeToFloat64(values.CreatedAt),
+				YValue: values.AverageCommitment,
+				Label:  fmt.Sprintf("%.2f", values.AverageCommitment),
+				Style:  chart.Style{StrokeColor: chart.ColorGreen}})
 			// annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{XValue: chart.TimeToFloat64(values.CreatedAt), YValue: values.NetworkDifficulty / 1024, Label: fmt.Sprintf("%.1f", values.NetworkDifficulty/1024)})
 		}
 	}
