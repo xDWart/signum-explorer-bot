@@ -28,10 +28,10 @@ func (pm *PriceManager) GetActualPrices() string {
 	prices := pm.cmcClient.GetPrices()
 
 	var signaSign string
-	if prices["SIGNA"].PercentChange24h > 0 {
-		signaSign = "\U0001F7E2 +"
-	} else {
+	if prices["SIGNA"].PercentChange24h < 0 {
 		signaSign = "🔴 "
+	} else {
+		signaSign = "\U0001F7E2 +"
 	}
 
 	var btcSign string

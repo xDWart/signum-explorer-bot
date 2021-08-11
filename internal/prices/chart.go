@@ -77,6 +77,12 @@ func (pm *PriceManager) GetPriceChart() []byte {
 		Annotations: []chart.Value2{},
 	}
 
+	var annotationColor = chart.ColorGreen
+	actualPrices := pm.cmcClient.GetPrices()
+	if actualPrices["SIGNA"].PercentChange24h < 0 {
+		annotationColor = chart.ColorRed
+	}
+
 	for index, values := range prices {
 		signaChartTimeSeries.XValues = append(signaChartTimeSeries.XValues, values.CreatedAt)
 		signaChartTimeSeries.YValues = append(signaChartTimeSeries.YValues, values.SignaPrice*signaMultiplier)
@@ -85,8 +91,12 @@ func (pm *PriceManager) GetPriceChart() []byte {
 		btcChartTimeSeries.YValues = append(btcChartTimeSeries.YValues, values.BtcPrice)
 
 		if index == len(prices)-1 {
-			// annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{XValue: chart.TimeToFloat64(values.CreatedAt), YValue: values.SignaPrice * 100, Label: fmt.Sprintf("SIGNA - %.1f", values.SignaPrice*100)})
-			// annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{XValue: chart.TimeToFloat64(values.CreatedAt), YValue: values.BtcPrice, Label: fmt.Sprintf("BTC - %.1f", values.BtcPrice)})
+			annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{
+				XValue: chart.TimeToFloat64(values.CreatedAt),
+				YValue: values.SignaPrice * signaMultiplier,
+				Label:  fmt.Sprintf("%.2f", values.SignaPrice*signaMultiplier),
+				Style:  chart.Style{StrokeColor: annotationColor}})
+			// annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{XValue: chart.TimeToFloat64(values.CreatedAt), YValue: values.BtcPrice, Label: fmt.Sprintf("%.f", values.BtcPrice)})
 		}
 	}
 

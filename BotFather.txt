@@ -5,3 +5,7 @@ crossing - Check your plots crossing
 price - Actual currency quotes of SIGNA and BTC
 network - Show Signum Network statistic
 info - Information about bot
+
+p - Actual currency quotes of SIGNA and BTC
+pc - Currency quotes + chart
+c - Chart only
