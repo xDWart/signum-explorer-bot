@@ -7,6 +7,7 @@ import (
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/prices"
+	"strings"
 	"sync"
 	"time"
 )
@@ -78,12 +79,13 @@ func (bot *TelegramPriceBot) startBotListener() {
 			if message != nil {
 				userAnswer := &common.BotMessage{}
 				switch true {
-				case message.Text == config.COMMAND_P:
+				case strings.HasPrefix(message.Text, config.COMMAND_P):
 					userAnswer.MainText = bot.priceManager.GetActualPrices()
-				case message.Text == config.COMMAND_PC:
-					userAnswer.MainText = bot.priceManager.GetActualPrices()
+					if !strings.HasPrefix(message.Text, config.COMMAND_PC) {
+						break
+					}
 					fallthrough
-				case message.Text == config.COMMAND_C:
+				case strings.HasPrefix(message.Text, config.COMMAND_C):
 					userAnswer.Chart = bot.priceManager.GetPriceChart()
 				default:
 					continue
