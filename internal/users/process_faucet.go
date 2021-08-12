@@ -39,10 +39,12 @@ func (user *User) ProcessFaucet(message string) string {
 		user.db.Model(&models.Donation{}).Select("sum(amount)").Scan(&totalDonation)
 
 		return fmt.Sprintf("💧 <b>Signum Explorer Bot Faucet:</b>"+
+			"\nFaucet address: <code>%v</code>"+
 			"\nFaucet current balance: <i>%v SIGNA</i>"+
 			"\nFaucet totaly received <i>%v SIGNA</i> donations"+
 			"\nFaucet sent <i>%v SIGNA</i> to %v accounts"+
 			"\n\n%v",
+			config.FAUCET.ACCOUNT,
 			common.FormatNumber(faucetAccount.TotalBalance, 2),
 			common.FormatNumber(totalDonation.Sum, 2),
 			common.FormatNumber(totalFaucets.Sum, 2), totalFaucets.Count,

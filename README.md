@@ -48,6 +48,7 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
   - Average values during the last 7 days
   - Plot a chart
 - Check plots for crossing
+- Faucet to get some free SIGNA
 
 ## Contribution
 
