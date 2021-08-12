@@ -2,8 +2,8 @@ package users
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
 	"signum-explorer-bot/internal/config"
+	"signum-explorer-bot/internal/database/models"
 	"signum-explorer-bot/internal/users/callback_data"
 )
 
@@ -36,8 +36,7 @@ var actionTypes = []map[bool]callback_data.ActionType{
 func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMarkup {
 	userAccount := user.GetDbAccount(account)
 	if userAccount == nil {
-		log.Printf("Could not get user db account for %v", account)
-		return nil
+		userAccount = &models.DbAccount{} // fake account
 	}
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
