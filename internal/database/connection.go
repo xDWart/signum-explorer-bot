@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"signum-explorer-bot/internal/database/models"
 	"strings"
 )
 
@@ -43,13 +42,4 @@ func NewPostgreConnection() (*gorm.DB, error) {
 	}
 
 	return gorm.Open(postgres.Open(connectStr), &gorm.Config{})
-}
-
-func autoMigrate(db *gorm.DB) {
-	db.AutoMigrate(
-		&models.DbUser{},
-		&models.DbAccount{},
-		&models.NetworkInfo{},
-		&models.Price{},
-	)
 }

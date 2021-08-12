@@ -50,6 +50,9 @@ func (bot *TelegramBot) startBotListener() {
 				case strings.HasPrefix(message, config.COMMAND_DEL):
 					user.ResetState()
 					userAnswer.MainText = user.ProcessDel(message)
+				case strings.HasPrefix(message, config.COMMAND_FAUCET):
+					user.ResetState()
+					userAnswer.MainText = user.ProcessFaucet(message)
 				case strings.HasPrefix(message, config.COMMAND_PRICE) || message == config.BUTTON_PRICES:
 					user.ResetState()
 					userAnswer.MainText = "💵 <b>Actual prices:</b>" + bot.priceManager.GetActualPrices()

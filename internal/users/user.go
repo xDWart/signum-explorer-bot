@@ -35,6 +35,7 @@ const (
 	CALC_TIB_STATE
 	CALC_COMMIT_STATE
 	CROSSING_STATE
+	FAUCET_STATE
 )
 
 func (user *User) ResetState() {

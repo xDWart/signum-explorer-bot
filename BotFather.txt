@@ -4,6 +4,7 @@ calc - Calculation expected mining rewards /calc TiB COMMITMENT
 crossing - Check your plots crossing
 price - Actual currency quotes of SIGNA and BTC
 network - Show Signum Network statistic
+faucet - Get some free SIGNA
 info - Information about bot
 
 p - Actual currency quotes of SIGNA and BTC

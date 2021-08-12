@@ -34,6 +34,16 @@ var CMC_API = struct {
 	LISTENER_DAYS_QUANTITY: 7,
 }
 
+var FAUCET = struct {
+	ACCOUNT     string
+	AMOUNT      float64
+	DAYS_PERIOD int
+}{
+	ACCOUNT:     "S-8N2F-TDD7-4LY6-64FZ7",
+	AMOUNT:      0.02,
+	DAYS_PERIOD: 7,
+}
+
 var SIGNUM_API = struct {
 	HOSTS                     []string
 	DEFAULT_AVG_COMMIT        float64

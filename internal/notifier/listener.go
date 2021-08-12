@@ -113,6 +113,15 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Amount:</i> +%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
+
+				if account.AccountRS == config.FAUCET.ACCOUNT { // it's donate
+					newDonate := models.Donation{
+						Account:   transaction.Sender,
+						AccountRS: transaction.SenderRS,
+						Amount:    transaction.AmountNQT / 1e8,
+					}
+					n.db.Save(&newDonate)
+				}
 			} else {
 				msg += fmt.Sprintf("new outgo:"+
 					"\n<i>Payment:</i> Ordinary"+

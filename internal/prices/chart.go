@@ -83,22 +83,28 @@ func (pm *PriceManager) GetPriceChart() []byte {
 		annotationColor = chart.ColorRed
 	}
 
-	for index, values := range prices {
+	for _, values := range prices {
 		signaChartTimeSeries.XValues = append(signaChartTimeSeries.XValues, values.CreatedAt)
 		signaChartTimeSeries.YValues = append(signaChartTimeSeries.YValues, values.SignaPrice*signaMultiplier)
 
 		btcChartTimeSeries.XValues = append(btcChartTimeSeries.XValues, values.CreatedAt)
 		btcChartTimeSeries.YValues = append(btcChartTimeSeries.YValues, values.BtcPrice)
-
-		if index == len(prices)-1 {
-			annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{
-				XValue: chart.TimeToFloat64(values.CreatedAt),
-				YValue: values.SignaPrice * signaMultiplier,
-				Label:  fmt.Sprintf("%.2f", values.SignaPrice*signaMultiplier),
-				Style:  chart.Style{StrokeColor: annotationColor}})
-			// annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{XValue: chart.TimeToFloat64(values.CreatedAt), YValue: values.BtcPrice, Label: fmt.Sprintf("%.f", values.BtcPrice)})
-		}
 	}
+
+	lastPrices := pm.cmcClient.GetPrices()
+	signaChartTimeSeries.XValues = append(signaChartTimeSeries.XValues, time.Now())
+	signaChartTimeSeries.YValues = append(signaChartTimeSeries.YValues, lastPrices["SIGNA"].Price*signaMultiplier)
+	btcChartTimeSeries.XValues = append(btcChartTimeSeries.XValues, time.Now())
+	btcChartTimeSeries.YValues = append(btcChartTimeSeries.YValues, lastPrices["BTC"].Price)
+	annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{
+		XValue: chart.TimeToFloat64(time.Now()),
+		YValue: lastPrices["SIGNA"].Price * signaMultiplier,
+		Label:  fmt.Sprintf("%.2f", lastPrices["SIGNA"].Price*signaMultiplier),
+		Style:  chart.Style{StrokeColor: annotationColor}})
+	//annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{
+	//	XValue: chart.TimeToFloat64(time.Now()),
+	//	YValue: lastPrices["BTC"].Price,
+	//	Label:  fmt.Sprintf("%.f", lastPrices["BTC"].Price)})
 
 	graph.Series = append(graph.Series, signaChartTimeSeries)
 	graph.Series = append(graph.Series, btcChartTimeSeries)
