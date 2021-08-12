@@ -36,6 +36,7 @@ Send <b>` + COMMAND_CALC + ` TiB COMMITMENT</b> (or just <b>` + COMMAND_CALC + `
 Send <b>` + COMMAND_PRICE + `</b> to get up-to-date currency quotes.
 Send <b>` + COMMAND_NETWORK + `</b> to get Signum Network statistic.
 Send <b>` + COMMAND_CROSSING + `</b> to check your plots crossing (they should not overlap to maximize mining profit).
+Send <b>` + COMMAND_FAUCET + `</b> to get some free SIGNA.
 Send <b>` + COMMAND_INFO + `</b> for information.
 `
 

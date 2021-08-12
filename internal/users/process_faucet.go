@@ -18,7 +18,7 @@ func (user *User) ProcessFaucet(message string) string {
 
 	if message == config.COMMAND_FAUCET {
 		usingMessage := fmt.Sprintf("<b>❗The faucet can be used no more than once every %v days per each Telegram account</b>"+
-			"\nPlease send me your <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) which you want to receive faucet payment:",
+			"\nPlease send me your Signum Account (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) which you want to receive faucet payment:",
 			config.FAUCET.DAYS_PERIOD)
 
 		if time.Since(user.LastFaucetClaim) < 24*time.Hour*time.Duration(config.FAUCET.DAYS_PERIOD) {
@@ -39,9 +39,9 @@ func (user *User) ProcessFaucet(message string) string {
 		user.db.Model(&models.Donation{}).Select("sum(amount)").Scan(&totalDonation)
 
 		return fmt.Sprintf("💧 <b>Signum Explorer Bot Faucet:</b>"+
-			"\nFaucet current balance: %v SIGNA"+
-			"\nFaucet totaly received %v SIGNA donations"+
-			"\nFaucet sent %v SIGNA to %v accounts"+
+			"\nFaucet current balance: <i>%v SIGNA</i>"+
+			"\nFaucet totaly received <i>%v SIGNA</i> donations"+
+			"\nFaucet sent <i>%v SIGNA</i> to %v accounts"+
 			"\n\n%v",
 			common.FormatNumber(faucetAccount.TotalBalance, 2),
 			common.FormatNumber(totalDonation.Sum, 2),
