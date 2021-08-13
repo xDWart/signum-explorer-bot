@@ -33,7 +33,7 @@ func (pm *PriceManager) GetPriceChart() []byte {
 	}
 
 	graph := chart.Chart{
-		Title: fmt.Sprintf("SIGNA and BTC prices (last %v days)", config.CMC_API.LISTENER_DAYS_QUANTITY),
+		Title: fmt.Sprintf("SIGNA and BTC prices (last %v days)", config.CMC_API.SAVING_DAYS_QUANTITY),
 		Background: chart.Style{
 			Padding: chart.Box{
 				Top:  50,

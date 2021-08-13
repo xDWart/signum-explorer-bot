@@ -116,9 +116,10 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 
 				if account.AccountRS == config.FAUCET.ACCOUNT { // it's donate
 					newDonate := models.Donation{
-						Account:   transaction.Sender,
-						AccountRS: transaction.SenderRS,
-						Amount:    transaction.AmountNQT / 1e8,
+						Account:       transaction.Sender,
+						AccountRS:     transaction.SenderRS,
+						TransactionID: transaction.TransactionID,
+						Amount:        transaction.AmountNQT / 1e8,
 					}
 					n.db.Save(&newDonate)
 				}

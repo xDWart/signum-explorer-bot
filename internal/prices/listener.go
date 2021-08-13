@@ -12,9 +12,11 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 	defer wg.Done()
 
 	log.Printf("Start Price Listener")
-	ticker := time.NewTicker(config.CMC_API.LISTENER_PERIOD)
+	ticker := time.NewTicker(config.CMC_API.SAMPLE_PERIOD)
 
-	pm.getPrices()
+	var index uint
+	samplesForAveraging := make([]*models.Price, config.CMC_API.SMOOTHING_FACTOR)
+
 	for {
 		select {
 		case <-shutdownChannel:
@@ -23,23 +25,30 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 			return
 
 		case <-ticker.C:
-			pm.getPrices()
+			prices := pm.cmcClient.GetPrices()
+			samplesForAveraging[index] = &models.Price{
+				SignaPrice: prices["SIGNA"].Price,
+				BtcPrice:   prices["BTC"].Price,
+			}
+			index = (index + 1) % config.CMC_API.SMOOTHING_FACTOR
+
+			if index == 0 { // it's time to save
+				dbPrice := models.Price{}
+				for _, p := range samplesForAveraging {
+					dbPrice.SignaPrice += p.SignaPrice
+					dbPrice.BtcPrice += p.BtcPrice
+				}
+				dbPrice.SignaPrice /= float64(len(samplesForAveraging))
+				dbPrice.BtcPrice /= float64(len(samplesForAveraging))
+				pm.db.Save(&dbPrice)
+				log.Printf("Saved new prices: SIGNA %v, BTC %v", dbPrice.SignaPrice, dbPrice.BtcPrice)
+
+				// delete irrelevant data
+				quantity := 24 * config.CMC_API.SAVING_DAYS_QUANTITY * uint(time.Hour/config.CMC_API.SAMPLE_PERIOD)
+				if quantity < dbPrice.ID {
+					pm.db.Unscoped().Delete(models.Price{}, "id <= ?", dbPrice.ID-quantity)
+				}
+			}
 		}
-	}
-}
-
-func (pm *PriceManager) getPrices() {
-	prices := pm.cmcClient.GetPrices()
-	dbPrices := models.Price{
-		SignaPrice: prices["SIGNA"].Price,
-		BtcPrice:   prices["BTC"].Price,
-	}
-	pm.db.Save(&dbPrices)
-	log.Printf("Have got and saved new Prices: SIGNA %v, BTC %v", dbPrices.SignaPrice, dbPrices.BtcPrice)
-
-	// delete irrelevant data
-	quantity := 24 * config.CMC_API.LISTENER_DAYS_QUANTITY * uint(time.Hour/config.CMC_API.LISTENER_PERIOD)
-	if quantity < dbPrices.ID {
-		pm.db.Unscoped().Delete(models.Price{}, "id <= ?", dbPrices.ID-quantity)
 	}
 }

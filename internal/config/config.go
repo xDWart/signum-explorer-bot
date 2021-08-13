@@ -21,17 +21,21 @@ var CALCULATOR = struct {
 }
 
 var CMC_API = struct {
-	ADDRESS                string
-	FREE_LIMIT             string
-	CACHE_TTL              time.Duration
-	LISTENER_PERIOD        time.Duration
-	LISTENER_DAYS_QUANTITY uint
+	ADDRESS              string
+	FREE_LIMIT           string
+	CACHE_TTL            time.Duration
+	SAMPLE_PERIOD        time.Duration
+	SAVE_EVERY_N_SAMPLES uint
+	SAVING_DAYS_QUANTITY uint
+	SMOOTHING_FACTOR     uint
 }{
-	ADDRESS:                "https://pro-api.coinmarketcap.com/v1",
-	FREE_LIMIT:             "200",
-	CACHE_TTL:              5 * time.Minute,
-	LISTENER_PERIOD:        time.Hour,
-	LISTENER_DAYS_QUANTITY: 7,
+	ADDRESS:              "https://pro-api.coinmarketcap.com/v1",
+	FREE_LIMIT:           "200",
+	CACHE_TTL:            5 * time.Minute,
+	SAMPLE_PERIOD:        20 * time.Minute,
+	SMOOTHING_FACTOR:     3, // samples for averaging
+	SAVE_EVERY_N_SAMPLES: 3, // 3 * 20 min = 1 hour
+	SAVING_DAYS_QUANTITY: 7,
 }
 
 var FAUCET = struct {
