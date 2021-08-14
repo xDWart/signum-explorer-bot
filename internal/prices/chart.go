@@ -5,15 +5,9 @@ import (
 	"fmt"
 	"github.com/wcharczuk/go-chart/v2"
 	"log"
+	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
 	"time"
-)
-
-const (
-	DAY   = 24 * time.Hour
-	WEEK  = 7 * DAY
-	MONTH = 30 * DAY
-	ALL   = 100 * 12 * MONTH
 )
 
 func (pm *PriceManager) GetPriceChart(duration time.Duration) []byte {
@@ -40,11 +34,11 @@ func (pm *PriceManager) GetPriceChart(duration time.Duration) []byte {
 
 	var lastText = "since rebranding"
 	switch duration {
-	case DAY:
+	case config.DAY:
 		lastText = "last 24 hours"
-	case WEEK:
+	case config.WEEK:
 		lastText = "last week"
-	case MONTH:
+	case config.MONTH:
 		lastText = "last month"
 	}
 

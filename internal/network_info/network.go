@@ -71,6 +71,7 @@ func (ni *NetworkInfoListener) StartNetworkInfoListener(wg *sync.WaitGroup, shut
 	var sampleIndex uint
 	samplesForAveraging := make([]*signum_api.MiningInfo, config.SIGNUM_API.SMOOTHING_FACTOR)
 	var timeToSave uint
+	var scanIndex int
 
 	for {
 		select {
@@ -115,10 +116,25 @@ func (ni *NetworkInfoListener) StartNetworkInfoListener(wg *sync.WaitGroup, shut
 				ni.lastMiningInfo.AverageNetworkDifficulty = (prevDifficulty*float64(averageCount-1) + miningInfo.ActualNetworkDifficulty) / float64(averageCount)
 				ni.Unlock()
 
-				// delete irrelevant data
-				quantity := 24 * config.SIGNUM_API.AVERAGING_DAYS_QUANTITY * uint(time.Hour/config.SIGNUM_API.SAMPLE_PERIOD)
-				if quantity < dbNetworkInfo.ID {
-					ni.db.Unscoped().Delete(models.NetworkInfo{}, "id <= ?", dbNetworkInfo.ID-quantity)
+				// scan prices and thin out an old ones
+				var scannedNetworkInfos []*models.NetworkInfo
+				ni.db.Order("id asc").Limit(config.SIGNUM_API.SCAN_QUANTITY).Offset(scanIndex * config.SIGNUM_API.SCAN_QUANTITY).Find(&scannedNetworkInfos)
+				if len(scannedNetworkInfos) == 0 {
+					scanIndex = 0
+				} else {
+					for i := 1; i < len(scannedNetworkInfos); i += 2 {
+						networkInfo0 := scannedNetworkInfos[i-1]
+						networkInfo1 := scannedNetworkInfos[i]
+						X := time.Since(networkInfo0.CreatedAt) / time.Hour / 24
+						delayM := config.SIGNUM_API.DELAY_FUNC_K*X + config.SIGNUM_API.DELAY_FUNC_B
+						if networkInfo1.CreatedAt.Sub(networkInfo0.CreatedAt) < delayM {
+							networkInfo0.AverageCommitment = (networkInfo0.AverageCommitment + networkInfo1.AverageCommitment) / 2
+							networkInfo0.NetworkDifficulty = (networkInfo0.NetworkDifficulty + networkInfo1.NetworkDifficulty) / 2
+							ni.db.Save(networkInfo0)
+							ni.db.Unscoped().Delete(networkInfo1)
+						}
+					}
+					scanIndex++
 				}
 			}
 		}

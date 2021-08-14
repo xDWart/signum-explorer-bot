@@ -63,6 +63,9 @@ var SIGNUM_API = struct {
 	SAVE_EVERY_N_SAMPLES      uint
 	SMOOTHING_FACTOR          uint
 	AVERAGING_DAYS_QUANTITY   uint
+	SCAN_QUANTITY             int
+	DELAY_FUNC_K              time.Duration // kx + b, x in days
+	DELAY_FUNC_B              time.Duration
 	CACHE_TTL                 time.Duration
 	NOTIFIER_PERIOD           time.Duration
 	NOTIFIER_CHECK_BLOCKS_PER uint
@@ -86,6 +89,9 @@ var SIGNUM_API = struct {
 	SMOOTHING_FACTOR:          6, // samples for averaging
 	SAVE_EVERY_N_SAMPLES:      3, // 3 * 1 hour = 3 hours
 	AVERAGING_DAYS_QUANTITY:   7, // during 7 days
+	SCAN_QUANTITY:             20,
+	DELAY_FUNC_K:              84 * time.Minute,   // kx + b: 1 week ~ 3 h between samples
+	DELAY_FUNC_B:              -408 * time.Minute, // 1 year ~ 3 week
 	CACHE_TTL:                 3 * time.Minute,
 	NOTIFIER_PERIOD:           4 * time.Minute,
 	NOTIFIER_CHECK_BLOCKS_PER: 3, // 4 min * 3 = per 12 min

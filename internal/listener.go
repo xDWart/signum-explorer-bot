@@ -4,7 +4,6 @@ import (
 	"log"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
-	"signum-explorer-bot/internal/prices"
 	"strings"
 	"time"
 )
@@ -57,15 +56,16 @@ func (bot *TelegramBot) startBotListener() {
 				case strings.HasPrefix(message, config.COMMAND_PRICE) || message == config.BUTTON_PRICES:
 					user.ResetState()
 					userAnswer.MainText = "💵 <b>Actual prices:</b>" + bot.priceManager.GetActualPrices()
+					userAnswer.Chart = bot.priceManager.GetPriceChart(config.WEEK)
 					userAnswer.InlineKeyboard = user.GetPriceChartKeyboard()
-					userAnswer.Chart = bot.priceManager.GetPriceChart(prices.WEEK)
 				case strings.HasPrefix(message, config.COMMAND_CALC) || message == config.BUTTON_CALC:
 					user.ResetState()
 					userAnswer.MainText = user.ProcessCalc(message)
 				case strings.HasPrefix(message, config.COMMAND_NETWORK) || message == config.BUTTON_NETWORK:
 					user.ResetState()
 					userAnswer.MainText = bot.networkInfoListener.GetNetworkInfo()
-					userAnswer.Chart = bot.networkInfoListener.GetNetworkChart()
+					userAnswer.Chart = bot.networkInfoListener.GetNetworkChart(config.WEEK)
+					userAnswer.InlineKeyboard = user.GetNetworkChartKeyboard()
 				case strings.HasPrefix(message, config.COMMAND_CROSSING):
 					user.ResetState()
 					userAnswer.MainText = user.ProcessCrossing()

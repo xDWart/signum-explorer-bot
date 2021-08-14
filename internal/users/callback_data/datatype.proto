@@ -18,6 +18,7 @@ enum KeyboardType {
     KT_MULTI_OUT_SAME = 4;
     KT_BLOCKS = 5;
     KT_PRICE_CHART = 6;
+    KT_NETWORK_CHART = 7;
 }
 
 enum ActionType {
@@ -40,4 +41,8 @@ enum ActionType {
     AT_PRICE_CHART_1_WEEK = 16;
     AT_PRICE_CHART_1_MONTH = 17;
     AT_PRICE_CHART_ALL = 18;
+    AT_NETWORK_CHART_1_DAY = 19;
+    AT_NETWORK_CHART_1_WEEK = 20;
+    AT_NETWORK_CHART_1_MONTH = 21;
+    AT_NETWORK_CHART_ALL = 22;
 }

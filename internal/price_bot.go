@@ -86,7 +86,7 @@ func (bot *TelegramPriceBot) startBotListener() {
 					}
 					fallthrough
 				case strings.HasPrefix(message.Text, config.COMMAND_C):
-					userAnswer.Chart = bot.priceManager.GetPriceChart(prices.WEEK)
+					userAnswer.Chart = bot.priceManager.GetPriceChart(config.WEEK)
 				default:
 					continue
 				}

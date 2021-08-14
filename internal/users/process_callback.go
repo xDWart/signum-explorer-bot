@@ -9,7 +9,6 @@ import (
 	"log"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
-	"signum-explorer-bot/internal/prices"
 	"signum-explorer-bot/internal/users/callback_data"
 	"time"
 )
@@ -40,17 +39,29 @@ func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *common
 	case callback_data.KeyboardType_KT_ACCOUNT:
 		answerBotMessage, err = user.processAccountKeyboard(&callbackData)
 	case callback_data.KeyboardType_KT_PRICE_CHART:
-		var duration = prices.ALL
+		var duration = config.ALL
 		switch callbackData.Action {
 		case callback_data.ActionType_AT_PRICE_CHART_1_DAY:
-			duration = prices.DAY
+			duration = config.DAY
 		case callback_data.ActionType_AT_PRICE_CHART_1_WEEK:
-			duration = prices.WEEK
+			duration = config.WEEK
 		case callback_data.ActionType_AT_PRICE_CHART_1_MONTH:
-			duration = prices.MONTH
+			duration = config.MONTH
 		}
 		answerBotMessage.Chart = user.priceManager.GetPriceChart(duration)
 		answerBotMessage.InlineKeyboard = user.GetPriceChartKeyboard()
+	case callback_data.KeyboardType_KT_NETWORK_CHART:
+		var duration = config.ALL
+		switch callbackData.Action {
+		case callback_data.ActionType_AT_NETWORK_CHART_1_DAY:
+			duration = config.DAY
+		case callback_data.ActionType_AT_NETWORK_CHART_1_WEEK:
+			duration = config.WEEK
+		case callback_data.ActionType_AT_NETWORK_CHART_1_MONTH:
+			duration = config.MONTH
+		}
+		answerBotMessage.Chart = user.networkInfoListener.GetNetworkChart(duration)
+		answerBotMessage.InlineKeyboard = user.GetNetworkChartKeyboard()
 	}
 
 	if err != nil {

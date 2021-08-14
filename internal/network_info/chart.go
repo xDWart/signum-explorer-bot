@@ -10,16 +10,26 @@ import (
 	"time"
 )
 
-func (ni *NetworkInfoListener) GetNetworkChart() []byte {
+func (ni *NetworkInfoListener) GetNetworkChart(duration time.Duration) []byte {
 	var networkInfos []models.NetworkInfo
-	result := ni.db.Order("id asc").Find(&networkInfos)
+	result := ni.db.Where("created_at > ?", time.Now().Add(-duration)).Order("id asc").Find(&networkInfos)
 	if result.Error != nil || len(networkInfos) == 0 {
 		log.Printf("Error getting Network Infos from DB for plotting chart: %v", result.Error)
 		return nil
 	}
 
+	var lastText = "since rebranding"
+	switch duration {
+	case config.DAY:
+		lastText = "last 24 hours"
+	case config.WEEK:
+		lastText = "last week"
+	case config.MONTH:
+		lastText = "last month"
+	}
+
 	graph := chart.Chart{
-		Title: fmt.Sprintf("Network Statistic (last %v days)", config.SIGNUM_API.AVERAGING_DAYS_QUANTITY),
+		Title: fmt.Sprintf("Network Statistic (%v)", lastText),
 		Background: chart.Style{
 			Padding: chart.Box{
 				Top:  50,

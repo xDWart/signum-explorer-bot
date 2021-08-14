@@ -1,7 +1,9 @@
 package config
 
+import "time"
+
 const NAME = "<b>🚀 Signum Explorer Bot</b>"
-const VERSION = "<i>v.0.7.2</i>"
+const VERSION = "<i>v.0.7.3</i>"
 
 const (
 	COMMAND_START    = "/start"
@@ -44,3 +46,10 @@ const AUTHOR_TEXT = `
 👦 <i>Author:</i> @AnatoliyB
 📒 <i>GitHub:</i> https://github.com/xDWart/signum-explorer-bot
 💰 <i>Donate:</i> <code>S-8N2F-TDD7-4LY6-64FZ7</code>`
+
+const (
+	DAY   = 24 * time.Hour
+	WEEK  = 7 * DAY
+	MONTH = 30 * DAY
+	ALL   = 100 * 12 * MONTH
+)
