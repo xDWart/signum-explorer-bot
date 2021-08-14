@@ -14,8 +14,9 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 	log.Printf("Start Price Listener")
 	ticker := time.NewTicker(config.CMC_API.SAMPLE_PERIOD)
 
-	var index uint
+	var sampleIndex uint
 	samplesForAveraging := make([]*models.Price, config.CMC_API.SMOOTHING_FACTOR)
+	var timeToSave uint
 
 	for {
 		select {
@@ -26,20 +27,25 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 
 		case <-ticker.C:
 			prices := pm.cmcClient.GetPrices()
-			samplesForAveraging[index] = &models.Price{
+			samplesForAveraging[sampleIndex] = &models.Price{
 				SignaPrice: prices["SIGNA"].Price,
 				BtcPrice:   prices["BTC"].Price,
 			}
-			index = (index + 1) % config.CMC_API.SMOOTHING_FACTOR
+			sampleIndex = (sampleIndex + 1) % config.CMC_API.SMOOTHING_FACTOR
+			timeToSave = (timeToSave + 1) % config.CMC_API.SAVE_EVERY_N_SAMPLES
 
-			if index == 0 { // it's time to save
+			if timeToSave == 0 {
 				dbPrice := models.Price{}
+				var numOfPrices float64
 				for _, p := range samplesForAveraging {
-					dbPrice.SignaPrice += p.SignaPrice
-					dbPrice.BtcPrice += p.BtcPrice
+					if p != nil {
+						dbPrice.SignaPrice += p.SignaPrice
+						dbPrice.BtcPrice += p.BtcPrice
+						numOfPrices++
+					}
 				}
-				dbPrice.SignaPrice /= float64(len(samplesForAveraging))
-				dbPrice.BtcPrice /= float64(len(samplesForAveraging))
+				dbPrice.SignaPrice /= numOfPrices
+				dbPrice.BtcPrice /= numOfPrices
 				pm.db.Save(&dbPrice)
 				log.Printf("Saved new prices: SIGNA %v, BTC %v", dbPrice.SignaPrice, dbPrice.BtcPrice)
 

@@ -62,28 +62,16 @@ func (ni *NetworkInfoListener) GetLastMiningInfo() signum_api.MiningInfo {
 	return lastMiningInfo
 }
 
-func (ni *NetworkInfoListener) saveNewNetworkInfo(networkInfo *signum_api.MiningInfo) {
-	dbCommit := &models.NetworkInfo{
-		AverageCommitment: networkInfo.ActualCommitment,
-		NetworkDifficulty: networkInfo.ActualNetworkDifficulty,
-	}
-	ni.db.Save(dbCommit)
-	log.Printf("Have got and saved new Network Info: Commitment %v, Difficulry %v", dbCommit.AverageCommitment, dbCommit.NetworkDifficulty)
-
-	// delete irrelevant data
-	quantity := 24 * config.SIGNUM_API.AVERAGING_DAYS_QUANTITY * uint(time.Hour/config.SIGNUM_API.GET_NETWORK_INFO_TIME)
-	if quantity < dbCommit.ID {
-		ni.db.Unscoped().Delete(models.NetworkInfo{}, "id <= ?", dbCommit.ID-quantity)
-	}
-}
-
 func (ni *NetworkInfoListener) StartNetworkInfoListener(wg *sync.WaitGroup, shutdownChannel chan interface{}) {
 	defer wg.Done()
 
 	log.Printf("Start Network Info Listener")
-	ticker := time.NewTicker(config.SIGNUM_API.GET_NETWORK_INFO_TIME)
+	ticker := time.NewTicker(config.SIGNUM_API.SAMPLE_PERIOD)
 
-	ni.updateMiningInfo()
+	var sampleIndex uint
+	samplesForAveraging := make([]*signum_api.MiningInfo, config.SIGNUM_API.SMOOTHING_FACTOR)
+	var timeToSave uint
+
 	for {
 		select {
 		case <-shutdownChannel:
@@ -92,31 +80,51 @@ func (ni *NetworkInfoListener) StartNetworkInfoListener(wg *sync.WaitGroup, shut
 			return
 
 		case <-ticker.C:
-			ni.updateMiningInfo()
+			miningInfo, err := ni.signumClient.GetMiningInfo()
+			if err != nil {
+				log.Printf("Error getting mining info: %v", err)
+				continue
+			}
+			miningInfo.ActualCommitment = miningInfo.AverageCommitmentNQT / 1e8
+			miningInfo.ActualNetworkDifficulty = 18325193796 / miningInfo.BaseTarget / 1.83
+			samplesForAveraging[sampleIndex] = miningInfo
+			sampleIndex = (sampleIndex + 1) % config.SIGNUM_API.SMOOTHING_FACTOR
+			timeToSave = (timeToSave + 1) % config.SIGNUM_API.SAVE_EVERY_N_SAMPLES
+
+			if timeToSave == 0 {
+				dbNetworkInfo := models.NetworkInfo{}
+				var numOfSamples float64
+				for _, ni := range samplesForAveraging {
+					if ni != nil {
+						dbNetworkInfo.AverageCommitment += ni.ActualCommitment
+						dbNetworkInfo.NetworkDifficulty += ni.ActualNetworkDifficulty
+						numOfSamples++
+					}
+				}
+				dbNetworkInfo.AverageCommitment /= numOfSamples
+				dbNetworkInfo.NetworkDifficulty /= numOfSamples
+				ni.db.Save(&dbNetworkInfo)
+				log.Printf("Saved new Network Info: Commitment %v, Difficulry %v", dbNetworkInfo.AverageCommitment, dbNetworkInfo.NetworkDifficulty)
+
+				// delete irrelevant data
+				quantity := 24 * config.SIGNUM_API.AVERAGING_DAYS_QUANTITY * uint(time.Hour/config.SIGNUM_API.SAMPLE_PERIOD)
+				if quantity < dbNetworkInfo.ID {
+					ni.db.Unscoped().Delete(models.NetworkInfo{}, "id <= ?", dbNetworkInfo.ID-quantity)
+				}
+
+				var count int64
+				ni.db.Model(&models.NetworkInfo{}).Count(&count)
+				if count > 0 {
+					ni.Lock() // update global value
+					prevCommitment := ni.lastMiningInfo.AverageCommitment
+					prevDifficulty := ni.lastMiningInfo.AverageNetworkDifficulty
+					ni.lastMiningInfo = *miningInfo
+					ni.lastMiningInfo.AverageCommitment = (prevCommitment*float64(count-1) + miningInfo.ActualCommitment) / float64(count)
+					ni.lastMiningInfo.AverageNetworkDifficulty = (prevDifficulty*float64(count-1) + miningInfo.ActualNetworkDifficulty) / float64(count)
+					ni.Unlock()
+				}
+			}
 		}
-	}
-}
-
-func (ni *NetworkInfoListener) updateMiningInfo() {
-	miningInfo, err := ni.signumClient.GetMiningInfo()
-	if err != nil {
-		log.Printf("Error getting mining info: %v", err)
-		return
-	}
-	miningInfo.ActualCommitment = miningInfo.AverageCommitmentNQT / 1e8
-	miningInfo.ActualNetworkDifficulty = 18325193796 / miningInfo.BaseTarget / 1.83
-	ni.saveNewNetworkInfo(miningInfo)
-
-	var count int64
-	ni.db.Model(&models.NetworkInfo{}).Count(&count)
-	if count > 0 {
-		ni.Lock() // update global value
-		prevCommitment := ni.lastMiningInfo.AverageCommitment
-		prevDifficulty := ni.lastMiningInfo.AverageNetworkDifficulty
-		ni.lastMiningInfo = *miningInfo
-		ni.lastMiningInfo.AverageCommitment = (prevCommitment*float64(count-1) + miningInfo.ActualCommitment) / float64(count)
-		ni.lastMiningInfo.AverageNetworkDifficulty = (prevDifficulty*float64(count-1) + miningInfo.ActualNetworkDifficulty) / float64(count)
-		ni.Unlock()
 	}
 }
 

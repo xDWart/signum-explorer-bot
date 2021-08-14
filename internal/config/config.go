@@ -33,7 +33,7 @@ var CMC_API = struct {
 	FREE_LIMIT:           "200",
 	CACHE_TTL:            5 * time.Minute,
 	SAMPLE_PERIOD:        20 * time.Minute,
-	SMOOTHING_FACTOR:     3, // samples for averaging
+	SMOOTHING_FACTOR:     6, // samples for averaging
 	SAVE_EVERY_N_SAMPLES: 3, // 3 * 20 min = 1 hour
 	SAVING_DAYS_QUANTITY: 7,
 }
@@ -53,7 +53,9 @@ var SIGNUM_API = struct {
 	DEFAULT_AVG_COMMIT        float64
 	DEFAULT_BASE_TARGET       float64
 	DEFAULT_BLOCK_REWARD      float64
-	GET_NETWORK_INFO_TIME     time.Duration
+	SAMPLE_PERIOD             time.Duration
+	SAVE_EVERY_N_SAMPLES      uint
+	SMOOTHING_FACTOR          uint
 	AVERAGING_DAYS_QUANTITY   uint
 	CACHE_TTL                 time.Duration
 	NOTIFIER_PERIOD           time.Duration
@@ -74,8 +76,10 @@ var SIGNUM_API = struct {
 	DEFAULT_AVG_COMMIT:        2500,
 	DEFAULT_BASE_TARGET:       280000,
 	DEFAULT_BLOCK_REWARD:      134,
-	GET_NETWORK_INFO_TIME:     time.Hour, // per hour
-	AVERAGING_DAYS_QUANTITY:   7,         // during 7 days
+	SAMPLE_PERIOD:             10 * time.Second, // per hour
+	SMOOTHING_FACTOR:          6,                // samples for averaging
+	SAVE_EVERY_N_SAMPLES:      3,                // 3 * 1 hour = 3 hours
+	AVERAGING_DAYS_QUANTITY:   7,                // during 7 days
 	CACHE_TTL:                 3 * time.Minute,
 	NOTIFIER_PERIOD:           4 * time.Minute,
 	NOTIFIER_CHECK_BLOCKS_PER: 3, // 4 min * 3 = per 12 min
