@@ -9,6 +9,7 @@ import (
 	"log"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
+	"signum-explorer-bot/internal/prices"
 	"signum-explorer-bot/internal/users/callback_data"
 	"time"
 )
@@ -38,6 +39,18 @@ func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *common
 	switch callbackData.GetKeyboard() {
 	case callback_data.KeyboardType_KT_ACCOUNT:
 		answerBotMessage, err = user.processAccountKeyboard(&callbackData)
+	case callback_data.KeyboardType_KT_PRICE_CHART:
+		var duration = prices.ALL
+		switch callbackData.Action {
+		case callback_data.ActionType_AT_PRICE_CHART_1_DAY:
+			duration = prices.DAY
+		case callback_data.ActionType_AT_PRICE_CHART_1_WEEK:
+			duration = prices.WEEK
+		case callback_data.ActionType_AT_PRICE_CHART_1_MONTH:
+			duration = prices.MONTH
+		}
+		answerBotMessage.Chart = user.priceManager.GetPriceChart(duration)
+		answerBotMessage.InlineKeyboard = user.GetPriceChartKeyboard()
 	}
 
 	if err != nil {

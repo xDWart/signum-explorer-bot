@@ -56,7 +56,7 @@ func InitTelegramBot() *TelegramBot {
 			BotAPI: botApi,
 		},
 		db:                  db,
-		usersManager:        users.InitManager(db, cmcClient, signumClient, networkInfoListener, wg, shutdownChannel),
+		usersManager:        users.InitManager(db, cmcClient, signumClient, priceManager, networkInfoListener, wg, shutdownChannel),
 		priceManager:        priceManager,
 		networkInfoListener: networkInfoListener,
 		notifierCh:          notifierCh,

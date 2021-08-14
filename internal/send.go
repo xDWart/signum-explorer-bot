@@ -17,21 +17,25 @@ func (bot *AbstractTelegramBot) SendAnswer(chatID int64, answer *common.BotMessa
 	if answer.MainText != "" {
 		bot.SendMessage(chatID, answer.MainText, answer.MainMenu)
 	}
-	if len(answer.Chart) > 0 {
-		bot.NewPhotoUpload(chatID, "", answer.Chart, answer.InlineKeyboard)
-	}
 	if answer.MessageID == 0 {
+		if len(answer.Chart) > 0 {
+			bot.NewPhotoUpload(chatID, "", answer.Chart, answer.InlineKeyboard)
+		}
 		if answer.InlineText != "" {
 			bot.SendMessage(chatID, answer.InlineText, answer.InlineKeyboard)
 		}
 	} else { // need edit existing message
-		if len(answer.InlineText) > 0 {
-			bot.EditMessageText(chatID, answer.MessageID, answer.InlineText)
-		}
+		if len(answer.Chart) > 0 {
+			bot.EditPhotoMessage(chatID, answer.MessageID, "", answer.Chart, answer.InlineKeyboard)
+		} else {
+			if len(answer.InlineText) > 0 {
+				bot.EditMessageText(chatID, answer.MessageID, answer.InlineText)
+			}
 
-		newInlineKeyboard, ok := answer.InlineKeyboard.(*tgbotapi.InlineKeyboardMarkup)
-		if ok && newInlineKeyboard != nil {
-			bot.EditInlineKeyboard(chatID, answer.MessageID, newInlineKeyboard)
+			newInlineKeyboard, ok := answer.InlineKeyboard.(*tgbotapi.InlineKeyboardMarkup)
+			if ok && newInlineKeyboard != nil {
+				bot.EditInlineKeyboard(chatID, answer.MessageID, newInlineKeyboard)
+			}
 		}
 	}
 }
@@ -45,6 +49,12 @@ func (bot *AbstractTelegramBot) NewPhotoUpload(chatID int64, text string, payloa
 	photoConfig.ReplyMarkup = replyMarkup
 	photoConfig.ParseMode = tgbotapi.ModeHTML
 	bot.ConfigureAndSend(photoConfig)
+}
+
+func (bot *AbstractTelegramBot) EditPhotoMessage(chatID int64, messageID int, text string, payload []byte, replyMarkup interface{}) {
+	deleteMessageConfig := tgbotapi.NewDeleteMessage(chatID, messageID)
+	bot.BotAPI.Request(deleteMessageConfig)
+	bot.NewPhotoUpload(chatID, text, payload, replyMarkup)
 }
 
 func (bot *AbstractTelegramBot) EditMessageText(chatID int64, messageID int, text string) {

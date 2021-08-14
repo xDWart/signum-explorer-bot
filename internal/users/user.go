@@ -8,6 +8,7 @@ import (
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
 	"signum-explorer-bot/internal/network_info"
+	"signum-explorer-bot/internal/prices"
 	"sync"
 	"time"
 )
@@ -18,6 +19,7 @@ type User struct {
 	db                  *gorm.DB
 	cmcClient           *cmc_api.Client
 	signumClient        *signum_api.Client
+	priceManager        *prices.PriceManager
 	networkInfoListener *network_info.NetworkInfoListener
 
 	state            StateType

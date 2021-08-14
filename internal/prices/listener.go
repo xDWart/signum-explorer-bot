@@ -17,6 +17,7 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 	var sampleIndex uint
 	samplesForAveraging := make([]*models.Price, config.CMC_API.SMOOTHING_FACTOR)
 	var timeToSave uint
+	var scanIndex int
 
 	for {
 		select {
@@ -49,10 +50,25 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 				pm.db.Save(&dbPrice)
 				log.Printf("Saved new prices: SIGNA %v, BTC %v", dbPrice.SignaPrice, dbPrice.BtcPrice)
 
-				// delete irrelevant data
-				quantity := 24 * config.CMC_API.SAVING_DAYS_QUANTITY * uint(time.Hour/config.CMC_API.SAMPLE_PERIOD)
-				if quantity < dbPrice.ID {
-					pm.db.Unscoped().Delete(models.Price{}, "id <= ?", dbPrice.ID-quantity)
+				// scan prices and thin out an old ones
+				var scannedPrices []*models.Price
+				pm.db.Order("id asc").Limit(config.CMC_API.SCAN_QUANTITY).Offset(scanIndex * config.CMC_API.SCAN_QUANTITY).Find(&scannedPrices)
+				if len(scannedPrices) == 0 {
+					scanIndex = 0
+				} else {
+					for i := 1; i < len(scannedPrices); i += 2 {
+						price0 := scannedPrices[i-1]
+						price1 := scannedPrices[i]
+						X := time.Since(price0.CreatedAt) / time.Hour / 24
+						delayM := config.CMC_API.DELAY_FUNC_K*X + config.CMC_API.DELAY_FUNC_B
+						if price1.CreatedAt.Sub(price0.CreatedAt) < delayM {
+							price0.SignaPrice = (price0.SignaPrice + price1.SignaPrice) / 2
+							price0.BtcPrice = (price0.BtcPrice + price1.BtcPrice) / 2
+							pm.db.Save(price0)
+							pm.db.Unscoped().Delete(price1)
+						}
+					}
+					scanIndex++
 				}
 			}
 		}

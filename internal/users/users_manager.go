@@ -7,6 +7,7 @@ import (
 	"signum-explorer-bot/internal/api/signum_api"
 	"signum-explorer-bot/internal/database/models"
 	"signum-explorer-bot/internal/network_info"
+	"signum-explorer-bot/internal/prices"
 	"sync"
 )
 
@@ -16,15 +17,17 @@ type Manager struct {
 	users               map[int64]*User
 	cmcClient           *cmc_api.Client
 	signumClient        *signum_api.Client
+	priceManager        *prices.PriceManager
 	networkInfoListener *network_info.NetworkInfoListener
 }
 
-func InitManager(db *gorm.DB, cmcClient *cmc_api.Client, signumClient *signum_api.Client, networkInfoListener *network_info.NetworkInfoListener, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Manager {
+func InitManager(db *gorm.DB, cmcClient *cmc_api.Client, signumClient *signum_api.Client, priceManager *prices.PriceManager, networkInfoListener *network_info.NetworkInfoListener, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Manager {
 	return &Manager{
 		db:                  db,
 		users:               make(map[int64]*User),
 		cmcClient:           cmcClient,
 		signumClient:        signumClient,
+		priceManager:        priceManager,
 		networkInfoListener: networkInfoListener,
 	}
 }
@@ -62,6 +65,7 @@ func (um *Manager) GetUserByChatIdFromUpdate(update *tgbotapi.Update) *User {
 			db:                  um.db,
 			cmcClient:           um.cmcClient,
 			signumClient:        um.signumClient,
+			priceManager:        um.priceManager,
 			networkInfoListener: um.networkInfoListener,
 		}
 

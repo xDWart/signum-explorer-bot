@@ -106,22 +106,19 @@ func (ni *NetworkInfoListener) StartNetworkInfoListener(wg *sync.WaitGroup, shut
 				ni.db.Save(&dbNetworkInfo)
 				log.Printf("Saved new Network Info: Commitment %v, Difficulry %v", dbNetworkInfo.AverageCommitment, dbNetworkInfo.NetworkDifficulty)
 
+				averageCount := 24 * config.SIGNUM_API.AVERAGING_DAYS_QUANTITY * uint(time.Hour/config.SIGNUM_API.SAMPLE_PERIOD) / config.SIGNUM_API.SAVE_EVERY_N_SAMPLES
+				ni.Lock() // update global value
+				prevCommitment := ni.lastMiningInfo.AverageCommitment
+				prevDifficulty := ni.lastMiningInfo.AverageNetworkDifficulty
+				ni.lastMiningInfo = *miningInfo
+				ni.lastMiningInfo.AverageCommitment = (prevCommitment*float64(averageCount-1) + miningInfo.ActualCommitment) / float64(averageCount)
+				ni.lastMiningInfo.AverageNetworkDifficulty = (prevDifficulty*float64(averageCount-1) + miningInfo.ActualNetworkDifficulty) / float64(averageCount)
+				ni.Unlock()
+
 				// delete irrelevant data
 				quantity := 24 * config.SIGNUM_API.AVERAGING_DAYS_QUANTITY * uint(time.Hour/config.SIGNUM_API.SAMPLE_PERIOD)
 				if quantity < dbNetworkInfo.ID {
 					ni.db.Unscoped().Delete(models.NetworkInfo{}, "id <= ?", dbNetworkInfo.ID-quantity)
-				}
-
-				var count int64
-				ni.db.Model(&models.NetworkInfo{}).Count(&count)
-				if count > 0 {
-					ni.Lock() // update global value
-					prevCommitment := ni.lastMiningInfo.AverageCommitment
-					prevDifficulty := ni.lastMiningInfo.AverageNetworkDifficulty
-					ni.lastMiningInfo = *miningInfo
-					ni.lastMiningInfo.AverageCommitment = (prevCommitment*float64(count-1) + miningInfo.ActualCommitment) / float64(count)
-					ni.lastMiningInfo.AverageNetworkDifficulty = (prevDifficulty*float64(count-1) + miningInfo.ActualNetworkDifficulty) / float64(count)
-					ni.Unlock()
 				}
 			}
 		}

@@ -5,14 +5,20 @@ import (
 	"fmt"
 	"github.com/wcharczuk/go-chart/v2"
 	"log"
-	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
 	"time"
 )
 
-func (pm *PriceManager) GetPriceChart() []byte {
+const (
+	DAY   = 24 * time.Hour
+	WEEK  = 7 * DAY
+	MONTH = 30 * DAY
+	ALL   = 100 * 12 * MONTH
+)
+
+func (pm *PriceManager) GetPriceChart(duration time.Duration) []byte {
 	var prices []models.Price
-	result := pm.db.Order("id asc").Find(&prices)
+	result := pm.db.Where("created_at > ?", time.Now().Add(-duration)).Order("id asc").Find(&prices)
 	if result.Error != nil || len(prices) == 0 {
 		log.Printf("Error getting Prices from DB for plotting chart: %v", result.Error)
 		return nil
@@ -32,8 +38,18 @@ func (pm *PriceManager) GetPriceChart() []byte {
 		signaMultiplier = 1
 	}
 
+	var lastText = "since rebranding"
+	switch duration {
+	case DAY:
+		lastText = "last 24 hours"
+	case WEEK:
+		lastText = "last week"
+	case MONTH:
+		lastText = "last month"
+	}
+
 	graph := chart.Chart{
-		Title: fmt.Sprintf("SIGNA and BTC prices (last %v days)", config.CMC_API.SAVING_DAYS_QUANTITY),
+		Title: fmt.Sprintf("SIGNA and BTC prices (%v)", lastText),
 		Background: chart.Style{
 			Padding: chart.Box{
 				Top:  50,

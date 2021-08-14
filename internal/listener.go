@@ -4,6 +4,7 @@ import (
 	"log"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
+	"signum-explorer-bot/internal/prices"
 	"strings"
 	"time"
 )
@@ -56,7 +57,8 @@ func (bot *TelegramBot) startBotListener() {
 				case strings.HasPrefix(message, config.COMMAND_PRICE) || message == config.BUTTON_PRICES:
 					user.ResetState()
 					userAnswer.MainText = "💵 <b>Actual prices:</b>" + bot.priceManager.GetActualPrices()
-					userAnswer.Chart = bot.priceManager.GetPriceChart()
+					userAnswer.InlineKeyboard = user.GetPriceChartKeyboard()
+					userAnswer.Chart = bot.priceManager.GetPriceChart(prices.WEEK)
 				case strings.HasPrefix(message, config.COMMAND_CALC) || message == config.BUTTON_CALC:
 					user.ResetState()
 					userAnswer.MainText = user.ProcessCalc(message)

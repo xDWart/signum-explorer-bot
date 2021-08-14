@@ -106,3 +106,35 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 	)
 	return &inlineKeyboard
 }
+
+func (user *User) GetPriceChartKeyboard() *tgbotapi.InlineKeyboardMarkup {
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				"Day",
+				callback_data.QueryDataType{
+					Keyboard: callback_data.KeyboardType_KT_PRICE_CHART,
+					Action:   callback_data.ActionType_AT_PRICE_CHART_1_DAY,
+				}.GetBase64ProtoString()),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"Week",
+				callback_data.QueryDataType{
+					Keyboard: callback_data.KeyboardType_KT_PRICE_CHART,
+					Action:   callback_data.ActionType_AT_PRICE_CHART_1_WEEK,
+				}.GetBase64ProtoString()),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"Month",
+				callback_data.QueryDataType{
+					Keyboard: callback_data.KeyboardType_KT_PRICE_CHART,
+					Action:   callback_data.ActionType_AT_PRICE_CHART_1_MONTH,
+				}.GetBase64ProtoString()),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"All",
+				callback_data.QueryDataType{
+					Keyboard: callback_data.KeyboardType_KT_PRICE_CHART,
+					Action:   callback_data.ActionType_AT_PRICE_CHART_ALL,
+				}.GetBase64ProtoString()),
+		),
+	)
+	return &inlineKeyboard
+}

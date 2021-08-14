@@ -17,6 +17,7 @@ enum KeyboardType {
     KT_MULTI_OUT = 3;
     KT_MULTI_OUT_SAME = 4;
     KT_BLOCKS = 5;
+    KT_PRICE_CHART = 6;
 }
 
 enum ActionType {
@@ -35,4 +36,8 @@ enum ActionType {
     AT_DISABLE_BLOCK_NOTIFY = 12;
     AT_ENABLE_OUTGO_TX_NOTIFY = 13;
     AT_DISABLE_OUTGO_TX_NOTIFY = 14;
+    AT_PRICE_CHART_1_DAY = 15;
+    AT_PRICE_CHART_1_WEEK = 16;
+    AT_PRICE_CHART_1_MONTH = 17;
+    AT_PRICE_CHART_ALL = 18;
 }
