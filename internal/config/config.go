@@ -60,9 +60,9 @@ var SIGNUM_API = struct {
 	DEFAULT_BASE_TARGET       float64
 	DEFAULT_BLOCK_REWARD      float64
 	SAMPLE_PERIOD             time.Duration
-	SAVE_EVERY_N_SAMPLES      uint
-	SMOOTHING_FACTOR          uint
-	AVERAGING_DAYS_QUANTITY   uint
+	SAVE_EVERY_N_SAMPLES      int
+	SMOOTHING_FACTOR          int
+	AVERAGING_DAYS_QUANTITY   int
 	SCAN_QUANTITY             int
 	DELAY_FUNC_K              time.Duration // kx + b, x in days
 	DELAY_FUNC_B              time.Duration
