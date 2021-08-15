@@ -59,9 +59,11 @@ func (user *User) ProcessAdd(message string) string {
 	}
 
 	userAccount, msg := user.addAccount(splittedMessage[1])
-	userAccount.LastTransactionID = user.GetLastTransaction(userAccount.Account)
-	userAccount.NotifyIncomeTransactions = true
-	user.db.Save(userAccount)
+	if userAccount != nil {
+		userAccount.LastTransactionID = user.GetLastTransaction(userAccount.Account)
+		userAccount.NotifyIncomeTransactions = true
+		user.db.Save(userAccount)
+	}
 	return msg
 }
 
