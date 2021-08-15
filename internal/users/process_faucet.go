@@ -114,6 +114,9 @@ func (user *User) sendFaucet(account string, amount float64) (bool, string) {
 
 func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string {
 	if !user.AlreadyHasAccount {
+		user.AlreadyHasAccount = true
+		user.db.Save(&user.DbUser)
+
 		newUsersExtraFaucetConfig := models.Config{Name: config.DB_CONFIG_NEW_USERS_EXTRA_FAUCET}
 		user.db.Where(&newUsersExtraFaucetConfig).First(&newUsersExtraFaucetConfig)
 
@@ -141,9 +144,6 @@ func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string 
 				}
 			}
 		}
-
-		user.AlreadyHasAccount = true
-		user.db.Save(&user.DbUser)
 	}
 	return ""
 }
