@@ -60,7 +60,7 @@ func (user *User) ProcessAdd(message string) string {
 
 	userAccount, msg := user.addAccount(splittedMessage[1])
 	if userAccount != nil {
-		userAccount.LastTransactionID = user.GetLastTransaction(userAccount.Account)
+		userAccount.LastTransactionID = user.getLastTransaction(userAccount.Account)
 		userAccount.NotifyIncomeTransactions = true
 		user.db.Save(userAccount)
 	}
@@ -139,7 +139,7 @@ func (user *User) delAccount(newAccount string) string {
 	return fmt.Sprintf("❎ Account <b>%v</b> has been deleted from the menu", newAccount)
 }
 
-func (user *User) GetLastTransaction(account string) string {
+func (user *User) getLastTransaction(account string) string {
 	userTransactions, err := user.signumClient.GetAccountPaymentTransactions(account)
 	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
 		return userTransactions.Transactions[0].TransactionID

@@ -207,7 +207,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			}
 		}
 
-		userAccount.LastTransactionID = user.GetLastTransaction(userAccount.Account)
+		userAccount.LastTransactionID = user.getLastTransaction(userAccount.Account)
 
 		var txType string
 		switch callbackData.GetAction() {

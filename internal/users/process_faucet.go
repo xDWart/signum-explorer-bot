@@ -83,7 +83,7 @@ func (user *User) sendFaucet(account string, amount float64) (bool, string) {
 		}
 	}
 
-	userAccount.LastTransactionID = user.GetLastTransaction(userAccount.Account)
+	userAccount.LastTransactionID = user.getLastTransaction(userAccount.Account)
 	userAccount.NotifyIncomeTransactions = true
 	user.db.Save(&userAccount)
 
@@ -107,8 +107,7 @@ func (user *User) sendFaucet(account string, amount float64) (bool, string) {
 	user.db.Save(&newFaucet)
 
 	user.ResetState()
-	return true, fmt.Sprintf("✅ Faucet payment <b>%v SIGNA</b> has been successfully sent to the account <b>%v</b>, wait for notification. "+
-		"\nRemark: since the faucet uses the lowest possible fee, transaction may take some time (up to several hours). Please, wait!",
+	return true, fmt.Sprintf("✅ Faucet payment <b>%v SIGNA</b> has been successfully sent to the account <b>%v</b>, please wait for notification!",
 		amount, userAccount.AccountRS)
 }
 
@@ -139,7 +138,7 @@ func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string 
 
 					user.db.Model(&newUsersExtraFaucetConfig).UpdateColumn("value_i", gorm.Expr("value_i - ?", 1))
 
-					return fmt.Sprintf("\n\n🎁 New user bonus <b>%v SIGNA</b> has been successfully submitted, please wait a notification!",
+					return fmt.Sprintf("\n\n🎁 New user bonus <b>%v SIGNA</b> has been successfully sent to the account, please wait for notification!",
 						common.FormatNumber(extraFaucetAmountConfig.ValueF, 2))
 				}
 			}
