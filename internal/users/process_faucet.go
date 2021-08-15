@@ -2,6 +2,7 @@ package users
 
 import (
 	"fmt"
+	"gorm.io/gorm"
 	"signum-explorer-bot/internal/api/signum_api"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
@@ -58,17 +59,18 @@ func (user *User) ProcessFaucet(message string) string {
 			"or <b>%v ACCOUNT</b> to receive faucet payment", config.COMMAND_FAUCET, config.COMMAND_FAUCET)
 	}
 
-	return user.sendFaucet(splittedMessage[1])
+	_, msg := user.sendFaucet(splittedMessage[1], config.FAUCET.AMOUNT)
+	return msg
 }
 
-func (user *User) sendFaucet(account string) string {
+func (user *User) sendFaucet(account string, amount float64) (bool, string) {
 	if !config.ValidAccountRS.MatchString(account) && !config.ValidAccount.MatchString(account) {
-		return "🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>"
+		return false, "🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>"
 	}
 
 	if time.Since(user.LastFaucetClaim) < 24*time.Hour*time.Duration(config.FAUCET.DAYS_PERIOD) {
 		user.ResetState()
-		return fmt.Sprintf("🚫 Sorry, you have used the faucet less than %v days ago!", config.FAUCET.DAYS_PERIOD)
+		return false, fmt.Sprintf("🚫 Sorry, you have used the faucet less than %v days ago!", config.FAUCET.DAYS_PERIOD)
 	}
 
 	userAccount := user.GetDbAccount(account)
@@ -77,23 +79,18 @@ func (user *User) sendFaucet(account string) string {
 		var msg string
 		userAccount, msg = user.addAccount(account)
 		if userAccount == nil {
-			return msg
+			return false, msg
 		}
 	}
 
-	// get last transaction
-	userTransactions, err := user.signumClient.GetAccountPaymentTransactions(userAccount.Account)
-	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
-		userAccount.LastTransactionID = userTransactions.Transactions[0].TransactionID
-	}
-
+	userAccount.LastTransactionID = user.GetLastTransaction(userAccount.Account)
 	userAccount.NotifyIncomeTransactions = true
 	user.db.Save(&userAccount)
 
-	response := user.signumClient.SendMoney(userAccount.AccountRS, config.FAUCET.AMOUNT, signum_api.MIN_FEE)
+	response := user.signumClient.SendMoney(userAccount.AccountRS, amount, signum_api.MIN_FEE)
 	if response.ErrorDescription != "" {
 		user.ResetState()
-		return fmt.Sprintf("🚫 Bad request: %v", response.ErrorDescription)
+		return false, fmt.Sprintf("🚫 Bad request: %v", response.ErrorDescription)
 	}
 
 	user.LastFaucetClaim = time.Now()
@@ -104,13 +101,49 @@ func (user *User) sendFaucet(account string) string {
 		Account:       userAccount.Account,
 		AccountRS:     userAccount.AccountRS,
 		TransactionID: response.Transaction,
-		Amount:        config.FAUCET.AMOUNT,
+		Amount:        amount,
 		Fee:           float64(signum_api.MIN_FEE),
 	}
 	user.db.Save(&newFaucet)
 
 	user.ResetState()
-	return fmt.Sprintf("✅ Faucet payment <b>%v SIGNA</b> has been successfully sent to the account <b>%v</b>, wait for notification. "+
-		"Remark: since the faucet uses the lowest possible fee, transaction may take some time (up to several hours). Please, wait!",
-		config.FAUCET.AMOUNT, userAccount.AccountRS)
+	return true, fmt.Sprintf("✅ Faucet payment <b>%v SIGNA</b> has been successfully sent to the account <b>%v</b>, wait for notification. "+
+		"\nRemark: since the faucet uses the lowest possible fee, transaction may take some time (up to several hours). Please, wait!",
+		amount, userAccount.AccountRS)
+}
+
+func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string {
+	if !user.AlreadyHasAccount {
+		newUsersExtraFaucetConfig := models.Config{Name: config.DB_CONFIG_NEW_USERS_EXTRA_FAUCET}
+		user.db.Where(&newUsersExtraFaucetConfig).First(&newUsersExtraFaucetConfig)
+
+		if newUsersExtraFaucetConfig.ValueI > 0 {
+			extraFaucetAmountConfig := models.Config{Name: config.DB_CONFIG_EXTRA_FAUCET_AMOUNT}
+			user.db.Where(&extraFaucetAmountConfig).First(&extraFaucetAmountConfig)
+
+			if extraFaucetAmountConfig.ValueF > 0 {
+				response := user.signumClient.SendMoney(userAccount.AccountRS, extraFaucetAmountConfig.ValueF, signum_api.MIN_FEE)
+				if response.ErrorDescription == "" {
+					newFaucet := models.Faucet{
+						DbUserID:      userAccount.DbUserID,
+						Account:       userAccount.Account,
+						AccountRS:     userAccount.AccountRS,
+						TransactionID: response.Transaction,
+						Amount:        extraFaucetAmountConfig.ValueF,
+						Fee:           float64(signum_api.MIN_FEE),
+					}
+					user.db.Save(&newFaucet)
+
+					user.db.Model(&newUsersExtraFaucetConfig).UpdateColumn("value_i", gorm.Expr("value_i - ?", 1))
+
+					return fmt.Sprintf("\n\n🎁 New user bonus <b>%v SIGNA</b> has been successfully submitted, please wait a notification!",
+						common.FormatNumber(extraFaucetAmountConfig.ValueF, 2))
+				}
+			}
+		}
+
+		user.AlreadyHasAccount = true
+		user.db.Save(&user.DbUser)
+	}
+	return ""
 }

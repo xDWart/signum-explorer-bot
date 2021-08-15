@@ -28,7 +28,10 @@ func (user *User) ProcessMessage(message string) *common.BotMessage {
 		user.ResetState()
 		return &common.BotMessage{MainText: user.calculate(user.lastTib, commit)}
 	case ADD_STATE:
-		_, msg := user.addAccount(message)
+		userAccount, msg := user.addAccount(message)
+		userAccount.LastTransactionID = user.GetLastTransaction(userAccount.Account)
+		userAccount.NotifyIncomeTransactions = true
+		user.db.Save(userAccount)
 		return &common.BotMessage{MainText: msg}
 	case DEL_STATE:
 		return &common.BotMessage{MainText: user.delAccount(message)}
@@ -37,7 +40,8 @@ func (user *User) ProcessMessage(message string) *common.BotMessage {
 		return &common.BotMessage{MainText: user.checkCrossing(message)}
 	case FAUCET_STATE:
 		user.ResetState()
-		return &common.BotMessage{MainText: user.sendFaucet(message)}
+		_, msg := user.sendFaucet(message, config.FAUCET.AMOUNT)
+		return &common.BotMessage{MainText: msg}
 	default:
 		botMessage, err := user.getAccountInfoMessage(message)
 		if err != nil {

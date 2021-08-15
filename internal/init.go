@@ -32,6 +32,8 @@ type TelegramBot struct {
 }
 
 func InitTelegramBot() *TelegramBot {
+	db := database.NewDatabaseConnection()
+
 	token := os.Getenv("TELEGRAM_BOT_TOKEN")
 	if token == "" {
 		log.Fatalf("TELEGRAM_BOT_TOKEN does not set")
@@ -42,7 +44,6 @@ func InitTelegramBot() *TelegramBot {
 		log.Fatalf(err.Error())
 	}
 
-	db := database.NewDatabaseConnection()
 	cmcClient := api_cmc.NewClient()
 	signumClient := signum_api.NewClient()
 	notifierCh := make(chan notifier.NotifierMessage)

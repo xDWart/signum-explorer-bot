@@ -13,5 +13,6 @@ func autoMigrate(db *gorm.DB) {
 		&models.Price{},
 		&models.Faucet{},
 		&models.Donation{},
+		&models.Config{},
 	)
 }

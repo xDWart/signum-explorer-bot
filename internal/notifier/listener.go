@@ -98,7 +98,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 
 			senderAccount, err := n.signumClient.GetAccount(transaction.SenderRS)
 			if err == nil && senderAccount.Name != "" {
-				senderName = fmt.Sprintf("\n<i>Sender Name:</i> %v", senderAccount.Name)
+				senderName = fmt.Sprintf("\n<i>Name:</i> %v", senderAccount.Name)
 			}
 		} else if !account.NotifyOutgoTransactions { // outgo
 			continue

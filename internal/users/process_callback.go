@@ -207,11 +207,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			}
 		}
 
-		// get last transaction
-		userTransactions, err := user.signumClient.GetAccountPaymentTransactions(account.Account)
-		if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
-			userAccount.LastTransactionID = userTransactions.Transactions[0].TransactionID
-		}
+		userAccount.LastTransactionID = user.GetLastTransaction(userAccount.Account)
 
 		var txType string
 		switch callbackData.GetAction() {

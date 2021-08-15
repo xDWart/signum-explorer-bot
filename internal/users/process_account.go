@@ -58,7 +58,10 @@ func (user *User) ProcessAdd(message string) string {
 			"or <b>%v ACCOUNT</b> to constantly add an account into your main menu", config.COMMAND_ADD, config.COMMAND_ADD)
 	}
 
-	_, msg := user.addAccount(splittedMessage[1])
+	userAccount, msg := user.addAccount(splittedMessage[1])
+	userAccount.LastTransactionID = user.GetLastTransaction(userAccount.Account)
+	userAccount.NotifyIncomeTransactions = true
+	user.db.Save(userAccount)
 	return msg
 }
 
@@ -89,7 +92,10 @@ func (user *User) addAccount(newAccount string) (*models.DbAccount, string) {
 	user.db.Save(&newDbAccount)
 	user.Accounts = append(user.Accounts, &newDbAccount)
 	user.ResetState()
-	return &newDbAccount, fmt.Sprintf("✅ New account <b>%v</b> has been successfully added to the menu", newAccount)
+
+	extraFaucetMessage := user.sendExtraFaucetIfNeeded(&newDbAccount)
+
+	return &newDbAccount, fmt.Sprintf("✅ New account <b>%v</b> has been successfully added to the menu"+extraFaucetMessage, newAccount)
 }
 
 func (user *User) ProcessDel(message string) string {
@@ -129,4 +135,12 @@ func (user *User) delAccount(newAccount string) string {
 	user.Accounts = append(user.Accounts[:foundAccountIndex], user.Accounts[foundAccountIndex+1:]...)
 	user.ResetState()
 	return fmt.Sprintf("❎ Account <b>%v</b> has been deleted from the menu", newAccount)
+}
+
+func (user *User) GetLastTransaction(account string) string {
+	userTransactions, err := user.signumClient.GetAccountPaymentTransactions(account)
+	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
+		return userTransactions.Transactions[0].TransactionID
+	}
+	return ""
 }
