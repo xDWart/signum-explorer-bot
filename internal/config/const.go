@@ -32,8 +32,8 @@ const (
 )
 
 const INSTRUCTION_TEXT = `
-Text any <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) to explore it once.
-Type <b>` + COMMAND_ADD + ` ACCOUNT</b> to constantly add an account into your main menu and <b>` + COMMAND_DEL + ` ACCOUNT</b> to remove it from there.
+Send any <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) to explore it once.
+Send <b>` + COMMAND_ADD + ` ACCOUNT</b> to constantly add an account into your main menu and <b>` + COMMAND_DEL + ` ACCOUNT</b> to remove it from there.
 Send <b>` + COMMAND_CALC + ` TiB COMMITMENT</b> (or just <b>` + COMMAND_CALC + ` TiB</b>) to calculate your expected mining rewards.
 Send <b>` + COMMAND_PRICE + `</b> to get up-to-date currency quotes.
 Send <b>` + COMMAND_NETWORK + `</b> to get Signum Network statistic.
