@@ -1,4 +1,4 @@
-package signum_api
+package signumapi
 
 type Transaction struct {
 	TransactionID string             `json:"transaction"`

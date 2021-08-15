@@ -1,9 +1,9 @@
-package signum_api
+package signumapi
 
 import (
 	"log"
 	"os"
-	abstract_api_client "signum-explorer-bot/internal/api/abstract-client"
+	abstract_api_client "signum-explorer-bot/internal/api/abstractclient"
 	"signum-explorer-bot/internal/config"
 	"sync"
 )

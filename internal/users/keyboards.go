@@ -4,7 +4,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
-	"signum-explorer-bot/internal/users/callback_data"
+	"signum-explorer-bot/internal/users/callbackdata"
 )
 
 var checkedIcon = map[bool]string{
@@ -18,18 +18,18 @@ const (
 	BLOCKS
 )
 
-var actionTypes = []map[bool]callback_data.ActionType{
+var actionTypes = []map[bool]callbackdata.ActionType{
 	INCOME_TX: {
-		true:  callback_data.ActionType_AT_DISABLE_INCOME_TX_NOTIFY,
-		false: callback_data.ActionType_AT_ENABLE_INCOME_TX_NOTIFY,
+		true:  callbackdata.ActionType_AT_DISABLE_INCOME_TX_NOTIFY,
+		false: callbackdata.ActionType_AT_ENABLE_INCOME_TX_NOTIFY,
 	},
 	OUTGO_TX: {
-		true:  callback_data.ActionType_AT_DISABLE_OUTGO_TX_NOTIFY,
-		false: callback_data.ActionType_AT_ENABLE_OUTGO_TX_NOTIFY,
+		true:  callbackdata.ActionType_AT_DISABLE_OUTGO_TX_NOTIFY,
+		false: callbackdata.ActionType_AT_ENABLE_OUTGO_TX_NOTIFY,
 	},
 	BLOCKS: {
-		true:  callback_data.ActionType_AT_DISABLE_BLOCK_NOTIFY,
-		false: callback_data.ActionType_AT_ENABLE_BLOCK_NOTIFY,
+		true:  callbackdata.ActionType_AT_DISABLE_BLOCK_NOTIFY,
+		false: callbackdata.ActionType_AT_ENABLE_BLOCK_NOTIFY,
 	},
 }
 
@@ -43,64 +43,64 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
 				"Transactions",
-				callback_data.QueryDataType{
+				callbackdata.QueryDataType{
 					Account:  account,
-					Keyboard: callback_data.KeyboardType_KT_ACCOUNT,
-					Action:   callback_data.ActionType_AT_TRANSACTIONS,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   callbackdata.ActionType_AT_TRANSACTIONS,
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
-				"Blocks", callback_data.QueryDataType{
+				"Blocks", callbackdata.QueryDataType{
 					Account:  account,
-					Keyboard: callback_data.KeyboardType_KT_ACCOUNT,
-					Action:   callback_data.ActionType_AT_BLOCKS,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   callbackdata.ActionType_AT_BLOCKS,
 				}.GetBase64ProtoString()),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
 				"MultiOut",
-				callback_data.QueryDataType{
+				callbackdata.QueryDataType{
 					Account:  account,
-					Keyboard: callback_data.KeyboardType_KT_ACCOUNT,
-					Action:   callback_data.ActionType_AT_MULTI_OUT,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   callbackdata.ActionType_AT_MULTI_OUT,
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				"MultiOutSame",
-				callback_data.QueryDataType{
+				callbackdata.QueryDataType{
 					Account:  account,
-					Keyboard: callback_data.KeyboardType_KT_ACCOUNT,
-					Action:   callback_data.ActionType_AT_MULTI_OUT_SAME,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   callbackdata.ActionType_AT_MULTI_OUT_SAME,
 				}.GetBase64ProtoString()),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
 				checkedIcon[userAccount.NotifyIncomeTransactions]+" Notify income TXs",
-				callback_data.QueryDataType{
+				callbackdata.QueryDataType{
 					Account:  account,
-					Keyboard: callback_data.KeyboardType_KT_ACCOUNT,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
 					Action:   actionTypes[INCOME_TX][userAccount.NotifyIncomeTransactions],
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				checkedIcon[userAccount.NotifyOutgoTransactions]+" Notify outgo TXs",
-				callback_data.QueryDataType{
+				callbackdata.QueryDataType{
 					Account:  account,
-					Keyboard: callback_data.KeyboardType_KT_ACCOUNT,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
 					Action:   actionTypes[OUTGO_TX][userAccount.NotifyOutgoTransactions],
 				}.GetBase64ProtoString()),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
 				checkedIcon[userAccount.NotifyNewBlocks]+" Notify about blocks",
-				callback_data.QueryDataType{
+				callbackdata.QueryDataType{
 					Account:  account,
-					Keyboard: callback_data.KeyboardType_KT_ACCOUNT,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
 					Action:   actionTypes[BLOCKS][userAccount.NotifyNewBlocks],
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				config.BUTTON_REFRESH,
-				callback_data.QueryDataType{
+				callbackdata.QueryDataType{
 					Account:  account,
-					Keyboard: callback_data.KeyboardType_KT_ACCOUNT,
-					Action:   callback_data.ActionType_AT_REFRESH,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   callbackdata.ActionType_AT_REFRESH,
 				}.GetBase64ProtoString()),
 		),
 	)
@@ -112,27 +112,27 @@ func (user *User) GetPriceChartKeyboard() *tgbotapi.InlineKeyboardMarkup {
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
 				"Day",
-				callback_data.QueryDataType{
-					Keyboard: callback_data.KeyboardType_KT_PRICE_CHART,
-					Action:   callback_data.ActionType_AT_PRICE_CHART_1_DAY,
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_PRICE_CHART,
+					Action:   callbackdata.ActionType_AT_PRICE_CHART_1_DAY,
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				"Week",
-				callback_data.QueryDataType{
-					Keyboard: callback_data.KeyboardType_KT_PRICE_CHART,
-					Action:   callback_data.ActionType_AT_PRICE_CHART_1_WEEK,
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_PRICE_CHART,
+					Action:   callbackdata.ActionType_AT_PRICE_CHART_1_WEEK,
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				"Month",
-				callback_data.QueryDataType{
-					Keyboard: callback_data.KeyboardType_KT_PRICE_CHART,
-					Action:   callback_data.ActionType_AT_PRICE_CHART_1_MONTH,
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_PRICE_CHART,
+					Action:   callbackdata.ActionType_AT_PRICE_CHART_1_MONTH,
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				"All",
-				callback_data.QueryDataType{
-					Keyboard: callback_data.KeyboardType_KT_PRICE_CHART,
-					Action:   callback_data.ActionType_AT_PRICE_CHART_ALL,
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_PRICE_CHART,
+					Action:   callbackdata.ActionType_AT_PRICE_CHART_ALL,
 				}.GetBase64ProtoString()),
 		),
 	)
@@ -144,27 +144,27 @@ func (user *User) GetNetworkChartKeyboard() *tgbotapi.InlineKeyboardMarkup {
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
 				"Day",
-				callback_data.QueryDataType{
-					Keyboard: callback_data.KeyboardType_KT_NETWORK_CHART,
-					Action:   callback_data.ActionType_AT_NETWORK_CHART_1_DAY,
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_NETWORK_CHART,
+					Action:   callbackdata.ActionType_AT_NETWORK_CHART_1_DAY,
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				"Week",
-				callback_data.QueryDataType{
-					Keyboard: callback_data.KeyboardType_KT_NETWORK_CHART,
-					Action:   callback_data.ActionType_AT_NETWORK_CHART_1_WEEK,
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_NETWORK_CHART,
+					Action:   callbackdata.ActionType_AT_NETWORK_CHART_1_WEEK,
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				"Month",
-				callback_data.QueryDataType{
-					Keyboard: callback_data.KeyboardType_KT_NETWORK_CHART,
-					Action:   callback_data.ActionType_AT_NETWORK_CHART_1_MONTH,
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_NETWORK_CHART,
+					Action:   callbackdata.ActionType_AT_NETWORK_CHART_1_MONTH,
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				"All",
-				callback_data.QueryDataType{
-					Keyboard: callback_data.KeyboardType_KT_NETWORK_CHART,
-					Action:   callback_data.ActionType_AT_NETWORK_CHART_ALL,
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_NETWORK_CHART,
+					Action:   callbackdata.ActionType_AT_NETWORK_CHART_ALL,
 				}.GetBase64ProtoString()),
 		),
 	)

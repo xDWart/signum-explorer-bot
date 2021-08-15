@@ -3,7 +3,7 @@ package notifier
 import (
 	"fmt"
 	"log"
-	"signum-explorer-bot/internal/api/signum_api"
+	"signum-explorer-bot/internal/api/signumapi"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
@@ -105,7 +105,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		}
 
 		switch transaction.Subtype {
-		case signum_api.ORDINARY_PAYMENT:
+		case signumapi.ORDINARY_PAYMENT:
 			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Ordinary"+
@@ -131,7 +131,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.RecipientRS, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
 			}
-		case signum_api.MULTI_OUT_PAYMENT:
+		case signumapi.MULTI_OUT_PAYMENT:
 			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out"+
@@ -147,7 +147,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Fee:</i> %v SIGNA",
 					len(transaction.Attachment.Recipients), common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
 			}
-		case signum_api.MULTI_OUT_SAME_PAYMENT:
+		case signumapi.MULTI_OUT_SAME_PAYMENT:
 			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out same"+

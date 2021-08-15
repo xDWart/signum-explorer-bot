@@ -9,12 +9,12 @@ import (
 	"log"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
-	"signum-explorer-bot/internal/users/callback_data"
+	"signum-explorer-bot/internal/users/callbackdata"
 	"time"
 )
 
 func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *common.BotMessage {
-	var callbackData callback_data.QueryDataType
+	var callbackData callbackdata.QueryDataType
 	var answerBotMessage = &common.BotMessage{}
 
 	// NB: iOS Telegram repeats callbacks on device blocking
@@ -36,28 +36,28 @@ func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *common
 		callbackQuery.From.UserName, callbackQuery.Message.Chat.ID, callbackData)
 
 	switch callbackData.GetKeyboard() {
-	case callback_data.KeyboardType_KT_ACCOUNT:
+	case callbackdata.KeyboardType_KT_ACCOUNT:
 		answerBotMessage, err = user.processAccountKeyboard(&callbackData)
-	case callback_data.KeyboardType_KT_PRICE_CHART:
+	case callbackdata.KeyboardType_KT_PRICE_CHART:
 		var duration = config.ALL
 		switch callbackData.Action {
-		case callback_data.ActionType_AT_PRICE_CHART_1_DAY:
+		case callbackdata.ActionType_AT_PRICE_CHART_1_DAY:
 			duration = config.DAY
-		case callback_data.ActionType_AT_PRICE_CHART_1_WEEK:
+		case callbackdata.ActionType_AT_PRICE_CHART_1_WEEK:
 			duration = config.WEEK
-		case callback_data.ActionType_AT_PRICE_CHART_1_MONTH:
+		case callbackdata.ActionType_AT_PRICE_CHART_1_MONTH:
 			duration = config.MONTH
 		}
 		answerBotMessage.Chart = user.priceManager.GetPriceChart(duration)
 		answerBotMessage.InlineKeyboard = user.GetPriceChartKeyboard()
-	case callback_data.KeyboardType_KT_NETWORK_CHART:
+	case callbackdata.KeyboardType_KT_NETWORK_CHART:
 		var duration = config.ALL
 		switch callbackData.Action {
-		case callback_data.ActionType_AT_NETWORK_CHART_1_DAY:
+		case callbackdata.ActionType_AT_NETWORK_CHART_1_DAY:
 			duration = config.DAY
-		case callback_data.ActionType_AT_NETWORK_CHART_1_WEEK:
+		case callbackdata.ActionType_AT_NETWORK_CHART_1_WEEK:
 			duration = config.WEEK
-		case callback_data.ActionType_AT_NETWORK_CHART_1_MONTH:
+		case callbackdata.ActionType_AT_NETWORK_CHART_1_MONTH:
 			duration = config.MONTH
 		}
 		answerBotMessage.Chart = user.networkInfoListener.GetNetworkChart(duration)
@@ -73,15 +73,15 @@ func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *common
 	return answerBotMessage
 }
 
-func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataType) (*common.BotMessage, error) {
+func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataType) (*common.BotMessage, error) {
 	backInlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
 				config.BUTTON_BACK,
-				callback_data.QueryDataType{
+				callbackdata.QueryDataType{
 					Account:  callbackData.Account,
-					Keyboard: callback_data.KeyboardType_KT_ACCOUNT,
-					Action:   callback_data.ActionType_AT_REFRESH,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   callbackdata.ActionType_AT_REFRESH,
 				}.GetBase64ProtoString()),
 		),
 	)
@@ -92,10 +92,10 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 	}
 
 	switch callbackData.GetAction() {
-	case callback_data.ActionType_AT_REFRESH:
+	case callbackdata.ActionType_AT_REFRESH:
 		return user.getAccountInfoMessage(account.Account)
 
-	case callback_data.ActionType_AT_TRANSACTIONS:
+	case callbackdata.ActionType_AT_TRANSACTIONS:
 		accountTransactions, err := user.signumClient.GetAccountOrdinaryPaymentTransactions(account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
@@ -117,7 +117,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
 
-	case callback_data.ActionType_AT_BLOCKS:
+	case callbackdata.ActionType_AT_BLOCKS:
 		accountBlocks, err := user.signumClient.GetAccountBlocks(account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
@@ -146,7 +146,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
 
-	case callback_data.ActionType_AT_MULTI_OUT:
+	case callbackdata.ActionType_AT_MULTI_OUT:
 		accountTransactions, err := user.signumClient.GetAccountMultiOutTransactions(account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
@@ -170,7 +170,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
 
-	case callback_data.ActionType_AT_MULTI_OUT_SAME:
+	case callbackdata.ActionType_AT_MULTI_OUT_SAME:
 		accountTransactions, err := user.signumClient.GetAccountMultiOutSameTransactions(account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
@@ -195,8 +195,8 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
 
-	case callback_data.ActionType_AT_ENABLE_INCOME_TX_NOTIFY,
-		callback_data.ActionType_AT_ENABLE_OUTGO_TX_NOTIFY:
+	case callbackdata.ActionType_AT_ENABLE_INCOME_TX_NOTIFY,
+		callbackdata.ActionType_AT_ENABLE_OUTGO_TX_NOTIFY:
 		userAccount := user.GetDbAccount(account.Account)
 		if userAccount == nil {
 			// needs to add it at first
@@ -211,10 +211,10 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 
 		var txType string
 		switch callbackData.GetAction() {
-		case callback_data.ActionType_AT_ENABLE_INCOME_TX_NOTIFY:
+		case callbackdata.ActionType_AT_ENABLE_INCOME_TX_NOTIFY:
 			userAccount.NotifyIncomeTransactions = true
 			txType = "income"
-		case callback_data.ActionType_AT_ENABLE_OUTGO_TX_NOTIFY:
+		case callbackdata.ActionType_AT_ENABLE_OUTGO_TX_NOTIFY:
 			userAccount.NotifyOutgoTransactions = true
 			txType = "outgo"
 		}
@@ -228,8 +228,8 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			MainMenu:       user.GetMainMenu(),
 		}, nil
 
-	case callback_data.ActionType_AT_DISABLE_INCOME_TX_NOTIFY,
-		callback_data.ActionType_AT_DISABLE_OUTGO_TX_NOTIFY:
+	case callbackdata.ActionType_AT_DISABLE_INCOME_TX_NOTIFY,
+		callbackdata.ActionType_AT_DISABLE_OUTGO_TX_NOTIFY:
 		userAccount := user.GetDbAccount(account.Account)
 		if userAccount == nil {
 			return nil, fmt.Errorf("could not get account for %v", account.Account)
@@ -237,10 +237,10 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 		var txType string
 
 		switch callbackData.GetAction() {
-		case callback_data.ActionType_AT_DISABLE_INCOME_TX_NOTIFY:
+		case callbackdata.ActionType_AT_DISABLE_INCOME_TX_NOTIFY:
 			userAccount.NotifyIncomeTransactions = false
 			txType = "income"
-		case callback_data.ActionType_AT_DISABLE_OUTGO_TX_NOTIFY:
+		case callbackdata.ActionType_AT_DISABLE_OUTGO_TX_NOTIFY:
 			userAccount.NotifyOutgoTransactions = false
 			txType = "outgo"
 		}
@@ -252,7 +252,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			MainText:       fmt.Sprintf("💸 Disabled %v transaction alerts for <b>%v</b>", txType, userAccount.AccountRS),
 		}, nil
 
-	case callback_data.ActionType_AT_ENABLE_BLOCK_NOTIFY:
+	case callbackdata.ActionType_AT_ENABLE_BLOCK_NOTIFY:
 		userAccount := user.GetDbAccount(account.Account)
 		if userAccount == nil {
 			// needs to add it at first
@@ -276,7 +276,7 @@ func (user *User) processAccountKeyboard(callbackData *callback_data.QueryDataTy
 			MainMenu:       user.GetMainMenu(),
 		}, nil
 
-	case callback_data.ActionType_AT_DISABLE_BLOCK_NOTIFY:
+	case callbackdata.ActionType_AT_DISABLE_BLOCK_NOTIFY:
 		userAccount := user.GetDbAccount(account.Account)
 		if userAccount != nil && userAccount.NotifyNewBlocks { // needs to disable
 			userAccount.NotifyNewBlocks = false

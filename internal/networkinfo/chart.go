@@ -1,4 +1,4 @@
-package network_info
+package networkinfo
 
 import (
 	"bytes"

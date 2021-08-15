@@ -1,4 +1,4 @@
-package signum_api
+package signumapi
 
 import (
 	"fmt"

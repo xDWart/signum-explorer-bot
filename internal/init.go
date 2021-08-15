@@ -6,10 +6,10 @@ import (
 	"log"
 	"os"
 	"runtime"
-	api_cmc "signum-explorer-bot/internal/api/cmc_api"
-	"signum-explorer-bot/internal/api/signum_api"
+	api_cmc "signum-explorer-bot/internal/api/cmcapi"
+	"signum-explorer-bot/internal/api/signumapi"
 	"signum-explorer-bot/internal/database"
-	"signum-explorer-bot/internal/network_info"
+	"signum-explorer-bot/internal/networkinfo"
 	"signum-explorer-bot/internal/notifier"
 	"signum-explorer-bot/internal/prices"
 	users "signum-explorer-bot/internal/users"
@@ -24,7 +24,7 @@ type TelegramBot struct {
 
 	usersManager        *users.Manager
 	priceManager        *prices.PriceManager
-	networkInfoListener *network_info.NetworkInfoListener
+	networkInfoListener *networkinfo.NetworkInfoListener
 	notifierCh          chan notifier.NotifierMessage
 
 	wg              *sync.WaitGroup
@@ -45,12 +45,12 @@ func InitTelegramBot() *TelegramBot {
 	}
 
 	cmcClient := api_cmc.NewClient()
-	signumClient := signum_api.NewClient()
+	signumClient := signumapi.NewClient()
 	notifierCh := make(chan notifier.NotifierMessage)
 	wg := &sync.WaitGroup{}
 	shutdownChannel := make(chan interface{})
 	priceManager := prices.NewPricesManager(db, cmcClient, wg, shutdownChannel)
-	networkInfoListener := network_info.NewNetworkInfoListener(db, signumClient, wg, shutdownChannel)
+	networkInfoListener := networkinfo.NewNetworkInfoListener(db, signumClient, wg, shutdownChannel)
 
 	bot := &TelegramBot{
 		AbstractTelegramBot: &AbstractTelegramBot{

@@ -1,7 +1,7 @@
-// protoc --go_out=plugins=grpc:. internal/users/callback_data/*.proto
+// protoc --go_out=plugins=grpc:. internal/users/callbackdata/*.proto
 syntax = "proto3";
 
-package callback_data;
+package callbackdata;
 
 message QueryDataType {
     int64 message_id = 1;

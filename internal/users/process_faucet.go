@@ -3,7 +3,7 @@ package users
 import (
 	"fmt"
 	"gorm.io/gorm"
-	"signum-explorer-bot/internal/api/signum_api"
+	"signum-explorer-bot/internal/api/signumapi"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
@@ -87,7 +87,7 @@ func (user *User) sendFaucet(account string, amount float64) (bool, string) {
 	userAccount.NotifyIncomeTransactions = true
 	user.db.Save(&userAccount)
 
-	response := user.signumClient.SendMoney(userAccount.AccountRS, amount, signum_api.MIN_FEE)
+	response := user.signumClient.SendMoney(userAccount.AccountRS, amount, signumapi.MIN_FEE)
 	if response.ErrorDescription != "" {
 		user.ResetState()
 		return false, fmt.Sprintf("🚫 Bad request: %v", response.ErrorDescription)
@@ -102,7 +102,7 @@ func (user *User) sendFaucet(account string, amount float64) (bool, string) {
 		AccountRS:     userAccount.AccountRS,
 		TransactionID: response.Transaction,
 		Amount:        amount,
-		Fee:           float64(signum_api.MIN_FEE),
+		Fee:           float64(signumapi.MIN_FEE),
 	}
 	user.db.Save(&newFaucet)
 
@@ -124,7 +124,7 @@ func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string 
 			user.db.Where(&extraFaucetAmountConfig).First(&extraFaucetAmountConfig)
 
 			if extraFaucetAmountConfig.ValueF > 0 {
-				response := user.signumClient.SendMoney(userAccount.AccountRS, extraFaucetAmountConfig.ValueF, signum_api.MIN_FEE)
+				response := user.signumClient.SendMoney(userAccount.AccountRS, extraFaucetAmountConfig.ValueF, signumapi.MIN_FEE)
 				if response.ErrorDescription == "" {
 					newFaucet := models.Faucet{
 						DbUserID:      userAccount.DbUserID,
@@ -132,7 +132,7 @@ func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string 
 						AccountRS:     userAccount.AccountRS,
 						TransactionID: response.Transaction,
 						Amount:        extraFaucetAmountConfig.ValueF,
-						Fee:           float64(signum_api.MIN_FEE),
+						Fee:           float64(signumapi.MIN_FEE),
 					}
 					user.db.Save(&newFaucet)
 

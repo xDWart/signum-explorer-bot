@@ -1,4 +1,4 @@
-package signum_api
+package signumapi
 
 import "signum-explorer-bot/internal/config"
 

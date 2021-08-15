@@ -2,7 +2,7 @@ package calculator
 
 import (
 	"math"
-	"signum-explorer-bot/internal/api/signum_api"
+	"signum-explorer-bot/internal/api/signumapi"
 )
 
 type CalcResult struct {
@@ -18,11 +18,11 @@ type CalcResult struct {
 
 const p = .4515449935
 
-func burstPerDay(miningInfo *signum_api.MiningInfo) float64 {
+func burstPerDay(miningInfo *signumapi.MiningInfo) float64 {
 	return 360 / miningInfo.AverageNetworkDifficulty * miningInfo.LastBlockReward
 }
 
-func Calculate(miningInfo *signum_api.MiningInfo, tib float64, commit float64) *CalcResult {
+func Calculate(miningInfo *signumapi.MiningInfo, tib float64, commit float64) *CalcResult {
 	var calcResult = CalcResult{
 		TiB:                tib,
 		Commitment:         commit,
@@ -46,7 +46,7 @@ var MultipliersList = [...]float64{0.125, 0.25, 0.5, 1, 2, 4, 8}
 
 type EntireRangeCommitment map[float64]CalcResult
 
-func CalculateEntireRange(miningInfo *signum_api.MiningInfo, tib float64) EntireRangeCommitment {
+func CalculateEntireRange(miningInfo *signumapi.MiningInfo, tib float64) EntireRangeCommitment {
 	var commitmentRange = EntireRangeCommitment{}
 
 	for _, multiplier := range MultipliersList {

@@ -1,4 +1,4 @@
-package abstract_client
+package abstractclient
 
 import (
 	"encoding/json"

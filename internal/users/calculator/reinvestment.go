@@ -1,7 +1,7 @@
 package calculator
 
 import (
-	"signum-explorer-bot/internal/api/signum_api"
+	"signum-explorer-bot/internal/api/signumapi"
 	"signum-explorer-bot/internal/config"
 )
 
@@ -15,7 +15,7 @@ type CalcReinvestmentResult struct {
 	YearlyAfterYear              float64
 }
 
-func CalculateReinvestment(miningInfo *signum_api.MiningInfo, calcResult *CalcResult) *CalcReinvestmentResult {
+func CalculateReinvestment(miningInfo *signumapi.MiningInfo, calcResult *CalcResult) *CalcReinvestmentResult {
 	localCalcResult := *calcResult
 
 	var reinvestEveryDays = float64(config.CALCULATOR.REINVEST_EVERY_DAYS) // days

@@ -3,10 +3,10 @@ package users
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"gorm.io/gorm"
-	"signum-explorer-bot/internal/api/cmc_api"
-	"signum-explorer-bot/internal/api/signum_api"
+	"signum-explorer-bot/internal/api/cmcapi"
+	"signum-explorer-bot/internal/api/signumapi"
 	"signum-explorer-bot/internal/database/models"
-	"signum-explorer-bot/internal/network_info"
+	"signum-explorer-bot/internal/networkinfo"
 	"signum-explorer-bot/internal/prices"
 	"sync"
 )
@@ -15,13 +15,13 @@ type Manager struct {
 	sync.RWMutex
 	db                  *gorm.DB
 	users               map[int64]*User
-	cmcClient           *cmc_api.Client
-	signumClient        *signum_api.Client
+	cmcClient           *cmcapi.Client
+	signumClient        *signumapi.Client
 	priceManager        *prices.PriceManager
-	networkInfoListener *network_info.NetworkInfoListener
+	networkInfoListener *networkinfo.NetworkInfoListener
 }
 
-func InitManager(db *gorm.DB, cmcClient *cmc_api.Client, signumClient *signum_api.Client, priceManager *prices.PriceManager, networkInfoListener *network_info.NetworkInfoListener, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Manager {
+func InitManager(db *gorm.DB, cmcClient *cmcapi.Client, signumClient *signumapi.Client, priceManager *prices.PriceManager, networkInfoListener *networkinfo.NetworkInfoListener, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Manager {
 	return &Manager{
 		db:                  db,
 		users:               make(map[int64]*User),

@@ -1,4 +1,4 @@
-package callback_data
+package callbackdata
 
 import (
 	"encoding/base64"

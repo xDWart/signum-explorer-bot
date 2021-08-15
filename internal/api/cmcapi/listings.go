@@ -1,4 +1,4 @@
-package cmc_api
+package cmcapi
 
 import (
 	"fmt"
@@ -11,23 +11,23 @@ import (
 // 1 call credit per 200 cryptocurrencies returned (rounded up)
 // and 1 call credit per convert option beyond the first but free basic plan is limited to 1 convert options only
 
-type Listings struct {
+type listings struct {
 	Data []struct {
 		Id      int              `json:"id"`
 		Name    string           `json:"name"`
 		Symbol  string           `json:"symbol"`
 		CmcRank int              `json:"cmc_rank"`
-		Quote   map[string]Quote `json:"quote"`
+		Quote   map[string]quote `json:"quote"`
 	} `json:"data"`
 }
 
-type Quote struct {
+type quote struct {
 	Price            float64 `json:"price"`
 	PercentChange24h float64 `json:"percent_change_24h"`
 }
 
-func (c *Client) getListings(start string) (*Listings, error) {
-	var listings Listings
+func (c *Client) getListings(start string) (*listings, error) {
+	var listings listings
 	err := c.DoJsonReq("GET", "/cryptocurrency/listings/latest",
 		map[string]string{"start": start, "limit": config.CMC_API.FREE_LIMIT, "convert": "USD", "cryptocurrency_type": "coins"},
 		nil,
@@ -60,7 +60,7 @@ func (c *Client) updateListings() error {
 	return nil
 }
 
-func (c *Client) updateCachedValues(listings *Listings) bool {
+func (c *Client) updateCachedValues(listings *listings) bool {
 	allSymbolsHaveBeenFound := true
 	for symbol := range c.cachedValues {
 		symbolHasBeenFound := false
@@ -76,8 +76,9 @@ func (c *Client) updateCachedValues(listings *Listings) bool {
 	return allSymbolsHaveBeenFound
 }
 
-func (c *Client) GetPrices() map[string]Quote {
-	prices := map[string]Quote{}
+// GetPrices - get currency quotes of SIGNA and BTC
+func (c *Client) GetPrices() map[string]quote {
+	prices := map[string]quote{}
 
 	c.RLock()
 	if time.Since(c.lastReqTimestamp) <= config.CMC_API.CACHE_TTL {

@@ -1,20 +1,22 @@
-package cmc_api
+package cmcapi
 
 import (
 	"os"
-	abstract_api_client "signum-explorer-bot/internal/api/abstract-client"
+	abstract_api_client "signum-explorer-bot/internal/api/abstractclient"
 	"signum-explorer-bot/internal/config"
 	"sync"
 	"time"
 )
 
+// Client - http client for coinmarketcap.com
 type Client struct {
 	*abstract_api_client.Client
 	sync.RWMutex
 	lastReqTimestamp time.Time
-	cachedValues     map[string]Quote
+	cachedValues     map[string]quote
 }
 
+// NewClient - init new Client
 func NewClient() *Client {
 	return &Client{
 		abstract_api_client.NewClient(
@@ -23,7 +25,7 @@ func NewClient() *Client {
 		),
 		sync.RWMutex{},
 		time.Time{},
-		map[string]Quote{
+		map[string]quote{
 			"BTC":   {},
 			"SIGNA": {},
 		},
