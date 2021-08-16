@@ -96,16 +96,6 @@ func (user *User) sendFaucet(account string, amount float64) (bool, string) {
 	user.LastFaucetClaim = time.Now()
 	user.db.Save(&user.DbUser)
 
-	newFaucet := models.Faucet{
-		DbUserID:      userAccount.DbUserID,
-		Account:       userAccount.Account,
-		AccountRS:     userAccount.AccountRS,
-		TransactionID: response.Transaction,
-		Amount:        amount,
-		Fee:           float64(signumapi.MIN_FEE),
-	}
-	user.db.Save(&newFaucet)
-
 	user.ResetState()
 	return true, fmt.Sprintf(addedMessage+"✅ Faucet payment <b>%v SIGNA</b> has been successfully sent to the account <b>%v</b>, please wait for notification!",
 		amount, userAccount.AccountRS)
@@ -126,16 +116,6 @@ func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string 
 			if extraFaucetAmountConfig.ValueF > 0 {
 				response := user.signumClient.SendMoney(userAccount.AccountRS, extraFaucetAmountConfig.ValueF, signumapi.MIN_FEE)
 				if response.ErrorDescription == "" {
-					newFaucet := models.Faucet{
-						DbUserID:      userAccount.DbUserID,
-						Account:       userAccount.Account,
-						AccountRS:     userAccount.AccountRS,
-						TransactionID: response.Transaction,
-						Amount:        extraFaucetAmountConfig.ValueF,
-						Fee:           float64(signumapi.MIN_FEE),
-					}
-					user.db.Save(&newFaucet)
-
 					user.db.Model(&newUsersExtraFaucetConfig).UpdateColumn("value_i", gorm.Expr("value_i - ?", 1))
 
 					return fmt.Sprintf("\n\n🎁 New user bonus <b>%v SIGNA</b> has been successfully sent to the account, please wait for notification!",

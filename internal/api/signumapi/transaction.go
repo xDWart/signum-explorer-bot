@@ -5,6 +5,7 @@ type Transaction struct {
 	Type          TransactionType    `json:"type"`
 	Subtype       TransactionSubType `json:"subtype"`
 	Timestamp     int64              `json:"timestamp"`
+	Recipient     string             `json:"recipient"`
 	RecipientRS   string             `json:"recipientRS"`
 	AmountNQT     float64            `json:"amountNQT,string"`
 	FeeNQT        float64            `json:"feeNQT,string"`
@@ -27,7 +28,6 @@ type Transaction struct {
 	// FullHash        string             `json:"fullHash"`
 	// Deadline        uint64             `json:"deadline"`
 	// SenderPublicKey string             `json:"senderPublicKey"`
-	// Recipient       string             `json:"recipient"`
 	// Height         uint64 `json:"height"`
 	// Version        uint64 `json:"version"`
 	// EcBlockId      uint64 `json:"ecBlockId,string"`

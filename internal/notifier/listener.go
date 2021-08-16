@@ -104,68 +104,89 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 			continue
 		}
 
+		var amount float64
+		var outgoAccount string
+		var outgoAccountRS string
 		switch transaction.Subtype {
 		case signumapi.ORDINARY_PAYMENT:
+			amount = transaction.AmountNQT / 1e8
 			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Ordinary"+
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Amount:</i> +%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
-					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
-
-				if account.AccountRS == config.FAUCET.ACCOUNT { // it's donate
-					newDonate := models.Donation{
-						Account:       transaction.Sender,
-						AccountRS:     transaction.SenderRS,
-						TransactionID: transaction.TransactionID,
-						Amount:        transaction.AmountNQT / 1e8,
-					}
-					n.db.Save(&newDonate)
-				}
+					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			} else {
 				msg += fmt.Sprintf("new outgo:"+
 					"\n<i>Payment:</i> Ordinary"+
 					"\n<i>Recipient:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
-					transaction.RecipientRS, common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
+					transaction.RecipientRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
+				outgoAccount = transaction.Recipient
+				outgoAccountRS = transaction.RecipientRS
 			}
 		case signumapi.MULTI_OUT_PAYMENT:
 			if incomeTransaction {
+				amount = transaction.Attachment.Recipients.FoundMyAmount(account.Account)
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out"+
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Amount:</i> +%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
-					transaction.SenderRS, common.FormatNumber(transaction.Attachment.Recipients.FoundMyAmount(account.Account), 2), transaction.FeeNQT/1e8)
+					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			} else {
+				amount = transaction.AmountNQT / 1e8
 				msg += fmt.Sprintf("new outgo:"+
 					"\n<i>Payment:</i> Multi-out"+
 					"\n<i>Recipients:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
-					len(transaction.Attachment.Recipients), common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
+					len(transaction.Attachment.Recipients), common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			}
 		case signumapi.MULTI_OUT_SAME_PAYMENT:
 			if incomeTransaction {
+				amount = transaction.AmountNQT / 1e8 / float64(len(transaction.Attachment.Recipients))
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out same"+
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Amount:</i> +%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
-					transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2), transaction.FeeNQT/1e8)
+					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			} else {
+				amount = transaction.AmountNQT / 1e8
 				msg += fmt.Sprintf("new outgo:"+
 					"\n<i>Payment:</i> Multi-out same"+
 					"\n<i>Recipients:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
-					len(transaction.Attachment.Recipients), common.FormatNumber(transaction.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
+					len(transaction.Attachment.Recipients), common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			}
 		default:
 			log.Printf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
 			continue
+		}
+
+		if account.AccountRS == config.FAUCET.ACCOUNT {
+			if incomeTransaction { // it's donate
+				newDonate := models.Donation{
+					Account:       transaction.Sender,
+					AccountRS:     transaction.SenderRS,
+					TransactionID: transaction.TransactionID,
+					Amount:        amount,
+				}
+				n.db.Save(&newDonate)
+			} else { // it's faucet
+				newFaucet := models.Faucet{
+					Account:       outgoAccount,
+					AccountRS:     outgoAccountRS,
+					TransactionID: transaction.TransactionID,
+					Amount:        amount,
+					Fee:           transaction.FeeNQT / 1e8,
+				}
+				n.db.Save(&newFaucet)
+			}
 		}
 
 		n.notifierCh <- NotifierMessage{
