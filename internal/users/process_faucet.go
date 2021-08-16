@@ -74,13 +74,13 @@ func (user *User) sendFaucet(account string, amount float64) (bool, string) {
 	}
 
 	userAccount := user.GetDbAccount(account)
-	if userAccount == nil {
-		// needs to add it at first
-		var msg string
-		userAccount, msg = user.addAccount(account)
+	addedMessage := ""
+	if userAccount == nil { // needs to add it at first
+		userAccount, addedMessage = user.addAccount(account)
 		if userAccount == nil {
-			return false, msg
+			return false, addedMessage
 		}
+		addedMessage += "\n\n"
 	}
 
 	userAccount.LastTransactionID = user.getLastTransaction(userAccount.Account)
@@ -107,7 +107,7 @@ func (user *User) sendFaucet(account string, amount float64) (bool, string) {
 	user.db.Save(&newFaucet)
 
 	user.ResetState()
-	return true, fmt.Sprintf("✅ Faucet payment <b>%v SIGNA</b> has been successfully sent to the account <b>%v</b>, please wait for notification!",
+	return true, fmt.Sprintf(addedMessage+"✅ Faucet payment <b>%v SIGNA</b> has been successfully sent to the account <b>%v</b>, please wait for notification!",
 		amount, userAccount.AccountRS)
 }
 
