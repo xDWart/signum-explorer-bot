@@ -8,8 +8,8 @@ import (
 
 func (user *User) ProcessCrossing() string {
 	user.state = CROSSING_STATE
-	return "💽 Please send me a list of your <b>plot file names</b> separated by new lines," +
-		" commas or spaces to check the crossing of nonces:"
+	return "💽 Please send me a list of your <b>plot file names</b> separated by new lines, " +
+		"commas or spaces to check the crossing of nonces:"
 }
 
 func (user *User) checkCrossing(message string) string {

@@ -38,7 +38,6 @@ func (bot *TelegramBot) startBotListener() {
 
 				message := strings.TrimSpace(message.Text)
 				message = strings.Join(strings.Fields(message), " ")
-				message = strings.Replace(message, ",", ".", -1)
 
 				switch true {
 				case strings.HasPrefix(message, config.COMMAND_START):

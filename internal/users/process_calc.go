@@ -39,6 +39,7 @@ func (user *User) ProcessCalc(message string) string {
 }
 
 func parseTib(message string) (float64, error) {
+	message = strings.Replace(message, ",", ".", -1)
 	tib, err := strconv.ParseFloat(message, 64)
 	if err != nil {
 		return tib, fmt.Errorf("🚫 Couldn't parse <b>%v</b> to number: %v", message, err)
@@ -47,6 +48,7 @@ func parseTib(message string) (float64, error) {
 }
 
 func parseCommit(message string) (float64, error) {
+	message = strings.Replace(message, ",", ".", -1)
 	commit, err := strconv.ParseFloat(message, 64)
 	if err != nil {
 		return commit, fmt.Errorf("🚫 Couldn't parse <b>%v</b> to number: %v", message, err)
