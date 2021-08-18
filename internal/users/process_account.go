@@ -28,13 +28,13 @@ func (user *User) getAccountInfoMessage(accountS string) (*common.BotMessage, er
 
 	inlineText := fmt.Sprintf("💳 <b>%v</b>:\n"+
 		"%v"+
-		"\nCommitment: %v SIGNA <i>($%v | %v BTC)</i>"+
 		"\nAvailable: %v SIGNA <i>($%v | %v BTC)</i>"+
+		"\nCommitment: %v SIGNA <i>($%v | %v BTC)</i>"+
 		"\n<b>Total: %v SIGNA</b> <i>($%v | %v BTC)</i>"+
 		"\n\nFor the full details visit the <a href='https://explorer.signum.network/?action=account&account=%v'>original Signum Explorer</a>",
 		account.AccountRS, accountName,
-		common.FormatNumber(account.CommittedBalance, 2), common.FormatNumber(account.CommittedBalance*signaPrice, 2), common.FormatNumber(account.CommittedBalance*signaPrice/btcPrice, 4),
 		common.FormatNumber(account.AvailableBalance, 2), common.FormatNumber(account.AvailableBalance*signaPrice, 2), common.FormatNumber(account.AvailableBalance*signaPrice/btcPrice, 4),
+		common.FormatNumber(account.CommittedBalance, 2), common.FormatNumber(account.CommittedBalance*signaPrice, 2), common.FormatNumber(account.CommittedBalance*signaPrice/btcPrice, 4),
 		common.FormatNumber(account.TotalBalance, 2), common.FormatNumber(account.TotalBalance*signaPrice, 2), common.FormatNumber(account.TotalBalance*signaPrice/btcPrice, 4),
 		account.Account)
 
