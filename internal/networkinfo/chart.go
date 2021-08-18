@@ -73,22 +73,25 @@ func (ni *NetworkInfoListener) GetNetworkChart(duration time.Duration) []byte {
 		Annotations: []chart.Value2{},
 	}
 
-	for index, values := range networkInfos {
+	for _, values := range networkInfos {
 		difficultyChartTimeSeries.XValues = append(difficultyChartTimeSeries.XValues, values.CreatedAt)
 		difficultyChartTimeSeries.YValues = append(difficultyChartTimeSeries.YValues, values.NetworkDifficulty/1024)
 
 		commitmentChartTimeSeries.XValues = append(commitmentChartTimeSeries.XValues, values.CreatedAt)
 		commitmentChartTimeSeries.YValues = append(commitmentChartTimeSeries.YValues, values.AverageCommitment)
-
-		if index == len(networkInfos)-1 {
-			annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{
-				XValue: chart.TimeToFloat64(values.CreatedAt),
-				YValue: values.AverageCommitment,
-				Label:  fmt.Sprintf("%.2f", values.AverageCommitment),
-				Style:  chart.Style{StrokeColor: chart.ColorGreen}})
-			// annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{XValue: chart.TimeToFloat64(values.CreatedAt), YValue: values.NetworkDifficulty / 1024, Label: fmt.Sprintf("%.1f", values.NetworkDifficulty/1024)})
-		}
 	}
+
+	actualMiningInfo := ni.GetLastMiningInfo()
+	difficultyChartTimeSeries.XValues = append(difficultyChartTimeSeries.XValues, time.Now())
+	difficultyChartTimeSeries.YValues = append(difficultyChartTimeSeries.YValues, actualMiningInfo.ActualNetworkDifficulty/1024)
+	commitmentChartTimeSeries.XValues = append(commitmentChartTimeSeries.XValues, time.Now())
+	commitmentChartTimeSeries.YValues = append(commitmentChartTimeSeries.YValues, actualMiningInfo.ActualCommitment)
+	annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{
+		XValue: chart.TimeToFloat64(time.Now()),
+		YValue: actualMiningInfo.ActualCommitment,
+		Label:  fmt.Sprintf("%.f.00", actualMiningInfo.ActualCommitment),
+		Style:  chart.Style{StrokeColor: chart.ColorGreen}})
+	// annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{XValue: chart.TimeToFloat64(values.CreatedAt), YValue: values.NetworkDifficulty / 1024, Label: fmt.Sprintf("%.1f", values.NetworkDifficulty/1024)})
 
 	graph.Series = append(graph.Series, commitmentChartTimeSeries)
 	graph.Series = append(graph.Series, difficultyChartTimeSeries)

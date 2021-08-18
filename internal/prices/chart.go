@@ -101,15 +101,14 @@ func (pm *PriceManager) GetPriceChart(duration time.Duration) []byte {
 		btcChartTimeSeries.YValues = append(btcChartTimeSeries.YValues, values.BtcPrice)
 	}
 
-	lastPrices := pm.cmcClient.GetPrices()
 	signaChartTimeSeries.XValues = append(signaChartTimeSeries.XValues, time.Now())
-	signaChartTimeSeries.YValues = append(signaChartTimeSeries.YValues, lastPrices["SIGNA"].Price*signaMultiplier)
+	signaChartTimeSeries.YValues = append(signaChartTimeSeries.YValues, actualPrices["SIGNA"].Price*signaMultiplier)
 	btcChartTimeSeries.XValues = append(btcChartTimeSeries.XValues, time.Now())
-	btcChartTimeSeries.YValues = append(btcChartTimeSeries.YValues, lastPrices["BTC"].Price)
+	btcChartTimeSeries.YValues = append(btcChartTimeSeries.YValues, actualPrices["BTC"].Price)
 	annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{
 		XValue: chart.TimeToFloat64(time.Now()),
-		YValue: lastPrices["SIGNA"].Price * signaMultiplier,
-		Label:  fmt.Sprintf("%.2f", lastPrices["SIGNA"].Price*signaMultiplier),
+		YValue: actualPrices["SIGNA"].Price * signaMultiplier,
+		Label:  fmt.Sprintf("%.2f", actualPrices["SIGNA"].Price*signaMultiplier),
 		Style:  chart.Style{StrokeColor: annotationColor}})
 	//annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{
 	//	XValue: chart.TimeToFloat64(time.Now()),
