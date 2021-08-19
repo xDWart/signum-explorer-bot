@@ -83,7 +83,7 @@ func (user *User) sendFaucet(account string, amount float64) (bool, string) {
 		addedMessage += "\n\n"
 	}
 
-	userAccount.LastTransactionID = user.getLastTransaction(userAccount.Account)
+	userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(userAccount.Account)
 	userAccount.NotifyIncomeTransactions = true
 	user.db.Save(&userAccount)
 

@@ -1,4 +1,4 @@
-package cross_checker
+package crosschecker
 
 import (
 	"errors"

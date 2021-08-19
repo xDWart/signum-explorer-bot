@@ -7,6 +7,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/golang/protobuf/proto"
 	"log"
+	"signum-explorer-bot/internal/api/signumapi"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/users/callbackdata"
@@ -52,12 +53,7 @@ func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *common
 		answerBotMessage.InlineKeyboard = user.GetPriceChartKeyboard()
 	case callbackdata.KeyboardType_KT_NETWORK_CHART:
 		var duration = config.ALL
-		switch callbackData.Action {
-		case callbackdata.ActionType_AT_NETWORK_CHART_1_DAY:
-			duration = config.DAY
-		case callbackdata.ActionType_AT_NETWORK_CHART_1_WEEK:
-			duration = config.WEEK
-		case callbackdata.ActionType_AT_NETWORK_CHART_1_MONTH:
+		if callbackData.Action == callbackdata.ActionType_AT_NETWORK_CHART_1_MONTH {
 			duration = config.MONTH
 		}
 		answerBotMessage.Chart = user.networkInfoListener.GetNetworkChart(duration)
@@ -95,7 +91,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 	case callbackdata.ActionType_AT_REFRESH:
 		return user.getAccountInfoMessage(account.Account)
 
-	case callbackdata.ActionType_AT_TRANSACTIONS:
+	case callbackdata.ActionType_AT_PAYMENTS:
 		accountTransactions, err := user.signumClient.GetAccountOrdinaryPaymentTransactions(account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
@@ -195,6 +191,34 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
 
+	case callbackdata.ActionType_AT_MINING_TXS:
+		accountTransactions, err := user.signumClient.GetAccountMiningTransactions(account.Account)
+		if err != nil {
+			return nil, fmt.Errorf("🚫 Error: %v", err)
+		}
+
+		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last mining transactions:\n\n", account.AccountRS)
+		for _, transaction := range accountTransactions.Transactions {
+			switch transaction.Subtype {
+			case signumapi.REWARD_RECIPIENT_ASSIGNMENT:
+				newInlineText += fmt.Sprintf("<i>%v</i>  Reward recipient assignment <b>%v</b>\n",
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.RecipientRS)
+			case signumapi.ADD_COMMITMENT:
+				newInlineText += fmt.Sprintf("<i>%v</i>  Add commitment  <b>+%v SIGNA</b>\n",
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp),
+					common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2))
+			case signumapi.REMOVE_COMMITMENT:
+				newInlineText += fmt.Sprintf("<i>%v</i>  Revoke commitment  <b>-%v SIGNA</b>\n",
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp),
+					common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2))
+			}
+		}
+
+		return &common.BotMessage{
+			InlineText:     newInlineText,
+			InlineKeyboard: &backInlineKeyboard,
+		}, nil
+
 	case callbackdata.ActionType_AT_ENABLE_INCOME_TX_NOTIFY,
 		callbackdata.ActionType_AT_ENABLE_OUTGO_TX_NOTIFY:
 		userAccount := user.GetDbAccount(account.Account)
@@ -207,7 +231,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			}
 		}
 
-		userAccount.LastTransactionID = user.getLastTransaction(userAccount.Account)
+		userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(userAccount.Account)
 
 		var txType string
 		switch callbackData.GetAction() {
@@ -224,7 +248,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("💸 Enabled %v transaction alerts for <b>%v</b>", txType, userAccount.AccountRS),
+			MainText:       fmt.Sprintf("💸 Enabled %v payment transaction notifications for <b>%v</b>", txType, userAccount.AccountRS),
 			MainMenu:       user.GetMainMenu(),
 		}, nil
 
@@ -249,7 +273,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("💸 Disabled %v transaction alerts for <b>%v</b>", txType, userAccount.AccountRS),
+			MainText:       fmt.Sprintf("💸 Disabled %v payment transaction notifications for <b>%v</b>", txType, userAccount.AccountRS),
 		}, nil
 
 	case callbackdata.ActionType_AT_ENABLE_BLOCK_NOTIFY:
@@ -272,7 +296,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("📃 Enabled new block alerts for <b>%v</b>", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("💽 Enabled new block notifications for <b>%v</b>", userAccount.AccountRS),
 			MainMenu:       user.GetMainMenu(),
 		}, nil
 
@@ -286,7 +310,44 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("📃 Disabled new block alerts for <b>%v</b>", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("💽 Disabled new block notifications for <b>%v</b>", userAccount.AccountRS),
+		}, nil
+
+	case callbackdata.ActionType_AT_ENABLE_MINING_TX_NOTIFICATIONS:
+		userAccount := user.GetDbAccount(account.Account)
+		if userAccount == nil {
+			// needs to add it at first
+			var msg string
+			userAccount, msg = user.addAccount(account.Account)
+			if userAccount == nil {
+				return nil, errors.New(msg)
+			}
+		}
+
+		if !userAccount.NotifyMiningTXs { // needs to enable
+			userAccount.NotifyMiningTXs = true
+			userAccount.LastMiningTX = user.signumClient.GetLastAccountMiningTransaction(account.Account)
+			user.db.Save(userAccount)
+		}
+
+		// and update a keyboard to change icon
+		return &common.BotMessage{
+			InlineKeyboard: user.GetAccountKeyboard(account.Account),
+			MainText:       fmt.Sprintf("📝 Enabled new mining transaction notifications for <b>%v</b>", userAccount.AccountRS),
+			MainMenu:       user.GetMainMenu(),
+		}, nil
+
+	case callbackdata.ActionType_AT_DISABLE_MINING_TX_NOTIFICATIONS:
+		userAccount := user.GetDbAccount(account.Account)
+		if userAccount != nil && userAccount.NotifyMiningTXs { // needs to disable
+			userAccount.NotifyMiningTXs = false
+			user.db.Save(userAccount)
+		}
+
+		// and update a keyboard to change icon
+		return &common.BotMessage{
+			InlineKeyboard: user.GetAccountKeyboard(account.Account),
+			MainText:       fmt.Sprintf("📝 Disabled new mining transaction notifications for <b>%v</b>", userAccount.AccountRS),
 		}, nil
 
 	default:

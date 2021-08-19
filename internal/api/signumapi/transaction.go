@@ -13,12 +13,12 @@ type Transaction struct {
 	SenderRS      string             `json:"senderRS"`
 	Attachment    struct {
 		Recipients RecipientsType `json:"recipients"`
+		AmountNQT  float64        `json:"amountNQT"`
 		// VersionMultiOutCreation          byte           `json:"version.MultiOutCreation"`
 		// VersionCommitmentAdd             byte           `json:"version.CommitmentAdd"`
 		// VersionRewardRecipientAssignment byte           `json:"version.RewardRecipientAssignment"`
 		// VersionPublicKeyAnnouncement     byte           `json:"version.PublicKeyAnnouncement"`
 		// VersionMessage                   byte           `json:"version.Message"`
-		// AmountNQT                        uint64         `json:"amountNQT"`
 		// Message                          string         `json:"message"`
 		// RecipientPublicKey               string         `json:"recipientPublicKey"`
 		// MessageIsText                    bool           `json:"messageIsText"`

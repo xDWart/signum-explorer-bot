@@ -41,7 +41,7 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 	err := n.db.Model(&models.DbUser{}).Select("*").
 		Joins("join db_accounts on db_accounts.db_user_id = db_users.id").
 		Where("db_accounts.notify_income_transactions = true OR db_accounts.notify_outgo_transactions = true " +
-			"OR db_accounts.notify_new_blocks = true").
+			"OR db_accounts.notify_new_blocks = true OR db_accounts.notify_mining_t_xs = true").
 		Scan(&monitoredAccounts).Error
 	if err != nil {
 		log.Printf("Can't get monitored accounts: %v", err)
@@ -56,16 +56,85 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 			n.checkPaymentTransactions(&account)
 		}
 
+		if account.NotifyMiningTXs {
+			n.checkMiningTransactions(&account)
+		}
+
 		if checkBlocks && account.NotifyNewBlocks {
 			n.checkBlocks(&account)
 		}
 	}
 }
 
+func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
+	userTransactions, err := n.signumClient.GetAccountMiningTransactions(account.Account)
+	if err != nil {
+		log.Printf("Can't get last account %v mining transactions: %v", account.Account, err)
+		return
+	}
+
+	if userTransactions == nil || len(userTransactions.Transactions) == 0 {
+		return
+	}
+
+	if userTransactions.Transactions[0].TransactionID == account.LastMiningTX {
+		return
+	}
+
+	for _, transaction := range userTransactions.Transactions {
+		if transaction.TransactionID == account.LastMiningTX {
+			break
+		}
+		msg := fmt.Sprintf("📝 <b>%v</b> ", account.AccountRS)
+
+		var totalCommitment string
+		newAccount, err := n.signumClient.InvalidateCacheAndGetAccount(account.Account)
+		if err == nil {
+			totalCommitment = fmt.Sprintf("\n<b>Total commitment: %v SIGNA</b>", common.FormatNumber(newAccount.CommittedBalance, 2))
+		}
+
+		switch transaction.Subtype {
+		case signumapi.REWARD_RECIPIENT_ASSIGNMENT:
+			var recipientName string
+			recipientAccount, err := n.signumClient.GetAccount(transaction.Recipient)
+			if err == nil && recipientAccount.Name != "" {
+				recipientName = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
+			}
+
+			msg += fmt.Sprintf("new recipient assigned:"+
+				"\n<i>Recipient:</i> %v"+recipientName+
+				"\n<i>Fee:</i> %v SIGNA",
+				transaction.SenderRS, transaction.FeeNQT/1e8)
+		case signumapi.ADD_COMMITMENT:
+			msg += fmt.Sprintf("new commitment added:"+
+				"\n<i>Amount:</i> +%v SIGNA"+
+				"\n<i>Fee:</i> %v SIGNA",
+				common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
+		case signumapi.REMOVE_COMMITMENT:
+			msg += fmt.Sprintf("commitment revoked:"+
+				"\n<i>Amount:</i> -%v SIGNA"+
+				"\n<i>Fee:</i> %v SIGNA",
+				common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
+		default:
+			log.Printf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
+			continue
+		}
+
+		n.notifierCh <- NotifierMessage{
+			UserName: account.UserName,
+			ChatID:   account.ChatID,
+			Message:  msg + totalCommitment,
+		}
+	}
+
+	account.DbAccount.LastMiningTX = userTransactions.Transactions[0].TransactionID
+	n.db.Save(&account.DbAccount)
+}
+
 func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 	userTransactions, err := n.signumClient.GetAccountPaymentTransactions(account.Account)
 	if err != nil {
-		log.Printf("Can't get last account %v transactions: %v", account.Account, err)
+		log.Printf("Can't get last account %v payment transactions: %v", account.Account, err)
 		return
 	}
 
@@ -216,7 +285,7 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 		return
 	}
 
-	msg := fmt.Sprintf("📃 <b>%v</b> new block <b>#%v</b> at %v  <b>+%v SIGNA</b>",
+	msg := fmt.Sprintf("💽 <b>%v</b> new block <b>#%v</b> at %v  <b>+%v SIGNA</b>",
 		account.AccountRS, foundBlock.Height, common.FormatChainTimeToStringTimeUTC(foundBlock.Timestamp), foundBlock.BlockReward)
 
 	account.DbAccount.LastBlockID = foundBlock.Block

@@ -148,13 +148,13 @@ func (ni *NetworkInfoListener) getMiningInfo(samplesForAveraging []*signumapi.Mi
 
 func (ni *NetworkInfoListener) GetNetworkInfo() string {
 	miningInfo := ni.GetLastMiningInfo()
-	return fmt.Sprintf("💻 <b>Network info at the moment:</b>"+
+	return fmt.Sprintf("💻 <b>Average network statistic during the last %v days:</b>"+
 		"\nDifficulty: %.2f PiB"+
 		"\nCommitment: %v SIGNA / TiB"+
-		"\n\n<b>Average values during the last %v days:</b>"+
+		"\n\n<b>Network statistic at the moment:</b>"+
 		"\nDifficulty: %.2f PiB"+
 		"\nCommitment: %v SIGNA / TiB",
-		miningInfo.ActualNetworkDifficulty/1024, common.FormatNumber(miningInfo.ActualCommitment, 0),
 		config.SIGNUM_API.AVERAGING_DAYS_QUANTITY,
-		miningInfo.AverageNetworkDifficulty/1024, common.FormatNumber(miningInfo.AverageCommitment, 0))
+		miningInfo.AverageNetworkDifficulty/1024, common.FormatNumber(miningInfo.AverageCommitment, 0),
+		miningInfo.ActualNetworkDifficulty/1024, common.FormatNumber(miningInfo.ActualCommitment, 0))
 }

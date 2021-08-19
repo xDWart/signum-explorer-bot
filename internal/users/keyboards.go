@@ -2,7 +2,6 @@ package users
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
 	"signum-explorer-bot/internal/users/callbackdata"
 )
@@ -15,6 +14,7 @@ var checkedIcon = map[bool]string{
 const (
 	INCOME_TX = iota
 	OUTGO_TX
+	MINING
 	BLOCKS
 )
 
@@ -26,6 +26,10 @@ var actionTypes = []map[bool]callbackdata.ActionType{
 	OUTGO_TX: {
 		true:  callbackdata.ActionType_AT_DISABLE_OUTGO_TX_NOTIFY,
 		false: callbackdata.ActionType_AT_ENABLE_OUTGO_TX_NOTIFY,
+	},
+	MINING: {
+		true:  callbackdata.ActionType_AT_DISABLE_MINING_TX_NOTIFICATIONS,
+		false: callbackdata.ActionType_AT_ENABLE_MINING_TX_NOTIFICATIONS,
 	},
 	BLOCKS: {
 		true:  callbackdata.ActionType_AT_DISABLE_BLOCK_NOTIFY,
@@ -42,17 +46,11 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				"Transactions",
+				"Payment transactions",
 				callbackdata.QueryDataType{
 					Account:  account,
 					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
-					Action:   callbackdata.ActionType_AT_TRANSACTIONS,
-				}.GetBase64ProtoString()),
-			tgbotapi.NewInlineKeyboardButtonData(
-				"Blocks", callbackdata.QueryDataType{
-					Account:  account,
-					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
-					Action:   callbackdata.ActionType_AT_BLOCKS,
+					Action:   callbackdata.ActionType_AT_PAYMENTS,
 				}.GetBase64ProtoString()),
 		),
 		tgbotapi.NewInlineKeyboardRow(
@@ -89,18 +87,32 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
+				"Mining transactions", callbackdata.QueryDataType{
+					Account:  account,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   callbackdata.ActionType_AT_MINING_TXS,
+				}.GetBase64ProtoString()),
+			tgbotapi.NewInlineKeyboardButtonData(
+				checkedIcon[userAccount.NotifyMiningTXs]+" Notify mining TXs",
+				callbackdata.QueryDataType{
+					Account:  account,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   actionTypes[MINING][userAccount.NotifyMiningTXs],
+				}.GetBase64ProtoString()),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				"Blocks", callbackdata.QueryDataType{
+					Account:  account,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   callbackdata.ActionType_AT_BLOCKS,
+				}.GetBase64ProtoString()),
+			tgbotapi.NewInlineKeyboardButtonData(
 				checkedIcon[userAccount.NotifyNewBlocks]+" Notify about blocks",
 				callbackdata.QueryDataType{
 					Account:  account,
 					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
 					Action:   actionTypes[BLOCKS][userAccount.NotifyNewBlocks],
-				}.GetBase64ProtoString()),
-			tgbotapi.NewInlineKeyboardButtonData(
-				config.BUTTON_REFRESH,
-				callbackdata.QueryDataType{
-					Account:  account,
-					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
-					Action:   callbackdata.ActionType_AT_REFRESH,
 				}.GetBase64ProtoString()),
 		),
 	)
@@ -142,18 +154,6 @@ func (user *User) GetPriceChartKeyboard() *tgbotapi.InlineKeyboardMarkup {
 func (user *User) GetNetworkChartKeyboard() *tgbotapi.InlineKeyboardMarkup {
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(
-				"Day",
-				callbackdata.QueryDataType{
-					Keyboard: callbackdata.KeyboardType_KT_NETWORK_CHART,
-					Action:   callbackdata.ActionType_AT_NETWORK_CHART_1_DAY,
-				}.GetBase64ProtoString()),
-			tgbotapi.NewInlineKeyboardButtonData(
-				"Week",
-				callbackdata.QueryDataType{
-					Keyboard: callbackdata.KeyboardType_KT_NETWORK_CHART,
-					Action:   callbackdata.ActionType_AT_NETWORK_CHART_1_WEEK,
-				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				"Month",
 				callbackdata.QueryDataType{

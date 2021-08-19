@@ -63,7 +63,7 @@ func (bot *TelegramBot) startBotListener() {
 				case strings.HasPrefix(message, config.COMMAND_NETWORK) || message == config.BUTTON_NETWORK:
 					user.ResetState()
 					userAnswer.MainText = bot.networkInfoListener.GetNetworkInfo()
-					userAnswer.Chart = bot.networkInfoListener.GetNetworkChart(config.WEEK)
+					userAnswer.Chart = bot.networkInfoListener.GetNetworkChart(config.MONTH)
 					userAnswer.InlineKeyboard = user.GetNetworkChartKeyboard()
 				case strings.HasPrefix(message, config.COMMAND_CROSSING):
 					user.ResetState()

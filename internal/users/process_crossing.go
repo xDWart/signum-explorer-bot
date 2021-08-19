@@ -2,7 +2,7 @@ package users
 
 import (
 	"fmt"
-	"signum-explorer-bot/internal/cross_checker"
+	"signum-explorer-bot/internal/crosschecker"
 	"sort"
 )
 
@@ -13,12 +13,12 @@ func (user *User) ProcessCrossing() string {
 }
 
 func (user *User) checkCrossing(message string) string {
-	plotsList := cross_checker.CheckPlotsForCrossing(message)
+	plotsList := crosschecker.CheckPlotsForCrossing(message)
 
 	var anyError bool
-	answer := "📃 <b>Results of cross checking your plots:</b>"
+	answer := "💽 <b>Results of cross checking your plots:</b>"
 	for account, nonces := range plotsList {
-		if account == cross_checker.INVALID_ACCOUNTS {
+		if account == crosschecker.INVALID_ACCOUNTS {
 			continue
 		}
 
@@ -50,7 +50,7 @@ func (user *User) checkCrossing(message string) string {
 		}
 	}
 
-	invalidAccounts := plotsList[cross_checker.INVALID_ACCOUNTS]
+	invalidAccounts := plotsList[crosschecker.INVALID_ACCOUNTS]
 	if invalidAccounts != nil {
 		anyError = true
 		answer += "\n\n❌ <b>Invalid AccountID:</b>"

@@ -30,7 +30,7 @@ func (user *User) ProcessMessage(message string) *common.BotMessage {
 	case ADD_STATE:
 		userAccount, msg := user.addAccount(message)
 		if userAccount != nil {
-			userAccount.LastTransactionID = user.getLastTransaction(userAccount.Account)
+			userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(userAccount.Account)
 			userAccount.NotifyIncomeTransactions = true
 			user.db.Save(userAccount)
 		}
