@@ -42,7 +42,7 @@ func (user *User) ProcessMessage(message string) *common.BotMessage {
 		return &common.BotMessage{MainText: user.checkCrossing(message)}
 	case FAUCET_STATE:
 		user.ResetState()
-		_, msg := user.sendFaucet(message, config.FAUCET.AMOUNT)
+		_, msg := user.sendOrdinaryFaucet(message)
 		return &common.BotMessage{MainText: msg}
 	default:
 		botMessage, err := user.getAccountInfoMessage(message)

@@ -46,7 +46,7 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				"Payment transactions",
+				"Ordinary Payments",
 				callbackdata.QueryDataType{
 					Account:  account,
 					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
@@ -55,14 +55,14 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				"MultiOut",
+				"Multi-Out",
 				callbackdata.QueryDataType{
 					Account:  account,
 					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
 					Action:   callbackdata.ActionType_AT_MULTI_OUT,
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
-				"MultiOutSame",
+				"Multi-Out Same",
 				callbackdata.QueryDataType{
 					Account:  account,
 					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,

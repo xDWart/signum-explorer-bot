@@ -59,11 +59,11 @@ func (user *User) ProcessFaucet(message string) string {
 			"or <b>%v ACCOUNT</b> to receive faucet payment", config.COMMAND_FAUCET, config.COMMAND_FAUCET)
 	}
 
-	_, msg := user.sendFaucet(splittedMessage[1], config.FAUCET.AMOUNT)
+	_, msg := user.sendOrdinaryFaucet(splittedMessage[1])
 	return msg
 }
 
-func (user *User) sendFaucet(account string, amount float64) (bool, string) {
+func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 	if !config.ValidAccountRS.MatchString(account) && !config.ValidAccount.MatchString(account) {
 		return false, "🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>"
 	}
@@ -86,6 +86,13 @@ func (user *User) sendFaucet(account string, amount float64) (bool, string) {
 	userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(userAccount.Account)
 	userAccount.NotifyIncomeTransactions = true
 	user.db.Save(&userAccount)
+
+	var amount = config.FAUCET.DEFAULT_ORDINARY_AMOUNT
+	ordinaryFaucetAmount := models.Config{Name: config.DB_CONFIG_ORDINARY_FAUCET_AMOUNT}
+	user.db.Where(&ordinaryFaucetAmount).First(&ordinaryFaucetAmount)
+	if ordinaryFaucetAmount.ValueF > 0 {
+		amount = ordinaryFaucetAmount.ValueF
+	}
 
 	response := user.signumClient.SendMoney(userAccount.AccountRS, amount, signumapi.MIN_FEE)
 	if response.ErrorDescription != "" {

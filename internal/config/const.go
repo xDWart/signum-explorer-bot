@@ -3,7 +3,7 @@ package config
 import "time"
 
 const NAME = "<b>🚀 Signum Explorer Bot</b>"
-const VERSION = "<i>v.0.7.8</i>"
+const VERSION = "<i>v.0.7.9</i>"
 
 const (
 	COMMAND_START    = "/start"
@@ -55,6 +55,7 @@ const (
 )
 
 const (
+	DB_CONFIG_ORDINARY_FAUCET_AMOUNT = "ORDINARY_FAUCET_AMOUNT"
 	DB_CONFIG_NEW_USERS_EXTRA_FAUCET = "NEW_USERS_EXTRA_FAUCET"
 	DB_CONFIG_EXTRA_FAUCET_AMOUNT    = "EXTRA_FAUCET_AMOUNT"
 )
