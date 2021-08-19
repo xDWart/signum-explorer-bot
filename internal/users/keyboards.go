@@ -71,6 +71,20 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
+				"Mining", callbackdata.QueryDataType{
+					Account:  account,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   callbackdata.ActionType_AT_MINING_TXS,
+				}.GetBase64ProtoString()),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"Blocks", callbackdata.QueryDataType{
+					Account:  account,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   callbackdata.ActionType_AT_BLOCKS,
+				}.GetBase64ProtoString()),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
 				checkedIcon[userAccount.NotifyIncomeTransactions]+" Notify income TXs",
 				callbackdata.QueryDataType{
 					Account:  account,
@@ -87,25 +101,11 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				"Mining transactions", callbackdata.QueryDataType{
-					Account:  account,
-					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
-					Action:   callbackdata.ActionType_AT_MINING_TXS,
-				}.GetBase64ProtoString()),
-			tgbotapi.NewInlineKeyboardButtonData(
 				checkedIcon[userAccount.NotifyMiningTXs]+" Notify mining TXs",
 				callbackdata.QueryDataType{
 					Account:  account,
 					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
 					Action:   actionTypes[MINING][userAccount.NotifyMiningTXs],
-				}.GetBase64ProtoString()),
-		),
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(
-				"Blocks", callbackdata.QueryDataType{
-					Account:  account,
-					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
-					Action:   callbackdata.ActionType_AT_BLOCKS,
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				checkedIcon[userAccount.NotifyNewBlocks]+" Notify about blocks",
