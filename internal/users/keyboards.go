@@ -108,7 +108,7 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 					Action:   actionTypes[MINING][userAccount.NotifyMiningTXs],
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
-				checkedIcon[userAccount.NotifyNewBlocks]+" Notify about blocks",
+				checkedIcon[userAccount.NotifyNewBlocks]+" Notify found blocks",
 				callbackdata.QueryDataType{
 					Account:  account,
 					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
