@@ -27,6 +27,7 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
   - Available
   - Total
   - USD / BTC equivalents
+- Faucet to get some free SIGNA
 - Show last transactions:
   - Ordinary Payments
   - Multi-Out Payments
@@ -34,11 +35,14 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
   - Notify about new transactions
 - Show last blocks:
   - Notify about new blocks
+- Show mining transactions
+  - Add / revoke commitment
+  - Reward recipient assignment
 - Show actual prices:
   - SIGNA/USD (+ daily percentage change)
   - SIGNA/BTC
   - BTC/USD (+ daily percentage change)
-  - Plot a chart
+  - Plot a chart (day, month, year, all)
 - Mining rewards calculator
   - Basic rewards
   - Rewards for the entire commitment range
@@ -46,9 +50,8 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
 - Show network info
   - Current values of difficulty and commitment
   - Average values during the last 7 days
-  - Plot a chart
+  - Plot a chart (month, all)
 - Check plots for crossing
-- Faucet to get some free SIGNA
 
 ## Contribution
 
@@ -58,10 +61,10 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
 
 ## Licence
 
-- signum-explorer-bot is licensed under the GPLv3
+- **signum-explorer-bot** is licensed under the **GPLv3**
 - See [LICENSE](LICENSE) for the full license text
 - Copyright (c) [Anatoliy Bezgubenko](https://t.me/AnatoliyB)
 
 ## Donations 💰
 
-S-8N2F-TDD7-4LY6-64FZ7
+**S-8N2F-TDD7-4LY6-64FZ7**

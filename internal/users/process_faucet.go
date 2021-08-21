@@ -121,7 +121,7 @@ func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string 
 			user.db.Where(&extraFaucetAmountConfig).First(&extraFaucetAmountConfig)
 
 			if extraFaucetAmountConfig.ValueF > 0 {
-				response := user.signumClient.SendMoney(userAccount.AccountRS, extraFaucetAmountConfig.ValueF, signumapi.MIN_FEE)
+				response := user.signumClient.SendMoney(userAccount.AccountRS, extraFaucetAmountConfig.ValueF, signumapi.CHEAP_FEE)
 				if response.ErrorDescription == "" {
 					user.db.Model(&newUsersExtraFaucetConfig).UpdateColumn("value_i", gorm.Expr("value_i - ?", 1))
 

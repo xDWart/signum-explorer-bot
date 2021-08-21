@@ -20,8 +20,9 @@ type FeeType float64
 
 const (
 	MIN_FEE      FeeType = 0.00735
-	STANDARD_FEE         = 0.0147
-	PRIORITY_FEE         = 0.002205
+	CHEAP_FEE            = 0.0147
+	STANDARD_FEE         = 0.02205
+	PRIORITY_FEE         = 0.0294
 )
 
 func (c *Client) createTransaction(secretPhrase string, requestType RequestType, recipient string, recipients string, amountNQT float64, feeNQT float64, deadline int) *TransactionResponse {
