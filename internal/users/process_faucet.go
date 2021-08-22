@@ -64,30 +64,35 @@ func (user *User) ProcessFaucet(message string) string {
 }
 
 func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
+	var userAccount *models.DbAccount
+	var addedMessage string
+
 	if !config.ValidAccountRS.MatchString(account) && !config.ValidAccount.MatchString(account) {
 		return false, "🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>"
 	}
 
-	var addedMessage string
-	userAccount := user.GetDbAccount(account)
-
-	if user.ID != 1 {
+	if user.ID > 1 {
 		if time.Since(user.LastFaucetClaim) < 24*time.Hour*time.Duration(config.FAUCET.DAYS_PERIOD) {
 			user.ResetState()
 			return false, fmt.Sprintf("🚫 Sorry, you have used the faucet less than %v days ago!", config.FAUCET.DAYS_PERIOD)
 		}
 
-		if userAccount == nil { // needs to add it at first
-			userAccount, addedMessage = user.addAccount(account)
-			if userAccount == nil {
-				return false, addedMessage
+		// if it's valid but not activated account send faucet anyway
+		_, err := user.signumClient.GetAccount(account)
+		if err.Error() != "Unknown account" {
+			userAccount = user.GetDbAccount(account)
+			if userAccount == nil { // needs to add it at first
+				userAccount, addedMessage = user.addAccount(account)
+				if userAccount == nil {
+					return false, addedMessage
+				}
+				addedMessage += "\n\n"
 			}
-			addedMessage += "\n\n"
-		}
 
-		userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(userAccount.Account)
-		userAccount.NotifyIncomeTransactions = true
-		user.db.Save(&userAccount)
+			userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(userAccount.Account)
+			userAccount.NotifyIncomeTransactions = true
+			user.db.Save(&userAccount)
+		}
 	}
 
 	var amount = config.FAUCET.DEFAULT_ORDINARY_AMOUNT
