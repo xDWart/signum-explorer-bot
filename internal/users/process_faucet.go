@@ -102,7 +102,7 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 		amount = ordinaryFaucetAmount.ValueF
 	}
 
-	response := user.signumClient.SendMoney(account, amount, signumapi.MIN_FEE)
+	response := user.signumClient.SendMoney(account, amount, signumapi.CHEAP_FEE)
 	if response.ErrorDescription != "" {
 		user.ResetState()
 		return false, fmt.Sprintf("🚫 Bad request: %v", response.ErrorDescription)
