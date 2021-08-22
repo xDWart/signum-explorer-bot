@@ -40,7 +40,6 @@ func (c *Client) createTransaction(secretPhrase string, requestType RequestType,
 	}
 	if recipients != "" {
 		urlParams["recipients"] = recipients
-		log.Printf("recipients: %v", recipients)
 	}
 	if amountNQT != 0 {
 		urlParams["amountNQT"] = fmt.Sprintf("%.f", amountNQT)

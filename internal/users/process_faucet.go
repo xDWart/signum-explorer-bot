@@ -68,24 +68,27 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 		return false, "🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>"
 	}
 
-	if time.Since(user.LastFaucetClaim) < 24*time.Hour*time.Duration(config.FAUCET.DAYS_PERIOD) {
-		user.ResetState()
-		return false, fmt.Sprintf("🚫 Sorry, you have used the faucet less than %v days ago!", config.FAUCET.DAYS_PERIOD)
-	}
-
+	var addedMessage string
 	userAccount := user.GetDbAccount(account)
-	addedMessage := ""
-	if userAccount == nil { // needs to add it at first
-		userAccount, addedMessage = user.addAccount(account)
-		if userAccount == nil {
-			return false, addedMessage
-		}
-		addedMessage += "\n\n"
-	}
 
-	userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(userAccount.Account)
-	userAccount.NotifyIncomeTransactions = true
-	user.db.Save(&userAccount)
+	if user.ID != 1 {
+		if time.Since(user.LastFaucetClaim) < 24*time.Hour*time.Duration(config.FAUCET.DAYS_PERIOD) {
+			user.ResetState()
+			return false, fmt.Sprintf("🚫 Sorry, you have used the faucet less than %v days ago!", config.FAUCET.DAYS_PERIOD)
+		}
+
+		if userAccount == nil { // needs to add it at first
+			userAccount, addedMessage = user.addAccount(account)
+			if userAccount == nil {
+				return false, addedMessage
+			}
+			addedMessage += "\n\n"
+		}
+
+		userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(userAccount.Account)
+		userAccount.NotifyIncomeTransactions = true
+		user.db.Save(&userAccount)
+	}
 
 	var amount = config.FAUCET.DEFAULT_ORDINARY_AMOUNT
 	ordinaryFaucetAmount := models.Config{Name: config.DB_CONFIG_ORDINARY_FAUCET_AMOUNT}
@@ -94,7 +97,7 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 		amount = ordinaryFaucetAmount.ValueF
 	}
 
-	response := user.signumClient.SendMoney(userAccount.AccountRS, amount, signumapi.MIN_FEE)
+	response := user.signumClient.SendMoney(account, amount, signumapi.MIN_FEE)
 	if response.ErrorDescription != "" {
 		user.ResetState()
 		return false, fmt.Sprintf("🚫 Bad request: %v", response.ErrorDescription)
@@ -105,7 +108,7 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 
 	user.ResetState()
 	return true, fmt.Sprintf(addedMessage+"✅ Faucet payment <b>%v SIGNA</b> has been successfully sent to the account <b>%v</b>, please wait for notification!",
-		amount, userAccount.AccountRS)
+		amount, account)
 }
 
 func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string {
