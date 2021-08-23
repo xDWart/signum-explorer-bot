@@ -79,7 +79,7 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 
 		// if it's valid but not activated account send faucet anyway
 		_, err := user.signumClient.GetAccount(account)
-		if err.Error() != "Unknown account" {
+		if !(err != nil && err.Error() == "Unknown account") {
 			userAccount = user.GetDbAccount(account)
 			if userAccount == nil { // needs to add it at first
 				userAccount, addedMessage = user.addAccount(account)
