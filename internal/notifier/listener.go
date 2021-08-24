@@ -104,7 +104,7 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 			msg += fmt.Sprintf("new recipient assigned:"+
 				"\n<i>Recipient:</i> %v"+recipientName+
 				"\n<i>Fee:</i> %v SIGNA",
-				transaction.Recipient, transaction.FeeNQT/1e8)
+				transaction.RecipientRS, transaction.FeeNQT/1e8)
 		case signumapi.ADD_COMMITMENT:
 			msg += fmt.Sprintf("new commitment added:"+
 				"\n<i>Amount:</i> +%v SIGNA"+
