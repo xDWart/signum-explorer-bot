@@ -1,4 +1,4 @@
-package abstractclient
+package abstractapi
 
 import (
 	"encoding/json"
@@ -9,33 +9,40 @@ import (
 	"net/url"
 )
 
-type Client struct {
-	http          *http.Client
+type AbstractApiClient struct {
+	http *http.Client
+
+	// config
+	Debug         bool
 	apiHosts      []string
 	staticHeaders map[string]string
 }
 
-func NewClient(apiHosts []string, staticHeaders map[string]string) *Client {
-	return &Client{
+func NewAbstractApiClient(apiHosts []string, staticHeaders map[string]string, debug bool) *AbstractApiClient {
+	return &AbstractApiClient{
 		http:          &http.Client{},
+		Debug:         debug,
 		apiHosts:      apiHosts,
 		staticHeaders: staticHeaders,
 	}
 }
 
-func (c *Client) DoJsonReq(httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
-	secretPhrase, ok := urlParams["secretPhrase"]
-	if ok {
-		delete(urlParams, "secretPhrase")
+func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
+	if c.Debug {
+		secretPhrase, ok := urlParams["secretPhrase"]
+		if ok {
+			delete(urlParams, "secretPhrase")
+		}
+		log.Printf("Will request %v %v with params: %v", httpMethod, method, urlParams)
+		if ok {
+			urlParams["secretPhrase"] = secretPhrase
+		}
 	}
-	log.Printf("Will request %v %v with params: %v", httpMethod, method, urlParams)
-	if ok {
-		urlParams["secretPhrase"] = secretPhrase
-	}
+
 	var lastErr error
 	for index, host := range c.apiHosts {
-		if lastErr != nil {
-			log.Print(lastErr)
+		if lastErr != nil && c.Debug {
+			log.Printf("AbstractApiClient.makeJsonReq error: %v", lastErr)
 		}
 		if index > 0 && httpMethod == "POST" {
 			return lastErr

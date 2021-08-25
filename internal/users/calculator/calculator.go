@@ -2,7 +2,7 @@ package calculator
 
 import (
 	"math"
-	"signum-explorer-bot/internal/api/signumapi"
+	"signum-explorer-bot/api/signumapi"
 )
 
 type CalcResult struct {

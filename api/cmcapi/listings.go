@@ -3,13 +3,14 @@ package cmcapi
 import (
 	"fmt"
 	"log"
-	"signum-explorer-bot/internal/config"
 	"time"
 )
 
 // Free basic plan 10.000 req per month = 333 per day = no more than one request per 5 minutes
 // 1 call credit per 200 cryptocurrencies returned (rounded up)
 // and 1 call credit per convert option beyond the first but free basic plan is limited to 1 convert options only
+const FREE_LIMIT = "200"
+const CACHE_TTL =  5 * time.Minute
 
 type listings struct {
 	Data []struct {
@@ -26,10 +27,10 @@ type quote struct {
 	PercentChange24h float64 `json:"percent_change_24h"`
 }
 
-func (c *Client) getListings(start string) (*listings, error) {
+func (c *CmcClient) getListings(start string) (*listings, error) {
 	var listings listings
 	err := c.DoJsonReq("GET", "/cryptocurrency/listings/latest",
-		map[string]string{"start": start, "limit": config.CMC_API.FREE_LIMIT, "convert": "USD", "cryptocurrency_type": "coins"},
+		map[string]string{"start": start, "limit": FREE_LIMIT, "convert": "USD", "cryptocurrency_type": "coins"},
 		nil,
 		&listings)
 	if err != nil {
@@ -41,15 +42,15 @@ func (c *Client) getListings(start string) (*listings, error) {
 	return &listings, nil
 }
 
-func (c *Client) updateListings() error {
+func (c *CmcClient) updateListings() error {
 	listings, err := c.getListings("1")
 	if err != nil {
 		return err
 	}
 
 	if !c.updateCachedValues(listings) {
-		log.Printf("Not all symbols have been found in a first %v coins, will request more coins", config.CMC_API.FREE_LIMIT)
-		listings, err := c.getListings(config.CMC_API.FREE_LIMIT)
+		log.Printf("Not all symbols have been found in a first %v coins, will request more coins", FREE_LIMIT)
+		listings, err := c.getListings(FREE_LIMIT)
 		if err != nil {
 			return err
 		}
@@ -60,7 +61,7 @@ func (c *Client) updateListings() error {
 	return nil
 }
 
-func (c *Client) updateCachedValues(listings *listings) bool {
+func (c *CmcClient) updateCachedValues(listings *listings) bool {
 	allSymbolsHaveBeenFound := true
 	for symbol := range c.cachedValues {
 		symbolHasBeenFound := false
@@ -77,11 +78,11 @@ func (c *Client) updateCachedValues(listings *listings) bool {
 }
 
 // GetPrices - get currency quotes of SIGNA and BTC
-func (c *Client) GetPrices() map[string]quote {
+func (c *CmcClient) GetPrices() map[string]quote {
 	prices := map[string]quote{}
 
 	c.RLock()
-	if time.Since(c.lastReqTimestamp) <= config.CMC_API.CACHE_TTL {
+	if time.Since(c.lastReqTimestamp) <= CACHE_TTL {
 		prices["BTC"] = c.cachedValues["BTC"]
 		prices["SIGNA"] = c.cachedValues["SIGNA"]
 		c.RUnlock()
@@ -91,7 +92,7 @@ func (c *Client) GetPrices() map[string]quote {
 
 	c.Lock()
 	// cache may already be updated to this moment, need check it again
-	if time.Since(c.lastReqTimestamp) > config.CMC_API.CACHE_TTL {
+	if time.Since(c.lastReqTimestamp) > CACHE_TTL {
 		err := c.updateListings()
 		if err != nil {
 			log.Printf("Update CMC listenings error: %v", err)

@@ -1,12 +1,12 @@
 package signumapi
 
 import (
-	"log"
-	"os"
-	abstract_api_client "signum-explorer-bot/internal/api/abstractclient"
-	"signum-explorer-bot/internal/config"
+	"signum-explorer-bot/api/abstractapi"
 	"sync"
+	"time"
 )
+
+const DEFAULT_DEADLINE = 1440
 
 type RequestType string
 
@@ -27,34 +27,22 @@ const (
 	RT_SET_ACCOUNT_INFO         RequestType = "setAccountInfo"
 )
 
-type FeeType float64
-
-const (
-	MIN_FEE      FeeType = 0.00735
-	CHEAP_FEE            = 0.0147
-	STANDARD_FEE         = 0.02205
-	PRIORITY_FEE         = 0.0294
-)
-
-type Client struct {
-	*abstract_api_client.Client
+type SignumApiClient struct {
+	*abstractapi.AbstractApiClient
 	localAccountCache      AccountCache
 	localTransactionsCache TransactionsCache
 	localBlocksCache       BlocksCache
-	secretPhrase           string
+
+	// config
+	cacheTtl time.Duration
 }
 
-func NewClient() *Client {
-	secretPhrase := os.Getenv("SECRET_PHRASE")
-	if secretPhrase == "" {
-		log.Printf("SECRET_PHRASE does not set")
-	}
-
-	return &Client{
-		abstract_api_client.NewClient(config.SIGNUM_API.HOSTS, nil),
-		AccountCache{sync.RWMutex{}, map[string]*Account{}},
-		TransactionsCache{sync.RWMutex{}, map[string]map[TransactionType]map[TransactionSubType]*AccountTransactions{}},
-		BlocksCache{sync.RWMutex{}, map[string]*AccountBlocks{}},
-		secretPhrase,
+func NewSignumApiClient(apiHosts []string, cacheTtl time.Duration, debug bool) *SignumApiClient {
+	return &SignumApiClient{
+		AbstractApiClient:      abstractapi.NewAbstractApiClient(apiHosts, nil, debug),
+		localAccountCache:      AccountCache{sync.RWMutex{}, map[string]*Account{}},
+		localTransactionsCache: TransactionsCache{sync.RWMutex{}, map[string]map[TransactionType]map[TransactionSubType]*AccountTransactions{}},
+		localBlocksCache:       BlocksCache{sync.RWMutex{}, map[string]*AccountBlocks{}},
+		cacheTtl:               cacheTtl,
 	}
 }

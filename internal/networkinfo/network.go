@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"log"
-	"signum-explorer-bot/internal/api/signumapi"
+	"signum-explorer-bot/api/signumapi"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
@@ -15,13 +15,13 @@ import (
 type NetworkInfoListener struct {
 	db *gorm.DB
 	sync.RWMutex
-	signumClient   *signumapi.Client
+	signumClient   *signumapi.SignumApiClient
 	lastMiningInfo signumapi.MiningInfo
 }
 
 var averageCount = 24 * config.SIGNUM_API.AVERAGING_DAYS_QUANTITY * int(time.Hour/config.SIGNUM_API.SAMPLE_PERIOD)
 
-func NewNetworkInfoListener(db *gorm.DB, signumClient *signumapi.Client, wg *sync.WaitGroup, shutdownChannel chan interface{}) *NetworkInfoListener {
+func NewNetworkInfoListener(db *gorm.DB, signumClient *signumapi.SignumApiClient, wg *sync.WaitGroup, shutdownChannel chan interface{}) *NetworkInfoListener {
 	networkListener := &NetworkInfoListener{
 		db:             db,
 		signumClient:   signumClient,

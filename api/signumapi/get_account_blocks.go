@@ -2,7 +2,6 @@ package signumapi
 
 import (
 	"fmt"
-	"signum-explorer-bot/internal/config"
 	"sync"
 	"time"
 )
@@ -23,29 +22,25 @@ type BlocksCache struct {
 	cache map[string]*AccountBlocks
 }
 
-func (c *Client) readAccountBlocksFromCache(account string) *AccountBlocks {
+func (c *SignumApiClient) readAccountBlocksFromCache(account string) *AccountBlocks {
 	c.localBlocksCache.RLock()
 	accountBlocks := c.localBlocksCache.cache[account]
 	c.localBlocksCache.RUnlock()
-	if accountBlocks != nil && time.Since(accountBlocks.LastUpdateTime) < config.SIGNUM_API.CACHE_TTL {
+	if accountBlocks != nil && time.Since(accountBlocks.LastUpdateTime) < c.cacheTtl {
 		return accountBlocks
 	}
 	return nil
 }
 
-func (c *Client) storeAccountBlocksToCache(accountS string, accountBlocks *AccountBlocks) {
+func (c *SignumApiClient) storeAccountBlocksToCache(accountS string, accountBlocks *AccountBlocks) {
 	c.localBlocksCache.Lock()
 	accountBlocks.LastUpdateTime = time.Now()
 	c.localBlocksCache.cache[accountS] = accountBlocks
 	c.localBlocksCache.Unlock()
 }
 
-func (c *Client) GetAccountBlocks(account string) (*AccountBlocks, error) {
-	accountBlocks := c.readAccountBlocksFromCache(account)
-	if accountBlocks != nil {
-		return accountBlocks, nil
-	}
-	accountBlocks = &AccountBlocks{}
+func (c *SignumApiClient) GetAccountBlocks(account string) (*AccountBlocks, error) {
+	accountBlocks := &AccountBlocks{}
 	err := c.DoJsonReq("GET", "/burst",
 		map[string]string{
 			"account":     account,
@@ -68,7 +63,15 @@ func (c *Client) GetAccountBlocks(account string) (*AccountBlocks, error) {
 	return accountBlocks, err
 }
 
-func (c *Client) GetLastAccountBlock(account string) string {
+func (c *SignumApiClient) GetCachedAccountBlocks(account string) (*AccountBlocks, error) {
+	accountBlocks := c.readAccountBlocksFromCache(account)
+	if accountBlocks != nil {
+		return accountBlocks, nil
+	}
+	return c.GetAccountBlocks(account)
+}
+
+func (c *SignumApiClient) GetLastAccountBlock(account string) string {
 	accountBlocks, err := c.GetAccountBlocks(account)
 	if err != nil || len(accountBlocks.Blocks) == 0 {
 		return ""

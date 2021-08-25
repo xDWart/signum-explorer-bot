@@ -2,8 +2,6 @@ package signumapi
 
 import (
 	"fmt"
-	"signum-explorer-bot/internal/config"
-	"sync"
 	"time"
 )
 
@@ -31,42 +29,10 @@ type Account struct {
 	//PublicKey string `json:"publicKey"`
 }
 
-type AccountCache struct {
-	sync.RWMutex
-	cache map[string]*Account
-}
-
-func (c *Client) readAccountFromCache(accountS string) *Account {
-	c.localAccountCache.RLock()
-	account := c.localAccountCache.cache[accountS]
-	c.localAccountCache.RUnlock()
-	if account != nil && time.Since(account.LastUpdateTime) < config.SIGNUM_API.CACHE_TTL {
-		return account
-	}
-	return nil
-}
-
-func (c *Client) storeAccountToCache(accountS string, account *Account) {
-	c.localAccountCache.Lock()
-	account.LastUpdateTime = time.Now()
-	c.localAccountCache.cache[accountS] = account
-	c.localAccountCache.Unlock()
-}
-
-func (c *Client) invalidateCache(accountS string) {
-	c.localAccountCache.Lock()
-	delete(c.localAccountCache.cache, accountS)
-	c.localAccountCache.Unlock()
-}
-
-func (c *Client) GetAccount(accountS string) (*Account, error) {
-	account := c.readAccountFromCache(accountS)
-	if account != nil {
-		return account, nil
-	}
-	account = &Account{}
+func (c *SignumApiClient) GetAccount(accountS string) (*Account, error) {
+	account := &Account{}
 	err := c.DoJsonReq("GET", "/burst",
-		map[string]string{"requestType": "getAccount", "getCommittedAmount": "true", "account": accountS},
+		map[string]string{"requestType": string(RT_GET_ACCOUNT), "getCommittedAmount": "true", "account": accountS},
 		nil,
 		account)
 	if err == nil {
@@ -81,9 +47,4 @@ func (c *Client) GetAccount(accountS string) (*Account, error) {
 		}
 	}
 	return account, err
-}
-
-func (c *Client) InvalidateCacheAndGetAccount(accountS string) (*Account, error) {
-	c.invalidateCache(accountS)
-	return c.GetAccount(accountS)
 }

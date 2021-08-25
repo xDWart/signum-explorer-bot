@@ -3,7 +3,7 @@ package notifier
 import (
 	"fmt"
 	"log"
-	"signum-explorer-bot/internal/api/signumapi"
+	"signum-explorer-bot/api/signumapi"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
@@ -68,7 +68,7 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 }
 
 func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
-	userTransactions, err := n.signumClient.GetAccountMiningTransactions(account.Account)
+	userTransactions, err := n.signumClient.GetCachedAccountMiningTransactions(account.Account)
 	if err != nil {
 		log.Printf("Can't get last account %v mining transactions: %v", account.Account, err)
 		return
@@ -89,15 +89,15 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 		msg := fmt.Sprintf("📝 <b>%v</b> ", account.AccountRS)
 
 		var totalCommitment string
-		newAccount, err := n.signumClient.InvalidateCacheAndGetAccount(account.Account)
+		newAccount, err := n.signumClient.GetAccount(account.Account)
 		if err == nil {
 			totalCommitment = fmt.Sprintf("\n<b>Total commitment: %v SIGNA</b>", common.FormatNumber(newAccount.CommittedBalance, 2))
 		}
 
 		switch transaction.Subtype {
-		case signumapi.REWARD_RECIPIENT_ASSIGNMENT:
+		case signumapi.TST_REWARD_RECIPIENT_ASSIGNMENT:
 			var recipientName string
-			recipientAccount, err := n.signumClient.GetAccount(transaction.Recipient)
+			recipientAccount, err := n.signumClient.GetCachedAccount(transaction.Recipient)
 			if err == nil && recipientAccount.Name != "" {
 				recipientName = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
 			}
@@ -106,12 +106,12 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 				"\n<i>Recipient:</i> %v"+recipientName+
 				"\n<i>Fee:</i> %v SIGNA",
 				transaction.RecipientRS, transaction.FeeNQT/1e8)
-		case signumapi.ADD_COMMITMENT:
+		case signumapi.TST_ADD_COMMITMENT:
 			msg += fmt.Sprintf("new commitment added:"+
 				"\n<i>Amount:</i> +%v SIGNA"+
 				"\n<i>Fee:</i> %v SIGNA",
 				common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
-		case signumapi.REMOVE_COMMITMENT:
+		case signumapi.TST_REMOVE_COMMITMENT:
 			msg += fmt.Sprintf("commitment revoked:"+
 				"\n<i>Amount:</i> -%v SIGNA"+
 				"\n<i>Fee:</i> %v SIGNA",
@@ -133,7 +133,7 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 }
 
 func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
-	userTransactions, err := n.signumClient.GetAccountPaymentTransactions(account.Account)
+	userTransactions, err := n.signumClient.GetCachedAccountPaymentTransactions(account.Account)
 	if err != nil {
 		log.Printf("Can't get last account %v payment transactions: %v", account.Account, err)
 		return
@@ -148,7 +148,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 	}
 
 	var totalBalance string
-	newAccount, err := n.signumClient.InvalidateCacheAndGetAccount(account.Account)
+	newAccount, err := n.signumClient.GetAccount(account.Account)
 	if err == nil {
 		totalBalance = fmt.Sprintf("\n<b>Total balance: %v SIGNA</b>", common.FormatNumber(newAccount.TotalBalance, 2))
 	}
@@ -166,13 +166,13 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 				continue
 			}
 
-			senderAccount, err := n.signumClient.GetAccount(transaction.SenderRS)
+			senderAccount, err := n.signumClient.GetCachedAccount(transaction.SenderRS)
 			if err == nil && senderAccount.Name != "" {
 				name = fmt.Sprintf("\n<i>Name:</i> %v", senderAccount.Name)
 			}
 		} else if account.NotifyOutgoTransactions { // outgo
 			if transaction.RecipientRS != "" {
-				recipientAccount, err := n.signumClient.GetAccount(transaction.RecipientRS)
+				recipientAccount, err := n.signumClient.GetCachedAccount(transaction.RecipientRS)
 				if err == nil && recipientAccount.Name != "" {
 					name = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
 				}
@@ -185,7 +185,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		var outgoAccount string
 		var outgoAccountRS string
 		switch transaction.Subtype {
-		case signumapi.ORDINARY_PAYMENT:
+		case signumapi.TST_ORDINARY_PAYMENT:
 			amount = transaction.AmountNQT / 1e8
 			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+
@@ -204,7 +204,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 				outgoAccount = transaction.Recipient
 				outgoAccountRS = transaction.RecipientRS
 			}
-		case signumapi.MULTI_OUT_PAYMENT:
+		case signumapi.TST_MULTI_OUT_PAYMENT:
 			if incomeTransaction {
 				amount = transaction.Attachment.Recipients.FoundMyAmount(account.Account)
 				msg += fmt.Sprintf("new income:"+
@@ -222,7 +222,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Fee:</i> %v SIGNA",
 					len(transaction.Attachment.Recipients), common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			}
-		case signumapi.MULTI_OUT_SAME_PAYMENT:
+		case signumapi.TST_MULTI_OUT_SAME_PAYMENT:
 			if incomeTransaction {
 				amount = transaction.AmountNQT / 1e8 / float64(len(transaction.Attachment.Recipients))
 				msg += fmt.Sprintf("new income:"+
@@ -278,7 +278,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 }
 
 func (n *Notifier) checkBlocks(account *MonitoredAccount) {
-	userBlocks, err := n.signumClient.GetAccountBlocks(account.Account)
+	userBlocks, err := n.signumClient.GetCachedAccountBlocks(account.Account)
 	if err != nil {
 		log.Printf("Can't get last account %v blocks: %v", account.Account, err)
 		return
@@ -307,7 +307,7 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 }
 
 func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
-	userMessages, err := n.signumClient.GetAccountMessages(account.Account)
+	userMessages, err := n.signumClient.GetCachedAccountMessageTransaction(account.Account)
 	if err != nil {
 		log.Printf("Can't get last account %v message transactions: %v", account.Account, err)
 		return
@@ -330,7 +330,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 		msg := fmt.Sprintf("📝 <b>%v</b> ", account.AccountRS)
 
 		switch transaction.Subtype {
-		case signumapi.ARBITRARY_MESSAGE:
+		case signumapi.TST_ARBITRARY_MESSAGE:
 			var message string
 			if transaction.Attachment.MessageIsText && transaction.Attachment.Message != "" {
 				message = transaction.Attachment.Message
@@ -340,7 +340,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 
 			if incomeTransaction {
 				var senderName string
-				senderAccount, err := n.signumClient.GetAccount(transaction.SenderRS)
+				senderAccount, err := n.signumClient.GetCachedAccount(transaction.SenderRS)
 				if err == nil && senderAccount.Name != "" {
 					senderName = fmt.Sprintf("\n<i>Name:</i> %v", senderAccount.Name)
 				}
@@ -352,7 +352,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 					transaction.SenderRS, transaction.FeeNQT/1e8)
 			} else {
 				var recipientName string
-				recipientAccount, err := n.signumClient.GetAccount(transaction.RecipientRS)
+				recipientAccount, err := n.signumClient.GetCachedAccount(transaction.RecipientRS)
 				if err == nil && recipientAccount.Name != "" {
 					recipientName = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
 				}

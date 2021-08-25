@@ -12,7 +12,7 @@ func (user *User) getAccountInfoMessage(accountS string) (*common.BotMessage, er
 	if !config.ValidAccountRS.MatchString(accountS) && !config.ValidAccount.MatchString(accountS) {
 		return nil, fmt.Errorf("🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>")
 	}
-	account, err := user.signumClient.GetAccount(accountS)
+	account, err := user.signumClient.GetCachedAccount(accountS)
 	if err != nil {
 		return nil, fmt.Errorf("🚫 Error: %v", err)
 	}
@@ -81,7 +81,7 @@ func (user *User) addAccount(newAccount string) (*models.DbAccount, string) {
 		return nil, "🚫 The maximum number of accounts has been exceeded"
 	}
 
-	signumAccount, err := user.signumClient.GetAccount(newAccount)
+	signumAccount, err := user.signumClient.GetCachedAccount(newAccount)
 	if err != nil {
 		return nil, fmt.Sprintf("🚫 Error: %v", err)
 	}

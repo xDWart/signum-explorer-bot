@@ -2,7 +2,7 @@ package notifier
 
 import (
 	"gorm.io/gorm"
-	"signum-explorer-bot/internal/api/signumapi"
+	"signum-explorer-bot/api/signumapi"
 	"signum-explorer-bot/internal/database/models"
 	"sync"
 )
@@ -10,7 +10,7 @@ import (
 type Notifier struct {
 	db *gorm.DB
 	sync.RWMutex
-	signumClient *signumapi.Client
+	signumClient *signumapi.SignumApiClient
 	notifierCh   chan NotifierMessage
 }
 
@@ -26,7 +26,7 @@ type MonitoredAccount struct {
 	models.DbAccount
 }
 
-func NewNotifier(db *gorm.DB, signumClient *signumapi.Client, notifierCh chan NotifierMessage, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Notifier {
+func NewNotifier(db *gorm.DB, signumClient *signumapi.SignumApiClient, notifierCh chan NotifierMessage, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Notifier {
 	notifier := &Notifier{
 		db:           db,
 		signumClient: signumClient,

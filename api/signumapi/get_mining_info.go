@@ -1,7 +1,5 @@
 package signumapi
 
-import "signum-explorer-bot/internal/config"
-
 type MiningInfo struct {
 	Height                   uint32  `json:"height,string"`
 	BaseTarget               float64 `json:"baseTarget,string"`
@@ -15,16 +13,13 @@ type MiningInfo struct {
 }
 
 var DEFAULT_MINING_INFO = MiningInfo{
-	AverageCommitmentNQT: config.SIGNUM_API.DEFAULT_AVG_COMMIT,
-	BaseTarget:           config.SIGNUM_API.DEFAULT_BASE_TARGET,
-	LastBlockReward:      config.SIGNUM_API.DEFAULT_BLOCK_REWARD,
+	AverageCommitmentNQT: 2500,
+	BaseTarget:           280000,
+	LastBlockReward:      127,
 }
 
-func (c *Client) GetMiningInfo() (*MiningInfo, error) {
-	var miningInfo = DEFAULT_MINING_INFO
-	err := c.DoJsonReq("GET", "/burst",
-		map[string]string{"requestType": "getMiningInfo"},
-		nil,
-		&miningInfo)
+func (c *SignumApiClient) GetMiningInfo() (*MiningInfo, error) {
+	var miningInfo = MiningInfo{}
+	err := c.DoJsonReq("GET", "/burst", map[string]string{"requestType": string(RT_GET_MINING_INFO)}, nil, &miningInfo)
 	return &miningInfo, err
 }

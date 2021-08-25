@@ -1,7 +1,7 @@
 package calculator
 
 import (
-	"signum-explorer-bot/internal/api/signumapi"
+	"signum-explorer-bot/api/signumapi"
 	"signum-explorer-bot/internal/config"
 )
 

@@ -6,8 +6,9 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"signum-explorer-bot/internal/api/cmcapi"
-	"signum-explorer-bot/internal/api/signumapi"
+	"signum-explorer-bot/api/cmcapi"
+	"signum-explorer-bot/api/signumapi"
+	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database"
 	"signum-explorer-bot/internal/networkinfo"
 	"signum-explorer-bot/internal/notifier"
@@ -44,8 +45,8 @@ func InitTelegramBot() *TelegramBot {
 		log.Fatalf(err.Error())
 	}
 
-	cmcClient := cmcapi.NewClient()
-	signumClient := signumapi.NewClient()
+	cmcClient := cmcapi.NewCmcClient(config.CMC_API.ADDRESS, true)
+	signumClient := signumapi.NewSignumApiClient(config.SIGNUM_API.HOSTS, config.SIGNUM_API.CACHE_TTL, true)
 	notifierCh := make(chan notifier.NotifierMessage)
 	wg := &sync.WaitGroup{}
 	shutdownChannel := make(chan interface{})

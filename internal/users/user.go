@@ -3,8 +3,8 @@ package users
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"gorm.io/gorm"
-	"signum-explorer-bot/internal/api/cmcapi"
-	"signum-explorer-bot/internal/api/signumapi"
+	"signum-explorer-bot/api/cmcapi"
+	"signum-explorer-bot/api/signumapi"
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
 	"signum-explorer-bot/internal/networkinfo"
@@ -17,8 +17,8 @@ type User struct {
 	*models.DbUser
 	sync.Mutex
 	db                  *gorm.DB
-	cmcClient           *cmcapi.Client
-	signumClient        *signumapi.Client
+	cmcClient           *cmcapi.CmcClient
+	signumClient        *signumapi.SignumApiClient
 	priceManager        *prices.PriceManager
 	networkInfoListener *networkinfo.NetworkInfoListener
 

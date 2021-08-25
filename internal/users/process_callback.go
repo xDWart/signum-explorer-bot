@@ -7,7 +7,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/golang/protobuf/proto"
 	"log"
-	"signum-explorer-bot/internal/api/signumapi"
+	"signum-explorer-bot/api/signumapi"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/users/callbackdata"
@@ -82,7 +82,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		),
 	)
 
-	account, err := user.signumClient.GetAccount(callbackData.Account)
+	account, err := user.signumClient.GetCachedAccount(callbackData.Account)
 	if err != nil {
 		return nil, fmt.Errorf("🚫 Error: %v", err)
 	}
@@ -92,7 +92,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		return user.getAccountInfoMessage(account.Account)
 
 	case callbackdata.ActionType_AT_PAYMENTS:
-		accountTransactions, err := user.signumClient.GetAccountOrdinaryPaymentTransactions(account.Account)
+		accountTransactions, err := user.signumClient.GetCachedAccountOrdinaryPaymentTransactions(account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
@@ -114,7 +114,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}, nil
 
 	case callbackdata.ActionType_AT_BLOCKS:
-		accountBlocks, err := user.signumClient.GetAccountBlocks(account.Account)
+		accountBlocks, err := user.signumClient.GetCachedAccountBlocks(account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
@@ -143,7 +143,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}, nil
 
 	case callbackdata.ActionType_AT_MULTI_OUT:
-		accountTransactions, err := user.signumClient.GetAccountMultiOutTransactions(account.Account)
+		accountTransactions, err := user.signumClient.GetCachedAccountMultiOutTransactions(account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
@@ -167,7 +167,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}, nil
 
 	case callbackdata.ActionType_AT_MULTI_OUT_SAME:
-		accountTransactions, err := user.signumClient.GetAccountMultiOutSameTransactions(account.Account)
+		accountTransactions, err := user.signumClient.GetCachedAccountMultiOutSameTransactions(account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
@@ -192,7 +192,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}, nil
 
 	case callbackdata.ActionType_AT_OTHER_TXS:
-		accountTransactions, err := user.signumClient.GetAccountMiningTransactions(account.Account)
+		accountTransactions, err := user.signumClient.GetCachedAccountMiningTransactions(account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
@@ -200,14 +200,14 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last mining transactions:\n\n", account.AccountRS)
 		for _, transaction := range accountTransactions.Transactions {
 			switch transaction.Subtype {
-			case signumapi.REWARD_RECIPIENT_ASSIGNMENT:
+			case signumapi.TST_REWARD_RECIPIENT_ASSIGNMENT:
 				newInlineText += fmt.Sprintf("<i>%v</i>  Reward recipient assignment <b>%v</b>\n",
 					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.RecipientRS)
-			case signumapi.ADD_COMMITMENT:
+			case signumapi.TST_ADD_COMMITMENT:
 				newInlineText += fmt.Sprintf("<i>%v</i>  Add commitment  <b>+%v SIGNA</b>\n",
 					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp),
 					common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2))
-			case signumapi.REMOVE_COMMITMENT:
+			case signumapi.TST_REMOVE_COMMITMENT:
 				newInlineText += fmt.Sprintf("<i>%v</i>  Revoke commitment  <b>-%v SIGNA</b>\n",
 					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp),
 					common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2))
@@ -327,7 +327,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		if !userAccount.NotifyOtherTXs { // needs to enable
 			userAccount.NotifyOtherTXs = true
 			userAccount.LastMiningTX = user.signumClient.GetLastAccountMiningTransaction(account.Account)
-			userAccount.LastMessageTX = user.signumClient.GetLastAccountMessage(account.Account)
+			userAccount.LastMessageTX = user.signumClient.GetLastAccountMessageTransaction(account.Account)
 			user.db.Save(userAccount)
 		}
 

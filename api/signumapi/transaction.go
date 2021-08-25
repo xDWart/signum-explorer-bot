@@ -2,7 +2,6 @@ package signumapi
 
 import (
 	"fmt"
-	"signum-explorer-bot/internal/config"
 	"strconv"
 )
 
@@ -81,7 +80,7 @@ type TransactionResponse struct {
 	ErrorDescription         string
 }
 
-func (c *Client) createTransaction(transactionRequest *TransactionRequest) (*TransactionResponse, error) {
+func (c *SignumApiClient) createTransaction(transactionRequest *TransactionRequest) (*TransactionResponse, error) {
 	if transactionRequest.SecretPhrase == "" {
 		return nil, fmt.Errorf("TransactionRequest.SecretPhrase is not set")
 	}
@@ -116,7 +115,7 @@ func (c *Client) createTransaction(transactionRequest *TransactionRequest) (*Tra
 		urlParams["description"] = transactionRequest.Description
 	}
 	if transactionRequest.Deadline == 0 {
-		urlParams["deadline"] = strconv.Itoa(config.SIGNUM_API.DEFAULT_DEADLINE)
+		urlParams["deadline"] = strconv.Itoa(DEFAULT_DEADLINE)
 	} else {
 		urlParams["deadline"] = strconv.Itoa(transactionRequest.Deadline)
 	}

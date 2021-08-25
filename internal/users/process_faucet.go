@@ -3,7 +3,8 @@ package users
 import (
 	"fmt"
 	"gorm.io/gorm"
-	"signum-explorer-bot/internal/api/signumapi"
+	"os"
+	"signum-explorer-bot/api/signumapi"
 	"signum-explorer-bot/internal/common"
 	"signum-explorer-bot/internal/config"
 	"signum-explorer-bot/internal/database/models"
@@ -12,7 +13,7 @@ import (
 )
 
 func (user *User) ProcessFaucet(message string) string {
-	faucetAccount, err := user.signumClient.GetAccount(config.FAUCET.ACCOUNT)
+	faucetAccount, err := user.signumClient.GetCachedAccount(config.FAUCET.ACCOUNT)
 	if err != nil {
 		return fmt.Sprintf("🚫 Something went wrong, could not get the faucet account balance: %v", err)
 	}
@@ -78,7 +79,7 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 		}
 
 		// if it's valid but not activated account send faucet anyway
-		_, err := user.signumClient.GetAccount(account)
+		_, err := user.signumClient.GetCachedAccount(account)
 		if !(err != nil && err.Error() == "Unknown account") {
 			userAccount = user.GetDbAccount(account)
 			if userAccount == nil { // needs to add it at first
@@ -102,7 +103,7 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 		amount = ordinaryFaucetAmount.ValueF
 	}
 
-	_, err := user.signumClient.SendMoney(account, amount, signumapi.CHEAP_FEE)
+	_, err := user.signumClient.SendMoney(os.Getenv("SECRET_PHRASE"), account, amount, signumapi.DEFAULT_CHEAP_FEE)
 	if err != nil {
 		user.ResetState()
 		return false, fmt.Sprintf("🚫 Bad request: %v", err)
@@ -129,7 +130,7 @@ func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string 
 			user.db.Where(&extraFaucetAmountConfig).First(&extraFaucetAmountConfig)
 
 			if extraFaucetAmountConfig.ValueF > 0 {
-				_, err := user.signumClient.SendMoney(userAccount.AccountRS, extraFaucetAmountConfig.ValueF, signumapi.CHEAP_FEE)
+				_, err := user.signumClient.SendMoney(os.Getenv("SECRET_PHRASE"), userAccount.AccountRS, extraFaucetAmountConfig.ValueF, signumapi.DEFAULT_CHEAP_FEE)
 				if err == nil {
 					user.db.Model(&newUsersExtraFaucetConfig).UpdateColumn("value_i", gorm.Expr("value_i - ?", 1))
 

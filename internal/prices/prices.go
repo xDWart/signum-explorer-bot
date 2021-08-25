@@ -3,7 +3,7 @@ package prices
 import (
 	"fmt"
 	"gorm.io/gorm"
-	"signum-explorer-bot/internal/api/cmcapi"
+	"signum-explorer-bot/api/cmcapi"
 	"signum-explorer-bot/internal/common"
 	"sync"
 )
@@ -11,10 +11,10 @@ import (
 type PriceManager struct {
 	db *gorm.DB
 	sync.RWMutex
-	cmcClient *cmcapi.Client
+	cmcClient *cmcapi.CmcClient
 }
 
-func NewPricesManager(db *gorm.DB, cmcClient *cmcapi.Client, wg *sync.WaitGroup, shutdownChannel chan interface{}) *PriceManager {
+func NewPricesManager(db *gorm.DB, cmcClient *cmcapi.CmcClient, wg *sync.WaitGroup, shutdownChannel chan interface{}) *PriceManager {
 	pm := PriceManager{
 		db:        db,
 		cmcClient: cmcClient,
