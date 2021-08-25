@@ -191,7 +191,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
 
-	case callbackdata.ActionType_AT_MINING_TXS:
+	case callbackdata.ActionType_AT_OTHER_TXS:
 		accountTransactions, err := user.signumClient.GetAccountMiningTransactions(account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
@@ -313,7 +313,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			MainText:       fmt.Sprintf("💽 Disabled new block notifications for <b>%v</b>", userAccount.AccountRS),
 		}, nil
 
-	case callbackdata.ActionType_AT_ENABLE_MINING_TX_NOTIFICATIONS:
+	case callbackdata.ActionType_AT_ENABLE_OTHER_TX_NOTIFICATIONS:
 		userAccount := user.GetDbAccount(account.Account)
 		if userAccount == nil {
 			// needs to add it at first
@@ -324,30 +324,31 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			}
 		}
 
-		if !userAccount.NotifyMiningTXs { // needs to enable
-			userAccount.NotifyMiningTXs = true
+		if !userAccount.NotifyOtherTXs { // needs to enable
+			userAccount.NotifyOtherTXs = true
 			userAccount.LastMiningTX = user.signumClient.GetLastAccountMiningTransaction(account.Account)
+			userAccount.LastMessageTX = user.signumClient.GetLastAccountMessage(account.Account)
 			user.db.Save(userAccount)
 		}
 
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("📝 Enabled new mining transaction notifications for <b>%v</b>", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("📝 Enabled other transaction notifications for <b>%v</b>", userAccount.AccountRS),
 			MainMenu:       user.GetMainMenu(),
 		}, nil
 
-	case callbackdata.ActionType_AT_DISABLE_MINING_TX_NOTIFICATIONS:
+	case callbackdata.ActionType_AT_DISABLE_OTHER_TX_NOTIFICATIONS:
 		userAccount := user.GetDbAccount(account.Account)
-		if userAccount != nil && userAccount.NotifyMiningTXs { // needs to disable
-			userAccount.NotifyMiningTXs = false
+		if userAccount != nil && userAccount.NotifyOtherTXs { // needs to disable
+			userAccount.NotifyOtherTXs = false
 			user.db.Save(userAccount)
 		}
 
 		// and update a keyboard to change icon
 		return &common.BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
-			MainText:       fmt.Sprintf("📝 Disabled new mining transaction notifications for <b>%v</b>", userAccount.AccountRS),
+			MainText:       fmt.Sprintf("📝 Disabled other transaction notifications for <b>%v</b>", userAccount.AccountRS),
 		}, nil
 
 	default:

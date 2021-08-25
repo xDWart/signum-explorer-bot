@@ -14,6 +14,7 @@ type DbAccount struct {
 	LastTransactionID        string `gorm:"type:varchar(255)"`
 	NotifyNewBlocks          bool
 	LastBlockID              string `gorm:"type:varchar(255)"`
-	NotifyMiningTXs          bool
+	NotifyOtherTXs           bool
 	LastMiningTX             string `gorm:"type:varchar(255)"`
+	LastMessageTX            string `gorm:"type:varchar(255)"`
 }

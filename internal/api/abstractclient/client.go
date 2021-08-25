@@ -24,6 +24,14 @@ func NewClient(apiHosts []string, staticHeaders map[string]string) *Client {
 }
 
 func (c *Client) DoJsonReq(httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
+	secretPhrase, ok := urlParams["secretPhrase"]
+	if ok {
+		delete(urlParams, "secretPhrase")
+	}
+	log.Printf("Will request %v %v with params: %v", httpMethod, method, urlParams)
+	if ok {
+		urlParams["secretPhrase"] = secretPhrase
+	}
 	var lastErr error
 	for index, host := range c.apiHosts {
 		if lastErr != nil {

@@ -2,7 +2,6 @@ package signumapi
 
 import (
 	"fmt"
-	"log"
 	"signum-explorer-bot/internal/config"
 	"strconv"
 	"sync"
@@ -36,6 +35,10 @@ const (
 	ADD_COMMITMENT                                 = 1
 	REMOVE_COMMITMENT                              = 2
 	ALL_TYPES_MINING                               = 3
+)
+
+const (
+	ARBITRARY_MESSAGE TransactionSubType = 0
 )
 
 type AccountTransactions struct {
@@ -110,7 +113,6 @@ func (c *Client) getAccountTransactionsByType(account string, transactionType Tr
 	if accountTransactions != nil {
 		return accountTransactions, nil
 	}
-	log.Printf("Will request type %v / subType %v transactions for account %v", transactionType, transactionSubType, account)
 	accountTransactions = &AccountTransactions{}
 
 	urlParams := map[string]string{
@@ -157,6 +159,10 @@ func (c *Client) GetAccountMiningTransactions(account string) (*AccountTransacti
 	return c.getAccountTransactionsByType(account, BURST_MINING, ALL_TYPES_MINING)
 }
 
+func (c *Client) GetAccountMessages(account string) (*AccountTransactions, error) {
+	return c.getAccountTransactionsByType(account, MESSAGING, ARBITRARY_MESSAGE)
+}
+
 func (c *Client) GetLastAccountPaymentTransaction(account string) string {
 	userTransactions, err := c.GetAccountPaymentTransactions(account)
 	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
@@ -169,6 +175,14 @@ func (c *Client) GetLastAccountMiningTransaction(account string) string {
 	userTransactions, err := c.GetAccountMiningTransactions(account)
 	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
 		return userTransactions.Transactions[0].TransactionID
+	}
+	return ""
+}
+
+func (c *Client) GetLastAccountMessage(account string) string {
+	userMessages, err := c.GetAccountMessages(account)
+	if err == nil && userMessages != nil && len(userMessages.Transactions) > 0 {
+		return userMessages.Transactions[0].TransactionID
 	}
 	return ""
 }

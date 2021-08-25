@@ -2,7 +2,6 @@ package signumapi
 
 import (
 	"fmt"
-	"log"
 	"signum-explorer-bot/internal/config"
 	"sync"
 	"time"
@@ -46,7 +45,6 @@ func (c *Client) GetAccountBlocks(account string) (*AccountBlocks, error) {
 	if accountBlocks != nil {
 		return accountBlocks, nil
 	}
-	log.Printf("Will request blocks for account %v", account)
 	accountBlocks = &AccountBlocks{}
 	err := c.DoJsonReq("GET", "/burst",
 		map[string]string{

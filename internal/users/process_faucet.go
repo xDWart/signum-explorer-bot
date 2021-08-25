@@ -102,10 +102,10 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 		amount = ordinaryFaucetAmount.ValueF
 	}
 
-	response := user.signumClient.SendMoney(account, amount, signumapi.CHEAP_FEE)
-	if response.ErrorDescription != "" {
+	_, err := user.signumClient.SendMoney(account, amount, signumapi.CHEAP_FEE)
+	if err != nil {
 		user.ResetState()
-		return false, fmt.Sprintf("🚫 Bad request: %v", response.ErrorDescription)
+		return false, fmt.Sprintf("🚫 Bad request: %v", err)
 	}
 
 	user.LastFaucetClaim = time.Now()
@@ -129,8 +129,8 @@ func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string 
 			user.db.Where(&extraFaucetAmountConfig).First(&extraFaucetAmountConfig)
 
 			if extraFaucetAmountConfig.ValueF > 0 {
-				response := user.signumClient.SendMoney(userAccount.AccountRS, extraFaucetAmountConfig.ValueF, signumapi.CHEAP_FEE)
-				if response.ErrorDescription == "" {
+				_, err := user.signumClient.SendMoney(userAccount.AccountRS, extraFaucetAmountConfig.ValueF, signumapi.CHEAP_FEE)
+				if err == nil {
 					user.db.Model(&newUsersExtraFaucetConfig).UpdateColumn("value_i", gorm.Expr("value_i - ?", 1))
 
 					return fmt.Sprintf("\n\n🎁 New user bonus <b>%v SIGNA</b> has been successfully sent to the account, please wait for notification!",

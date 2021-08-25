@@ -41,7 +41,7 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 	err := n.db.Model(&models.DbUser{}).Select("*").
 		Joins("join db_accounts on db_accounts.db_user_id = db_users.id").
 		Where("db_accounts.notify_income_transactions = true OR db_accounts.notify_outgo_transactions = true " +
-			"OR db_accounts.notify_new_blocks = true OR db_accounts.notify_mining_t_xs = true").
+			"OR db_accounts.notify_new_blocks = true OR db_accounts.notify_other_t_xs = true").
 		Scan(&monitoredAccounts).Error
 	if err != nil {
 		log.Printf("Can't get monitored accounts: %v", err)
@@ -56,8 +56,9 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 			n.checkPaymentTransactions(&account)
 		}
 
-		if account.NotifyMiningTXs {
+		if account.NotifyOtherTXs {
 			n.checkMiningTransactions(&account)
+			n.checkMessageTransactions(&account)
 		}
 
 		if checkBlocks && account.NotifyNewBlocks {
@@ -159,7 +160,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		msg := fmt.Sprintf("💸 <b>%v</b> ", account.AccountRS)
 
 		var incomeTransaction = transaction.Sender != account.Account
-		var senderName string
+		var name string
 		if incomeTransaction {
 			if !account.NotifyIncomeTransactions {
 				continue
@@ -167,9 +168,16 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 
 			senderAccount, err := n.signumClient.GetAccount(transaction.SenderRS)
 			if err == nil && senderAccount.Name != "" {
-				senderName = fmt.Sprintf("\n<i>Name:</i> %v", senderAccount.Name)
+				name = fmt.Sprintf("\n<i>Name:</i> %v", senderAccount.Name)
 			}
-		} else if !account.NotifyOutgoTransactions { // outgo
+		} else if account.NotifyOutgoTransactions { // outgo
+			if transaction.RecipientRS != "" {
+				recipientAccount, err := n.signumClient.GetAccount(transaction.RecipientRS)
+				if err == nil && recipientAccount.Name != "" {
+					name = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
+				}
+			}
+		} else {
 			continue
 		}
 
@@ -182,14 +190,14 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Ordinary"+
-					"\n<i>Sender:</i> %v"+senderName+
+					"\n<i>Sender:</i> %v"+name+
 					"\n<i>Amount:</i> +%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			} else {
 				msg += fmt.Sprintf("new outgo:"+
 					"\n<i>Payment:</i> Ordinary"+
-					"\n<i>Recipient:</i> %v"+
+					"\n<i>Recipient:</i> %v"+name+
 					"\n<i>Amount:</i> -%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.RecipientRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
@@ -201,7 +209,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 				amount = transaction.Attachment.Recipients.FoundMyAmount(account.Account)
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out"+
-					"\n<i>Sender:</i> %v"+senderName+
+					"\n<i>Sender:</i> %v"+name+
 					"\n<i>Amount:</i> +%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
@@ -219,7 +227,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 				amount = transaction.AmountNQT / 1e8 / float64(len(transaction.Attachment.Recipients))
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out same"+
-					"\n<i>Sender:</i> %v"+senderName+
+					"\n<i>Sender:</i> %v"+name+
 					"\n<i>Amount:</i> +%v SIGNA"+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
@@ -296,4 +304,77 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 		ChatID:   account.ChatID,
 		Message:  msg,
 	}
+}
+
+func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
+	userMessages, err := n.signumClient.GetAccountMessages(account.Account)
+	if err != nil {
+		log.Printf("Can't get last account %v message transactions: %v", account.Account, err)
+		return
+	}
+
+	if userMessages == nil || len(userMessages.Transactions) == 0 {
+		return
+	}
+
+	if userMessages.Transactions[0].TransactionID == account.LastMessageTX {
+		return
+	}
+
+	for _, transaction := range userMessages.Transactions {
+		if transaction.TransactionID == account.LastMessageTX {
+			break
+		}
+		var incomeTransaction = transaction.Sender != account.Account
+
+		msg := fmt.Sprintf("📝 <b>%v</b> ", account.AccountRS)
+
+		switch transaction.Subtype {
+		case signumapi.ARBITRARY_MESSAGE:
+			var message string
+			if transaction.Attachment.MessageIsText && transaction.Attachment.Message != "" {
+				message = transaction.Attachment.Message
+			} else {
+				message = "[encrypted]"
+			}
+
+			if incomeTransaction {
+				var senderName string
+				senderAccount, err := n.signumClient.GetAccount(transaction.SenderRS)
+				if err == nil && senderAccount.Name != "" {
+					senderName = fmt.Sprintf("\n<i>Name:</i> %v", senderAccount.Name)
+				}
+
+				msg += fmt.Sprintf("new message received:"+
+					"\n<i>Sender:</i> %v"+senderName+
+					"\n<i>Message:</i> "+message+
+					"\n<i>Fee:</i> %v SIGNA",
+					transaction.SenderRS, transaction.FeeNQT/1e8)
+			} else {
+				var recipientName string
+				recipientAccount, err := n.signumClient.GetAccount(transaction.RecipientRS)
+				if err == nil && recipientAccount.Name != "" {
+					recipientName = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
+				}
+
+				msg += fmt.Sprintf("new message sent:"+
+					"\n<i>Recipient:</i> %v"+recipientName+
+					"\n<i>Message:</i> "+message+
+					"\n<i>Fee:</i> %v SIGNA",
+					transaction.RecipientRS, transaction.FeeNQT/1e8)
+			}
+		default:
+			log.Printf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
+			continue
+		}
+
+		n.notifierCh <- NotifierMessage{
+			UserName: account.UserName,
+			ChatID:   account.ChatID,
+			Message:  msg,
+		}
+	}
+
+	account.DbAccount.LastMessageTX = userMessages.Transactions[0].TransactionID
+	n.db.Save(&account.DbAccount)
 }

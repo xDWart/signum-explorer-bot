@@ -2,7 +2,6 @@ package signumapi
 
 import (
 	"fmt"
-	"log"
 	"signum-explorer-bot/internal/config"
 	"sync"
 	"time"
@@ -65,7 +64,6 @@ func (c *Client) GetAccount(accountS string) (*Account, error) {
 	if account != nil {
 		return account, nil
 	}
-	log.Printf("Will request account %v", accountS)
 	account = &Account{}
 	err := c.DoJsonReq("GET", "/burst",
 		map[string]string{"requestType": "getAccount", "getCommittedAmount": "true", "account": accountS},

@@ -14,8 +14,8 @@ var checkedIcon = map[bool]string{
 const (
 	INCOME_TX = iota
 	OUTGO_TX
-	MINING
 	BLOCKS
+	OTHER
 )
 
 var actionTypes = []map[bool]callbackdata.ActionType{
@@ -27,13 +27,13 @@ var actionTypes = []map[bool]callbackdata.ActionType{
 		true:  callbackdata.ActionType_AT_DISABLE_OUTGO_TX_NOTIFY,
 		false: callbackdata.ActionType_AT_ENABLE_OUTGO_TX_NOTIFY,
 	},
-	MINING: {
-		true:  callbackdata.ActionType_AT_DISABLE_MINING_TX_NOTIFICATIONS,
-		false: callbackdata.ActionType_AT_ENABLE_MINING_TX_NOTIFICATIONS,
-	},
 	BLOCKS: {
 		true:  callbackdata.ActionType_AT_DISABLE_BLOCK_NOTIFY,
 		false: callbackdata.ActionType_AT_ENABLE_BLOCK_NOTIFY,
+	},
+	OTHER: {
+		true:  callbackdata.ActionType_AT_DISABLE_OTHER_TX_NOTIFICATIONS,
+		false: callbackdata.ActionType_AT_ENABLE_OTHER_TX_NOTIFICATIONS,
 	},
 }
 
@@ -74,7 +74,7 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 				"Mining", callbackdata.QueryDataType{
 					Account:  account,
 					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
-					Action:   callbackdata.ActionType_AT_MINING_TXS,
+					Action:   callbackdata.ActionType_AT_OTHER_TXS,
 				}.GetBase64ProtoString()),
 			tgbotapi.NewInlineKeyboardButtonData(
 				"Blocks", callbackdata.QueryDataType{
@@ -101,18 +101,18 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
-				checkedIcon[userAccount.NotifyMiningTXs]+" Notify mining TXs",
-				callbackdata.QueryDataType{
-					Account:  account,
-					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
-					Action:   actionTypes[MINING][userAccount.NotifyMiningTXs],
-				}.GetBase64ProtoString()),
-			tgbotapi.NewInlineKeyboardButtonData(
 				checkedIcon[userAccount.NotifyNewBlocks]+" Notify found blocks",
 				callbackdata.QueryDataType{
 					Account:  account,
 					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
 					Action:   actionTypes[BLOCKS][userAccount.NotifyNewBlocks],
+				}.GetBase64ProtoString()),
+			tgbotapi.NewInlineKeyboardButtonData(
+				checkedIcon[userAccount.NotifyOtherTXs]+" Notify other TXs",
+				callbackdata.QueryDataType{
+					Account:  account,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   actionTypes[OTHER][userAccount.NotifyOtherTXs],
 				}.GetBase64ProtoString()),
 		),
 	)

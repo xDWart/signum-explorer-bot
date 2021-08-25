@@ -1,5 +1,11 @@
 package signumapi
 
+import (
+	"fmt"
+	"signum-explorer-bot/internal/config"
+	"strconv"
+)
+
 type Transaction struct {
 	TransactionID string             `json:"transaction"`
 	Type          TransactionType    `json:"type"`
@@ -12,16 +18,16 @@ type Transaction struct {
 	Sender        string             `json:"sender"`
 	SenderRS      string             `json:"senderRS"`
 	Attachment    struct {
-		Recipients RecipientsType `json:"recipients"`
-		AmountNQT  float64        `json:"amountNQT"`
+		Recipients    RecipientsType `json:"recipients"`
+		AmountNQT     float64        `json:"amountNQT"`
+		Message       string         `json:"message"`
+		MessageIsText bool           `json:"messageIsText"`
 		// VersionMultiOutCreation          byte           `json:"version.MultiOutCreation"`
 		// VersionCommitmentAdd             byte           `json:"version.CommitmentAdd"`
 		// VersionRewardRecipientAssignment byte           `json:"version.RewardRecipientAssignment"`
 		// VersionPublicKeyAnnouncement     byte           `json:"version.PublicKeyAnnouncement"`
 		// VersionMessage                   byte           `json:"version.Message"`
-		// Message                          string         `json:"message"`
 		// RecipientPublicKey               string         `json:"recipientPublicKey"`
-		// MessageIsText                    bool           `json:"messageIsText"`
 	} `json:"attachment"`
 	// Signature       string             `json:"signature"`
 	// SignatureHash   string             `json:"signatureHash"`
@@ -38,22 +44,28 @@ type Transaction struct {
 }
 
 type TransactionRequest struct {
-	SecretPhrase string  // is the secret passphrase of the account (optional, but transaction neither signed nor broadcast if omitted)
-	FeeNQT       float64 // is the fee (in NQT) for the transaction
-	Deadline     int     // deadline (in minutes) for the transaction to be confirmed, 1440 minutes maximum
-	// PublicKey    string  // is the public key of the account (optional if secretPhrase provided)
-	//Broadcast                    bool    // is set to false to prevent broadcasting the transaction to the network (optional)
-	//Message                      string  // is either UTF-8 text or a string of hex digits (perhaps previously encoded using an arbitrary algorithm) to be converted into a bytecode with a maximum length of one kilobyte
-	//MessageIsText                bool    // is false if the message is a hex string, otherwise the message is text (optional)
-	//MessageToEncrypt             string  // is either UTF-8 text or a string of hex digits to be compressed and converted into a bytecode with a maximum length of one kilobyte, then encrypted using AES (optional)
-	//MessageToEncryptIsText       bool    // is false if the message to encrypt is a hex string, otherwise, the message to encrypt is text (optional)
-	//EncryptedMessageData         string  // is already encrypted data which overrides messageToEncrypt if provided (optional)
-	//EncryptedMessageNonce        string  // is a unique 32-byte number which cannot be reused (optional unless encryptedMessageData is provided)
-	//MessageToEncryptToSelf       string  // is either UTF-8 text or a string of hex digits to be compressed and converted into a one-kilobyte maximum bytecode then encrypted with AES, then sent to the sending account (optional)
-	//MessageToEncryptToSelfIsText bool    // is false if the message to self-encrypt is a hex string, otherwise the message to encrypt is text (optional)
-	//EncryptToSelfMessageData     string  // is already encrypted data which overrides messageToEncryptToSelf if provided (optional)
-	//EncryptToSelfMessageNonce    string  // is a unique 32-byte number which cannot be reused (optional unless encryptToSelfMessageData is provided)
-	//RecipientPublicKey           string  //is the public key of the receiving account (optional, enhances the security of a new account)
+	RequestType                  RequestType
+	Recipient                    string
+	Recipients                   string
+	Name                         string
+	Description                  string
+	SecretPhrase                 string // is the secret passphrase of the account (optional, but transaction neither signed nor broadcast if omitted)
+	AmountNQT                    float64
+	FeeNQT                       FeeType // is the fee (in NQT) for the transaction
+	Deadline                     int     // deadline (in minutes) for the transaction to be confirmed, 1440 minutes maximum
+	PublicKey                    string  // is the public key of the account (optional if secretPhrase provided)
+	Broadcast                    bool    // is set to false to prevent broadcasting the transaction to the network (optional)
+	Message                      string  // is either UTF-8 text or a string of hex digits (perhaps previously encoded using an arbitrary algorithm) to be converted into a bytecode with a maximum length of one kilobyte
+	MessageIsText                bool    // is false if the message is a hex string, otherwise the message is text (optional)
+	MessageToEncrypt             string  // is either UTF-8 text or a string of hex digits to be compressed and converted into a bytecode with a maximum length of one kilobyte, then encrypted using AES (optional)
+	MessageToEncryptIsText       bool    // is false if the message to encrypt is a hex string, otherwise, the message to encrypt is text (optional)
+	EncryptedMessageData         string  // is already encrypted data which overrides messageToEncrypt if provided (optional)
+	EncryptedMessageNonce        string  // is a unique 32-byte number which cannot be reused (optional unless encryptedMessageData is provided)
+	MessageToEncryptToSelf       string  // is either UTF-8 text or a string of hex digits to be compressed and converted into a one-kilobyte maximum bytecode then encrypted with AES, then sent to the sending account (optional)
+	MessageToEncryptToSelfIsText bool    // is false if the message to self-encrypt is a hex string, otherwise the message to encrypt is text (optional)
+	EncryptToSelfMessageData     string  // is already encrypted data which overrides messageToEncryptToSelf if provided (optional)
+	EncryptToSelfMessageNonce    string  // is a unique 32-byte number which cannot be reused (optional unless encryptToSelfMessageData is provided)
+	RecipientPublicKey           string  //is the public key of the receiving account (optional, enhances the security of a new account)
 }
 
 type TransactionResponse struct {
@@ -65,5 +77,60 @@ type TransactionResponse struct {
 	TransactionBytes         string      // is the signed transaction bytes
 	FullHash                 string      // is the full hash of the signed transaction
 	Transaction              string      // is the ID of the newly created transaction
+	Error                    string
 	ErrorDescription         string
+}
+
+func (c *Client) createTransaction(transactionRequest *TransactionRequest) (*TransactionResponse, error) {
+	if transactionRequest.SecretPhrase == "" {
+		return nil, fmt.Errorf("TransactionRequest.SecretPhrase is not set")
+	}
+
+	var urlParams = map[string]string{
+		"requestType":  string(transactionRequest.RequestType),
+		"secretPhrase": transactionRequest.SecretPhrase,
+		"feeNQT":       fmt.Sprintf("%.f", transactionRequest.FeeNQT),
+	}
+
+	if transactionRequest.Recipient != "" {
+		urlParams["recipient"] = transactionRequest.Recipient
+	}
+	if transactionRequest.Recipients != "" {
+		urlParams["recipients"] = transactionRequest.Recipients
+	}
+	if transactionRequest.AmountNQT != 0 {
+		urlParams["amountNQT"] = fmt.Sprintf("%.f", transactionRequest.AmountNQT)
+	}
+	if transactionRequest.Message != "" {
+		urlParams["message"] = transactionRequest.Message
+		urlParams["messageIsText"] = fmt.Sprint(transactionRequest.MessageIsText)
+	}
+	if transactionRequest.MessageToEncrypt != "" {
+		urlParams["messageToEncrypt"] = transactionRequest.MessageToEncrypt
+		urlParams["messageToEncryptIsText"] = fmt.Sprint(transactionRequest.MessageToEncryptIsText)
+	}
+	if transactionRequest.Name != "" {
+		urlParams["name"] = transactionRequest.Name
+	}
+	if transactionRequest.Description != "" {
+		urlParams["description"] = transactionRequest.Description
+	}
+	if transactionRequest.Deadline == 0 {
+		urlParams["deadline"] = strconv.Itoa(config.SIGNUM_API.DEFAULT_DEADLINE)
+	} else {
+		urlParams["deadline"] = strconv.Itoa(transactionRequest.Deadline)
+	}
+
+	transactionResponse := &TransactionResponse{}
+	err := c.DoJsonReq("POST", "/burst", urlParams, nil, transactionResponse)
+	if err != nil {
+		return nil, fmt.Errorf("bad create transaction request: %v", err)
+	}
+	if transactionResponse.Error != "" {
+		return nil, fmt.Errorf("bad create transaction request: %v", transactionResponse.Error)
+	}
+	if transactionResponse.ErrorDescription != "" {
+		return nil, fmt.Errorf("bad create transaction request: %v", transactionResponse.ErrorDescription)
+	}
+	return transactionResponse, nil
 }
