@@ -1,4 +1,4 @@
-module signum-explorer-bot
+module github.com/xDWart/signum-explorer-bot
 
 // +heroku goVersion go1.16
 go 1.16

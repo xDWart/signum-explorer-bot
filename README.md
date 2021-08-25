@@ -38,6 +38,7 @@ Add to a group and text `/p@signa_price_bot` to view the prices:
 - Show mining transactions
   - Add / revoke commitment
   - Reward recipient assignment
+- Notify mining and message transactions
 - Show actual prices:
   - SIGNA/USD (+ daily percentage change)
   - SIGNA/BTC

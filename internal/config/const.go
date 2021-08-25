@@ -3,7 +3,7 @@ package config
 import "time"
 
 const NAME = "<b>🚀 Signum Explorer Bot</b>"
-const VERSION = "<i>v.0.9.0</i>"
+const VERSION = "<i>v.0.9.1</i>"
 
 const (
 	COMMAND_START    = "/start"
