@@ -1,9 +1,9 @@
 package internal
 
 import (
+	"github.com/xDWart/signum-explorer-bot/internal/common"
+	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"log"
-	"signum-explorer-bot/internal/common"
-	"signum-explorer-bot/internal/config"
 	"strings"
 	"time"
 )

@@ -2,8 +2,8 @@ package internal
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"log"
-	"signum-explorer-bot/internal/common"
 )
 
 type AbstractTelegramBot struct {

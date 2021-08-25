@@ -2,8 +2,8 @@ package users
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"signum-explorer-bot/internal/database/models"
-	"signum-explorer-bot/internal/users/callbackdata"
+	"github.com/xDWart/signum-explorer-bot/internal/database/models"
+	"github.com/xDWart/signum-explorer-bot/internal/users/callbackdata"
 )
 
 var checkedIcon = map[bool]string{

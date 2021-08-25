@@ -2,8 +2,8 @@ package crosschecker
 
 import (
 	"errors"
+	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"math"
-	"signum-explorer-bot/internal/config"
 	"strconv"
 	"strings"
 )

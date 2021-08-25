@@ -1,9 +1,9 @@
 package prices
 
 import (
+	"github.com/xDWart/signum-explorer-bot/internal/config"
+	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"log"
-	"signum-explorer-bot/internal/config"
-	"signum-explorer-bot/internal/database/models"
 	"sync"
 	"time"
 )

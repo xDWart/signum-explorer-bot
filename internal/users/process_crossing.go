@@ -2,7 +2,7 @@ package users
 
 import (
 	"fmt"
-	"signum-explorer-bot/internal/crosschecker"
+	"github.com/xDWart/signum-explorer-bot/internal/crosschecker"
 	"sort"
 )
 

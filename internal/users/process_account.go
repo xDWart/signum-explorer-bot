@@ -2,9 +2,9 @@ package users
 
 import (
 	"fmt"
-	"signum-explorer-bot/internal/common"
-	"signum-explorer-bot/internal/config"
-	"signum-explorer-bot/internal/database/models"
+	"github.com/xDWart/signum-explorer-bot/internal/common"
+	"github.com/xDWart/signum-explorer-bot/internal/config"
+	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"strings"
 )
 

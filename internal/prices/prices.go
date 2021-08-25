@@ -2,9 +2,9 @@ package prices
 
 import (
 	"fmt"
+	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
+	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"gorm.io/gorm"
-	"signum-explorer-bot/api/cmcapi"
-	"signum-explorer-bot/internal/common"
 	"sync"
 )
 

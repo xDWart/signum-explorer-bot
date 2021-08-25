@@ -1,7 +1,7 @@
 package signumapi
 
 import (
-	"signum-explorer-bot/api/abstractapi"
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"sync"
 	"time"
 )

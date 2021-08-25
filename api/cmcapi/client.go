@@ -1,8 +1,8 @@
 package cmcapi
 
 import (
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"os"
-	"signum-explorer-bot/api/abstractapi"
 	"sync"
 	"time"
 )

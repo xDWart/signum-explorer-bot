@@ -1,8 +1,8 @@
 package calculator
 
 import (
+	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"math"
-	"signum-explorer-bot/api/signumapi"
 )
 
 type CalcResult struct {

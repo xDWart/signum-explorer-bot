@@ -2,12 +2,12 @@ package users
 
 import (
 	"fmt"
+	"github.com/xDWart/signum-explorer-bot/api/signumapi"
+	"github.com/xDWart/signum-explorer-bot/internal/common"
+	"github.com/xDWart/signum-explorer-bot/internal/config"
+	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"gorm.io/gorm"
 	"os"
-	"signum-explorer-bot/api/signumapi"
-	"signum-explorer-bot/internal/common"
-	"signum-explorer-bot/internal/config"
-	"signum-explorer-bot/internal/database/models"
 	"strings"
 	"time"
 )

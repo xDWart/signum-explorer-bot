@@ -2,13 +2,13 @@ package users
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
+	"github.com/xDWart/signum-explorer-bot/api/signumapi"
+	"github.com/xDWart/signum-explorer-bot/internal/config"
+	"github.com/xDWart/signum-explorer-bot/internal/database/models"
+	"github.com/xDWart/signum-explorer-bot/internal/networkinfo"
+	"github.com/xDWart/signum-explorer-bot/internal/prices"
 	"gorm.io/gorm"
-	"signum-explorer-bot/api/cmcapi"
-	"signum-explorer-bot/api/signumapi"
-	"signum-explorer-bot/internal/config"
-	"signum-explorer-bot/internal/database/models"
-	"signum-explorer-bot/internal/networkinfo"
-	"signum-explorer-bot/internal/prices"
 	"sync"
 	"time"
 )

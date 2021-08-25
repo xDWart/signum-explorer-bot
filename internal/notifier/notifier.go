@@ -1,9 +1,9 @@
 package notifier
 
 import (
+	"github.com/xDWart/signum-explorer-bot/api/signumapi"
+	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"gorm.io/gorm"
-	"signum-explorer-bot/api/signumapi"
-	"signum-explorer-bot/internal/database/models"
 	"sync"
 )
 

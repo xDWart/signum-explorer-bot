@@ -1,8 +1,8 @@
 package database
 
 import (
+	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"gorm.io/gorm"
-	"signum-explorer-bot/internal/database/models"
 )
 
 func autoMigrate(db *gorm.DB) {

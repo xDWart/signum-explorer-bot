@@ -2,11 +2,11 @@ package internal
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/xDWart/signum-explorer-bot/internal/common"
+	"github.com/xDWart/signum-explorer-bot/internal/config"
+	"github.com/xDWart/signum-explorer-bot/internal/prices"
 	"log"
 	"os"
-	"signum-explorer-bot/internal/common"
-	"signum-explorer-bot/internal/config"
-	"signum-explorer-bot/internal/prices"
 	"strings"
 	"sync"
 	"time"

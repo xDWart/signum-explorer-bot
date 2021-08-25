@@ -1,8 +1,8 @@
 package users
 
 import (
-	"signum-explorer-bot/internal/common"
-	"signum-explorer-bot/internal/config"
+	"github.com/xDWart/signum-explorer-bot/internal/common"
+	"github.com/xDWart/signum-explorer-bot/internal/config"
 )
 
 func (user *User) ProcessMessage(message string) *common.BotMessage {

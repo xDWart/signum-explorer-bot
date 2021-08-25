@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/xDWart/signum-explorer-bot/internal"
 	"log"
 	"os"
 	"os/signal"
-	"signum-explorer-bot/internal"
 	"syscall"
 )
 

@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/wcharczuk/go-chart/v2"
+	"github.com/xDWart/signum-explorer-bot/internal/config"
+	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"log"
-	"signum-explorer-bot/internal/config"
-	"signum-explorer-bot/internal/database/models"
 	"time"
 )
 

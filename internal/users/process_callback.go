@@ -6,11 +6,11 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/golang/protobuf/proto"
+	"github.com/xDWart/signum-explorer-bot/api/signumapi"
+	"github.com/xDWart/signum-explorer-bot/internal/common"
+	"github.com/xDWart/signum-explorer-bot/internal/config"
+	"github.com/xDWart/signum-explorer-bot/internal/users/callbackdata"
 	"log"
-	"signum-explorer-bot/api/signumapi"
-	"signum-explorer-bot/internal/common"
-	"signum-explorer-bot/internal/config"
-	"signum-explorer-bot/internal/users/callbackdata"
 	"time"
 )
 

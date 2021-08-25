@@ -1,8 +1,8 @@
 package calculator
 
 import (
-	"signum-explorer-bot/api/signumapi"
-	"signum-explorer-bot/internal/config"
+	"github.com/xDWart/signum-explorer-bot/api/signumapi"
+	"github.com/xDWart/signum-explorer-bot/internal/config"
 )
 
 type CalcReinvestmentResult struct {
