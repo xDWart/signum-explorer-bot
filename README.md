@@ -16,7 +16,7 @@
 ![Account Menu Screenshot](https://github.com/xDWart/signum-explorer-bot/raw/master/assets/account_menu_screenshot.png)
 
 [@signa_price_bot](https://t.me/signa_price_bot) - child bot for public groups to display only the current price of SIGNA and BTC.  
-Add to a group and text `/p@signa_price_bot` to view the prices:
+Add to a group and text `/pc@signa_price_bot` to view the prices:
 
 ![Signa Price Screenshot](https://github.com/xDWart/signum-explorer-bot/raw/master/assets/signa_price_bot.png)
 
