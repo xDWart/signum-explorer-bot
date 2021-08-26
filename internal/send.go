@@ -2,7 +2,7 @@ package internal
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/xDWart/signum-explorer-bot/internal/common"
+	"github.com/xDWart/signum-explorer-bot/internal/users"
 	"log"
 )
 
@@ -10,7 +10,7 @@ type AbstractTelegramBot struct {
 	*tgbotapi.BotAPI
 }
 
-func (bot *AbstractTelegramBot) SendAnswer(chatID int64, answer *common.BotMessage) {
+func (bot *AbstractTelegramBot) SendAnswer(chatID int64, answer *users.BotMessage) {
 	if answer == nil {
 		return
 	}

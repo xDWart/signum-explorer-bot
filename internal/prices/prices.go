@@ -6,18 +6,30 @@ import (
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"gorm.io/gorm"
 	"sync"
+	"time"
 )
 
 type PriceManager struct {
 	db *gorm.DB
 	sync.RWMutex
 	cmcClient *cmcapi.CmcClient
+	config    *Config
 }
 
-func NewPricesManager(db *gorm.DB, cmcClient *cmcapi.CmcClient, wg *sync.WaitGroup, shutdownChannel chan interface{}) *PriceManager {
+type Config struct {
+	SamplePeriod      time.Duration
+	SaveEveryNSamples uint
+	SmoothingFactor   uint
+	ScanQuantity      int
+	DelayFuncK        time.Duration // kx + b, x in days
+	DelayFuncB        time.Duration
+}
+
+func NewPricesManager(db *gorm.DB, cmcClient *cmcapi.CmcClient, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *PriceManager {
 	pm := PriceManager{
 		db:        db,
 		cmcClient: cmcClient,
+		config:    config,
 	}
 	wg.Add(1)
 	go pm.startListener(wg, shutdownChannel)

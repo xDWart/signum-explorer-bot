@@ -11,11 +11,14 @@ import (
 	"time"
 )
 
+const NOTIFIER_PERIOD = 4 * time.Minute
+const NOTIFIER_CHECK_BLOCKS_PER = 3 // 4 min * 3 = per 12 min
+
 func (n *Notifier) startListener(wg *sync.WaitGroup, shutdownChannel chan interface{}) {
 	defer wg.Done()
 
 	log.Printf("Start Notifier")
-	ticker := time.NewTicker(config.SIGNUM_API.NOTIFIER_PERIOD)
+	ticker := time.NewTicker(NOTIFIER_PERIOD)
 
 	var counter uint
 
@@ -29,7 +32,7 @@ func (n *Notifier) startListener(wg *sync.WaitGroup, shutdownChannel chan interf
 
 		case <-ticker.C:
 			counter++
-			checkBlocks := counter%config.SIGNUM_API.NOTIFIER_CHECK_BLOCKS_PER == 0
+			checkBlocks := counter%NOTIFIER_CHECK_BLOCKS_PER == 0
 			n.checkAccounts(checkBlocks)
 		}
 	}
@@ -245,7 +248,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 			continue
 		}
 
-		if account.AccountRS == config.FAUCET.ACCOUNT {
+		if account.AccountRS == config.FAUCET_ACCOUNT {
 			if incomeTransaction { // it's donate
 				newDonate := models.Donation{
 					Account:       transaction.Sender,

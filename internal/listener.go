@@ -1,8 +1,8 @@
 package internal
 
 import (
-	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
+	"github.com/xDWart/signum-explorer-bot/internal/users"
 	"log"
 	"strings"
 	"time"
@@ -31,7 +31,7 @@ func (bot *TelegramBot) startBotListener() {
 			user.Lock()
 
 			message := update.Message
-			userAnswer := &common.BotMessage{}
+			userAnswer := &users.BotMessage{}
 
 			if message != nil && len(message.Text) > 0 {
 				log.Printf("Received message from user %v (Chat.ID %v): %v", message.From, message.Chat.ID, strings.Replace(message.Text, "\n", " ", -1))

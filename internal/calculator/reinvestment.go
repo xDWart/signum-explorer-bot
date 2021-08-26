@@ -2,7 +2,6 @@ package calculator
 
 import (
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
-	"github.com/xDWart/signum-explorer-bot/internal/config"
 )
 
 type CalcReinvestmentResult struct {
@@ -18,7 +17,7 @@ type CalcReinvestmentResult struct {
 func CalculateReinvestment(miningInfo *signumapi.MiningInfo, calcResult *CalcResult) *CalcReinvestmentResult {
 	localCalcResult := *calcResult
 
-	var reinvestEveryDays = float64(config.CALCULATOR.REINVEST_EVERY_DAYS) // days
+	var reinvestEveryDays float64 = 7
 	// divide a year into 52 weeks and will reinvest all of our rewards into commitment
 	for w := 0; w < int(365/reinvestEveryDays); w++ {
 		localCalcResult = *Calculate(miningInfo,

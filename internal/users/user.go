@@ -28,6 +28,18 @@ type User struct {
 	lastCallbackTime time.Time
 }
 
+type BotMessage struct {
+	MessageID int // for edit existing message
+
+	MainText string
+	MainMenu interface{}
+
+	InlineText     string
+	InlineKeyboard interface{}
+
+	Chart []byte
+}
+
 type StateType byte
 
 const (

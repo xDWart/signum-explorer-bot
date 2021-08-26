@@ -4,7 +4,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
-	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database"
 	"github.com/xDWart/signum-explorer-bot/internal/networkinfo"
 	"github.com/xDWart/signum-explorer-bot/internal/notifier"
@@ -16,6 +15,7 @@ import (
 	"runtime"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type TelegramBot struct {
@@ -45,13 +45,48 @@ func InitTelegramBot() *TelegramBot {
 		log.Fatalf(err.Error())
 	}
 
-	cmcClient := cmcapi.NewCmcClient(config.CMC_API.ADDRESS, true)
-	signumClient := signumapi.NewSignumApiClient(config.SIGNUM_API.HOSTS, config.SIGNUM_API.CACHE_TTL, true)
+	cmcClient := cmcapi.NewCmcClient(&cmcapi.Config{
+		Host:      "https://pro-api.coinmarketcap.com/v1",
+		FreeLimit: 200,
+		CacheTtl:  5 * time.Minute,
+		Debug:     true,
+	})
+	signumClient := signumapi.NewSignumApiClient(&signumapi.Config{
+		ApiHosts: []string{
+			"https://europe1.signum.network",
+			"https://europe.signum.network",
+			"https://europe3.signum.network",
+			"https://canada.signum.network",
+			"https://australia.signum.network",
+			"https://brazil.signum.network",
+			"https://uk.signum.network",
+			"https://wallet.burstcoin.ro",
+		},
+		CacheTtl: 3 * time.Minute,
+		Debug:    true,
+	})
 	notifierCh := make(chan notifier.NotifierMessage)
 	wg := &sync.WaitGroup{}
 	shutdownChannel := make(chan interface{})
-	priceManager := prices.NewPricesManager(db, cmcClient, wg, shutdownChannel)
-	networkInfoListener := networkinfo.NewNetworkInfoListener(db, signumClient, wg, shutdownChannel)
+	priceManager := prices.NewPricesManager(db, cmcClient, wg, shutdownChannel,
+		&prices.Config{
+			SamplePeriod:      20 * time.Minute,
+			SmoothingFactor:   6, // samples for averaging
+			SaveEveryNSamples: 3, // 3 * 20 min = 1 hour
+			ScanQuantity:      20,
+			DelayFuncK:        28 * time.Minute,   // kx + b: 1 week ~ 1 h between samples
+			DelayFuncB:        -136 * time.Minute, // 1 year ~ 1 week
+		})
+	networkInfoListener := networkinfo.NewNetworkInfoListener(db, signumClient, wg, shutdownChannel,
+		&networkinfo.Config{
+			SamplePeriod:          time.Hour,
+			AveragingDaysQuantity: 7, // during 7 days
+			SaveEveryNSamples:     3, // 3 * 1 hour = 3 hours
+			SmoothingFactor:       6, // samples for averaging
+			ScanQuantity:          20,
+			DelayFuncK:            84 * time.Minute,   // kx + b: 1 week ~ 3 h between samples
+			DelayFuncB:            -408 * time.Minute, // 1 year ~ 3 week
+		})
 
 	bot := &TelegramBot{
 		AbstractTelegramBot: &AbstractTelegramBot{
@@ -108,6 +143,8 @@ func (bot *TelegramBot) Shutdown() {
 
 	bot.StopReceivingUpdates()
 	close(bot.shutdownChannel)
+
+	bot.wg.Wait()
 
 	sqlDB, err := bot.db.DB()
 	if err == nil {

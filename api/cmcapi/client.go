@@ -12,19 +12,30 @@ type CmcClient struct {
 	sync.RWMutex
 	lastReqTimestamp time.Time
 	cachedValues     map[string]quote
+	config           *Config
 }
 
-func NewCmcClient(host string, debug bool) *CmcClient {
+type Config struct {
+	Host      string
+	FreeLimit int
+	CacheTtl  time.Duration
+	Debug     bool
+}
+
+func NewCmcClient(config *Config) *CmcClient {
+	abstractConfig := abstractapi.Config{
+		ApiHosts:      []string{config.Host},
+		StaticHeaders: map[string]string{"X-CMC_PRO_API_KEY": os.Getenv("CMC_PRO_API_KEY")},
+		Debug:         config.Debug,
+	}
 	return &CmcClient{
-		AbstractApiClient: abstractapi.NewAbstractApiClient(
-			[]string{host},
-			map[string]string{"X-CMC_PRO_API_KEY": os.Getenv("CMC_PRO_API_KEY")},
-			debug),
-		RWMutex:          sync.RWMutex{},
-		lastReqTimestamp: time.Time{},
+		AbstractApiClient: abstractapi.NewAbstractApiClient(&abstractConfig),
+		RWMutex:           sync.RWMutex{},
+		lastReqTimestamp:  time.Time{},
 		cachedValues: map[string]quote{
 			"BTC":   {},
 			"SIGNA": {},
 		},
+		config: config,
 	}
 }

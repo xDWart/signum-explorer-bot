@@ -2,9 +2,9 @@ package internal
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/prices"
+	"github.com/xDWart/signum-explorer-bot/internal/users"
 	"log"
 	"os"
 	"strings"
@@ -77,7 +77,7 @@ func (bot *TelegramPriceBot) startBotListener() {
 			message := update.Message
 
 			if message != nil {
-				userAnswer := &common.BotMessage{}
+				userAnswer := &users.BotMessage{}
 				switch true {
 				case strings.HasPrefix(message.Text, config.COMMAND_P):
 					userAnswer.MainText = bot.priceManager.GetActualPrices()

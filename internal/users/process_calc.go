@@ -2,9 +2,9 @@ package users
 
 import (
 	"fmt"
+	calculator2 "github.com/xDWart/signum-explorer-bot/internal/calculator"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
-	"github.com/xDWart/signum-explorer-bot/internal/users/calculator"
 	"strconv"
 	"strings"
 )
@@ -61,10 +61,10 @@ func (user *User) calculate(tib, commit float64) string {
 	lastMiningInfo := user.networkInfoListener.GetLastMiningInfo()
 
 	if commit > 0 {
-		calcResult := calculator.Calculate(&lastMiningInfo, tib, commit)
-		reinvestmentCalcResult := calculator.CalculateReinvestment(&lastMiningInfo, calcResult)
+		calcResult := calculator2.Calculate(&lastMiningInfo, tib, commit)
+		reinvestmentCalcResult := calculator2.CalculateReinvestment(&lastMiningInfo, calcResult)
 
-		return fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB with %v SIGNA ($%v) commitment:</b>"+
+		return fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB (%.2f TB) with %v SIGNA ($%v) commitment:</b>"+
 			"\nAverage Network Commitment during the last %v days: %v SIGNA / TiB"+
 			"\nYour Commitment: %v SIGNA / TiB"+
 			"\nYour Capacity Multiplier: %v"+
@@ -78,8 +78,8 @@ func (user *User) calculate(tib, commit float64) string {
 			"\nDaily: %v SIGNA (+%v%%)"+
 			"\nMonthly: %v SIGNA (+%v%%)"+
 			"\nYearly: %v SIGNA (+%v%%)",
-			calcResult.TiB, common.FormatNumber(calcResult.Commitment, 0), common.FormatNumber(calcResult.Commitment*signaPrice, 0),
-			config.SIGNUM_API.AVERAGING_DAYS_QUANTITY, common.FormatNumber(lastMiningInfo.AverageCommitment, 0),
+			calcResult.TiB, calcResult.TiB/0.909495, common.FormatNumber(calcResult.Commitment, 0), common.FormatNumber(calcResult.Commitment*signaPrice, 0),
+			user.networkInfoListener.Config.AveragingDaysQuantity, common.FormatNumber(lastMiningInfo.AverageCommitment, 0),
 			common.FormatNumber(calcResult.MyCommitmentPerTiB, 0),
 			common.FormatNumber(calcResult.CapacityMultiplier, 3),
 			common.FormatNumber(calcResult.EffectiveCapacity, 2),
@@ -94,13 +94,13 @@ func (user *User) calculate(tib, commit float64) string {
 		)
 	}
 
-	entireRangeCalculation := calculator.CalculateEntireRange(&lastMiningInfo, tib)
-	result := fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB for the entire commitment range:</b>"+
+	entireRangeCalculation := calculator2.CalculateEntireRange(&lastMiningInfo, tib)
+	result := fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB (%.2f TB) for the entire commitment range:</b>"+
 		"\nAverage Network Commitment during the last %v days: %v SIGNA / TiB"+
-		"\n\n<b>Capacity multipliers, commitment and mining rewards:</b>", tib,
-		config.SIGNUM_API.AVERAGING_DAYS_QUANTITY, common.FormatNumber(lastMiningInfo.AverageCommitment, 0))
+		"\n\n<b>Capacity multipliers, commitment and mining rewards:</b>", tib, tib/0.909495,
+		user.networkInfoListener.Config.AveragingDaysQuantity, common.FormatNumber(lastMiningInfo.AverageCommitment, 0))
 
-	for _, multiplier := range calculator.MultipliersList {
+	for _, multiplier := range calculator2.MultipliersList {
 		var minMax string
 		if multiplier == 0.125 {
 			minMax = " (min)"

@@ -7,45 +7,51 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type AbstractApiClient struct {
-	http *http.Client
-
-	// config
-	Debug         bool
-	apiHosts      []string
-	staticHeaders map[string]string
+	http   *http.Client
+	config *Config
 }
 
-func NewAbstractApiClient(apiHosts []string, staticHeaders map[string]string, debug bool) *AbstractApiClient {
+func NewAbstractApiClient(config *Config) *AbstractApiClient {
+	if config == nil || len(config.ApiHosts) == 0 {
+		log.Fatalf("No api hosts specified")
+	}
+	config.apiHostsLatencies = make([]time.Duration, len(config.ApiHosts))
+
 	return &AbstractApiClient{
-		http:          &http.Client{},
-		Debug:         debug,
-		apiHosts:      apiHosts,
-		staticHeaders: staticHeaders,
+		http:   &http.Client{},
+		config: config,
 	}
 }
 
 func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
-	if c.Debug {
-		secretPhrase, ok := urlParams["secretPhrase"]
-		if ok {
-			delete(urlParams, "secretPhrase")
-		}
-		log.Printf("Will request %v %v with params: %v", httpMethod, method, urlParams)
-		if ok {
-			urlParams["secretPhrase"] = secretPhrase
-		}
-	}
-
+	var bestIndex int
 	var lastErr error
-	for index, host := range c.apiHosts {
-		if lastErr != nil && c.Debug {
-			log.Printf("AbstractApiClient.makeJsonReq error: %v", lastErr)
+	for index := 0; index < len(c.config.ApiHosts); index++ {
+		var host string
+		if lastErr != nil && c.config.Debug {
+			log.Printf("AbstractApiClient.DoJsonReq error: %v", lastErr)
 		}
-		if index > 0 && httpMethod == "POST" {
-			return lastErr
+		if index > 0 {
+			c.config.penaltyTheHost(bestIndex)
+			if httpMethod == "POST" {
+				return lastErr
+			}
+		}
+		host, bestIndex = c.config.getBestHost()
+
+		if c.config.Debug {
+			secretPhrase, ok := urlParams["secretPhrase"]
+			if ok {
+				delete(urlParams, "secretPhrase")
+			}
+			log.Printf("Will request %v %v%v with params: %v", httpMethod, host, method, urlParams)
+			if ok {
+				urlParams["secretPhrase"] = secretPhrase
+			}
 		}
 
 		req, err := http.NewRequest(httpMethod, host+method, nil)
@@ -55,7 +61,7 @@ func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParam
 		}
 
 		req.Header.Set("Accepts", "application/json")
-		for key, value := range c.staticHeaders {
+		for key, value := range c.config.StaticHeaders {
 			req.Header.Add(key, value)
 		}
 		for key, value := range additionalHeaders {
@@ -68,6 +74,7 @@ func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParam
 		}
 		req.URL.RawQuery = q.Encode()
 
+		startTime := time.Now()
 		resp, err := c.http.Do(req)
 		if err != nil {
 			lastErr = fmt.Errorf("error perform %v %v: %v", httpMethod, host+method, err)
@@ -90,7 +97,11 @@ func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParam
 			lastErr = fmt.Errorf("couldn't unmarshal body of %v: %v", host+method, err)
 			continue
 		}
+		latency := time.Since(startTime)
+		c.config.appendLatencyToHost(latency, bestIndex)
+
 		return nil
 	}
+	c.config.penaltyTheHost(bestIndex)
 	return fmt.Errorf("couldn't get %v method: %v", method, lastErr)
 }

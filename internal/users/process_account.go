@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (user *User) getAccountInfoMessage(accountS string) (*common.BotMessage, error) {
+func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
 	if !config.ValidAccountRS.MatchString(accountS) && !config.ValidAccount.MatchString(accountS) {
 		return nil, fmt.Errorf("🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>")
 	}
@@ -40,7 +40,7 @@ func (user *User) getAccountInfoMessage(accountS string) (*common.BotMessage, er
 
 	inlineKeyboard := user.GetAccountKeyboard(account.Account)
 
-	return &common.BotMessage{
+	return &BotMessage{
 		InlineText:     inlineText,
 		InlineKeyboard: inlineKeyboard,
 	}, nil
@@ -76,7 +76,7 @@ func (user *User) addAccount(newAccount string) (*models.DbAccount, string) {
 		user.ResetState()
 		return userAccount, "🚫 This account already exists in menu"
 	}
-	if len(user.Accounts) >= config.COMMON.MAX_NUM_OF_ACCOUNTS {
+	if len(user.Accounts) >= 6 {
 		user.ResetState()
 		return nil, "🚫 The maximum number of accounts has been exceeded"
 	}

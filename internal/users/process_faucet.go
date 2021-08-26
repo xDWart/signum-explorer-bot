@@ -13,7 +13,7 @@ import (
 )
 
 func (user *User) ProcessFaucet(message string) string {
-	faucetAccount, err := user.signumClient.GetCachedAccount(config.FAUCET.ACCOUNT)
+	faucetAccount, err := user.signumClient.GetCachedAccount(config.FAUCET_ACCOUNT)
 	if err != nil {
 		return fmt.Sprintf("🚫 Something went wrong, could not get the faucet account balance: %v", err)
 	}
@@ -21,10 +21,10 @@ func (user *User) ProcessFaucet(message string) string {
 	if message == config.COMMAND_FAUCET {
 		usingMessage := fmt.Sprintf("<b>❗The faucet can be used no more than once every %v days per each Telegram account</b>"+
 			"\nPlease send me your Signum Account (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) which you want to receive faucet payment:",
-			config.FAUCET.DAYS_PERIOD)
+			config.FAUCET_DAYS_PERIOD)
 
-		if time.Since(user.LastFaucetClaim) < 24*time.Hour*time.Duration(config.FAUCET.DAYS_PERIOD) {
-			usingMessage = fmt.Sprintf("🚫 Sorry, you cannot get paid, you have used the faucet less than %v days ago!", config.FAUCET.DAYS_PERIOD)
+		if time.Since(user.LastFaucetClaim) < 24*time.Hour*time.Duration(config.FAUCET_DAYS_PERIOD) {
+			usingMessage = fmt.Sprintf("🚫 Sorry, you cannot get paid, you have used the faucet less than %v days ago!", config.FAUCET_DAYS_PERIOD)
 		} else {
 			user.state = FAUCET_STATE
 		}
@@ -46,7 +46,7 @@ func (user *User) ProcessFaucet(message string) string {
 			"\nFaucet totaly received <i>%v SIGNA</i> donations"+
 			"\nFaucet sent <i>%v SIGNA</i> to %v accounts"+
 			"\n\n%v",
-			config.FAUCET.ACCOUNT,
+			config.FAUCET_ACCOUNT,
 			common.FormatNumber(faucetAccount.TotalBalance, 2),
 			common.FormatNumber(totalDonation.Sum, 2),
 			common.FormatNumber(totalFaucets.Sum, 2), totalFaucets.Count,
@@ -73,9 +73,9 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 	}
 
 	if user.ID > 1 {
-		if time.Since(user.LastFaucetClaim) < 24*time.Hour*time.Duration(config.FAUCET.DAYS_PERIOD) {
+		if time.Since(user.LastFaucetClaim) < 24*time.Hour*time.Duration(config.FAUCET_DAYS_PERIOD) {
 			user.ResetState()
-			return false, fmt.Sprintf("🚫 Sorry, you have used the faucet less than %v days ago!", config.FAUCET.DAYS_PERIOD)
+			return false, fmt.Sprintf("🚫 Sorry, you have used the faucet less than %v days ago!", config.FAUCET_DAYS_PERIOD)
 		}
 
 		// if it's valid but not activated account send faucet anyway
@@ -96,7 +96,7 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 		}
 	}
 
-	var amount = config.FAUCET.DEFAULT_ORDINARY_AMOUNT
+	var amount = 0.02 // DEFAULT_ORDINARY_AMOUNT
 	ordinaryFaucetAmount := models.Config{Name: config.DB_CONFIG_ORDINARY_FAUCET_AMOUNT}
 	user.db.Where(&ordinaryFaucetAmount).First(&ordinaryFaucetAmount)
 	if ordinaryFaucetAmount.ValueF > 0 {

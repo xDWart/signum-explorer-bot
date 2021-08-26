@@ -21,7 +21,7 @@ func (c *SignumApiClient) readAccountTransactionsFromCache(account string, trans
 		}
 	}
 	c.localTransactionsCache.RUnlock()
-	if transactions != nil && time.Since(transactions.LastUpdateTime) < c.cacheTtl {
+	if transactions != nil && time.Since(transactions.LastUpdateTime) < c.config.CacheTtl {
 		return transactions
 	}
 	return nil

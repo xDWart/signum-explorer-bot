@@ -32,17 +32,25 @@ type SignumApiClient struct {
 	localAccountCache      AccountCache
 	localTransactionsCache TransactionsCache
 	localBlocksCache       BlocksCache
-
-	// config
-	cacheTtl time.Duration
+	config                 *Config
 }
 
-func NewSignumApiClient(apiHosts []string, cacheTtl time.Duration, debug bool) *SignumApiClient {
+type Config struct {
+	Debug    bool
+	ApiHosts []string
+	CacheTtl time.Duration
+}
+
+func NewSignumApiClient(config *Config) *SignumApiClient {
+	abstractConfig := abstractapi.Config{
+		ApiHosts: config.ApiHosts,
+		Debug:    config.Debug,
+	}
 	return &SignumApiClient{
-		AbstractApiClient:      abstractapi.NewAbstractApiClient(apiHosts, nil, debug),
+		AbstractApiClient:      abstractapi.NewAbstractApiClient(&abstractConfig),
 		localAccountCache:      AccountCache{sync.RWMutex{}, map[string]*Account{}},
 		localTransactionsCache: TransactionsCache{sync.RWMutex{}, map[string]map[TransactionType]map[TransactionSubType]*AccountTransactions{}},
 		localBlocksCache:       BlocksCache{sync.RWMutex{}, map[string]*AccountBlocks{}},
-		cacheTtl:               cacheTtl,
+		config:                 config,
 	}
 }

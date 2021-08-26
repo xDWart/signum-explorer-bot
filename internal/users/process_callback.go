@@ -14,9 +14,9 @@ import (
 	"time"
 )
 
-func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *common.BotMessage {
+func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *BotMessage {
 	var callbackData callbackdata.QueryDataType
-	var answerBotMessage = &common.BotMessage{}
+	var answerBotMessage = &BotMessage{}
 
 	// NB: iOS Telegram repeats callbacks on device blocking
 	if user.lastCallbackData == callbackQuery.Data &&
@@ -61,7 +61,7 @@ func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *common
 	}
 
 	if err != nil {
-		return &common.BotMessage{MainText: err.Error()}
+		return &BotMessage{MainText: err.Error()}
 	}
 
 	answerBotMessage.MessageID = callbackQuery.Message.MessageID
@@ -69,7 +69,7 @@ func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *common
 	return answerBotMessage
 }
 
-func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataType) (*common.BotMessage, error) {
+func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataType) (*BotMessage, error) {
 	backInlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(
@@ -108,7 +108,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			}
 		}
 
-		return &common.BotMessage{
+		return &BotMessage{
 			InlineText:     newInlineText,
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
@@ -137,7 +137,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 				timeSinceStr, block.Height, block.BlockReward)
 		}
 
-		return &common.BotMessage{
+		return &BotMessage{
 			InlineText:     newInlineText,
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
@@ -161,7 +161,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			}
 		}
 
-		return &common.BotMessage{
+		return &BotMessage{
 			InlineText:     newInlineText,
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
@@ -186,7 +186,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 
 		}
 
-		return &common.BotMessage{
+		return &BotMessage{
 			InlineText:     newInlineText,
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
@@ -214,7 +214,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			}
 		}
 
-		return &common.BotMessage{
+		return &BotMessage{
 			InlineText:     newInlineText,
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
@@ -246,7 +246,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		user.db.Save(userAccount)
 
 		// and update a keyboard to change icon
-		return &common.BotMessage{
+		return &BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
 			MainText:       fmt.Sprintf("💸 Enabled %v payment transaction notifications for <b>%v</b>", txType, userAccount.AccountRS),
 			MainMenu:       user.GetMainMenu(),
@@ -271,7 +271,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		user.db.Save(userAccount)
 
 		// and update a keyboard to change icon
-		return &common.BotMessage{
+		return &BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
 			MainText:       fmt.Sprintf("💸 Disabled %v payment transaction notifications for <b>%v</b>", txType, userAccount.AccountRS),
 		}, nil
@@ -294,7 +294,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}
 
 		// and update a keyboard to change icon
-		return &common.BotMessage{
+		return &BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
 			MainText:       fmt.Sprintf("💽 Enabled new block notifications for <b>%v</b>", userAccount.AccountRS),
 			MainMenu:       user.GetMainMenu(),
@@ -308,7 +308,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}
 
 		// and update a keyboard to change icon
-		return &common.BotMessage{
+		return &BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
 			MainText:       fmt.Sprintf("💽 Disabled new block notifications for <b>%v</b>", userAccount.AccountRS),
 		}, nil
@@ -332,7 +332,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}
 
 		// and update a keyboard to change icon
-		return &common.BotMessage{
+		return &BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
 			MainText:       fmt.Sprintf("📝 Enabled other transaction notifications for <b>%v</b>", userAccount.AccountRS),
 			MainMenu:       user.GetMainMenu(),
@@ -346,7 +346,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}
 
 		// and update a keyboard to change icon
-		return &common.BotMessage{
+		return &BotMessage{
 			InlineKeyboard: user.GetAccountKeyboard(account.Account),
 			MainText:       fmt.Sprintf("📝 Disabled other transaction notifications for <b>%v</b>", userAccount.AccountRS),
 		}, nil

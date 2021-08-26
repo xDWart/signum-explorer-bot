@@ -1,7 +1,6 @@
 package prices
 
 import (
-	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"log"
 	"sync"
@@ -12,10 +11,10 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 	defer wg.Done()
 
 	log.Printf("Start Price Listener")
-	ticker := time.NewTicker(config.CMC_API.SAMPLE_PERIOD)
+	ticker := time.NewTicker(pm.config.SamplePeriod)
 
 	var sampleIndex uint
-	samplesForAveraging := make([]*models.Price, config.CMC_API.SMOOTHING_FACTOR)
+	samplesForAveraging := make([]*models.Price, pm.config.SmoothingFactor)
 	var timeToSave uint
 	var scanIndex int
 
@@ -32,8 +31,8 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 				SignaPrice: prices["SIGNA"].Price,
 				BtcPrice:   prices["BTC"].Price,
 			}
-			sampleIndex = (sampleIndex + 1) % config.CMC_API.SMOOTHING_FACTOR
-			timeToSave = (timeToSave + 1) % config.CMC_API.SAVE_EVERY_N_SAMPLES
+			sampleIndex = (sampleIndex + 1) % pm.config.SmoothingFactor
+			timeToSave = (timeToSave + 1) % pm.config.SaveEveryNSamples
 
 			if timeToSave == 0 {
 				dbPrice := models.Price{}
@@ -52,7 +51,7 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 
 				// scan prices and thin out an old ones
 				var scannedPrices []*models.Price
-				pm.db.Order("id asc").Limit(config.CMC_API.SCAN_QUANTITY).Offset(scanIndex * config.CMC_API.SCAN_QUANTITY).Find(&scannedPrices)
+				pm.db.Order("id asc").Limit(pm.config.ScanQuantity).Offset(scanIndex * pm.config.ScanQuantity).Find(&scannedPrices)
 				if len(scannedPrices) == 0 {
 					scanIndex = 0
 				} else {
@@ -60,7 +59,7 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 						price0 := scannedPrices[i-1]
 						price1 := scannedPrices[i]
 						X := time.Since(price0.CreatedAt) / time.Hour / 24
-						delayM := config.CMC_API.DELAY_FUNC_K*X + config.CMC_API.DELAY_FUNC_B
+						delayM := pm.config.DelayFuncK*X + pm.config.DelayFuncB
 						if price1.CreatedAt.Sub(price0.CreatedAt) < delayM {
 							price0.SignaPrice = (price0.SignaPrice + price1.SignaPrice) / 2
 							price0.BtcPrice = (price0.BtcPrice + price1.BtcPrice) / 2

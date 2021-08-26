@@ -1,9 +1,12 @@
 package config
 
-import "time"
+import (
+	"regexp"
+	"time"
+)
 
 const NAME = "<b>🚀 Signum Explorer Bot</b>"
-const VERSION = "<i>v.0.9.1</i>"
+const VERSION = "<i>v.0.9.2</i>"
 
 const (
 	COMMAND_START    = "/start"
@@ -59,3 +62,9 @@ const (
 	DB_CONFIG_NEW_USERS_EXTRA_FAUCET = "NEW_USERS_EXTRA_FAUCET"
 	DB_CONFIG_EXTRA_FAUCET_AMOUNT    = "EXTRA_FAUCET_AMOUNT"
 )
+
+const FAUCET_ACCOUNT = "S-8N2F-TDD7-4LY6-64FZ7"
+const FAUCET_DAYS_PERIOD = 7
+
+var ValidAccount = regexp.MustCompile(`^[0-9]{1,}$`)
+var ValidAccountRS = regexp.MustCompile(`^(S|BURST)-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{5}$`)

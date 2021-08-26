@@ -9,8 +9,6 @@ import (
 // Free basic plan 10.000 req per month = 333 per day = no more than one request per 5 minutes
 // 1 call credit per 200 cryptocurrencies returned (rounded up)
 // and 1 call credit per convert option beyond the first but free basic plan is limited to 1 convert options only
-const FREE_LIMIT = "200"
-const CACHE_TTL =  5 * time.Minute
 
 type listings struct {
 	Data []struct {
@@ -27,10 +25,10 @@ type quote struct {
 	PercentChange24h float64 `json:"percent_change_24h"`
 }
 
-func (c *CmcClient) getListings(start string) (*listings, error) {
+func (c *CmcClient) getListings(start int) (*listings, error) {
 	var listings listings
 	err := c.DoJsonReq("GET", "/cryptocurrency/listings/latest",
-		map[string]string{"start": start, "limit": FREE_LIMIT, "convert": "USD", "cryptocurrency_type": "coins"},
+		map[string]string{"start": fmt.Sprint(start), "limit": fmt.Sprint(c.config.FreeLimit), "convert": "USD", "cryptocurrency_type": "coins"},
 		nil,
 		&listings)
 	if err != nil {
@@ -43,14 +41,14 @@ func (c *CmcClient) getListings(start string) (*listings, error) {
 }
 
 func (c *CmcClient) updateListings() error {
-	listings, err := c.getListings("1")
+	listings, err := c.getListings(1)
 	if err != nil {
 		return err
 	}
 
 	if !c.updateCachedValues(listings) {
-		log.Printf("Not all symbols have been found in a first %v coins, will request more coins", FREE_LIMIT)
-		listings, err := c.getListings(FREE_LIMIT)
+		log.Printf("Not all symbols have been found in a first %v coins, will request more coins", c.config.FreeLimit)
+		listings, err := c.getListings(c.config.FreeLimit)
 		if err != nil {
 			return err
 		}
@@ -82,7 +80,7 @@ func (c *CmcClient) GetPrices() map[string]quote {
 	prices := map[string]quote{}
 
 	c.RLock()
-	if time.Since(c.lastReqTimestamp) <= CACHE_TTL {
+	if time.Since(c.lastReqTimestamp) <= c.config.CacheTtl {
 		prices["BTC"] = c.cachedValues["BTC"]
 		prices["SIGNA"] = c.cachedValues["SIGNA"]
 		c.RUnlock()
@@ -92,7 +90,7 @@ func (c *CmcClient) GetPrices() map[string]quote {
 
 	c.Lock()
 	// cache may already be updated to this moment, need check it again
-	if time.Since(c.lastReqTimestamp) > CACHE_TTL {
+	if time.Since(c.lastReqTimestamp) > c.config.CacheTtl {
 		err := c.updateListings()
 		if err != nil {
 			log.Printf("Update CMC listenings error: %v", err)

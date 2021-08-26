@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
-	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"gorm.io/gorm"
 	"log"
@@ -17,15 +16,27 @@ type NetworkInfoListener struct {
 	sync.RWMutex
 	signumClient   *signumapi.SignumApiClient
 	lastMiningInfo signumapi.MiningInfo
+	Config         *Config
 }
 
-var averageCount = 24 * config.SIGNUM_API.AVERAGING_DAYS_QUANTITY * int(time.Hour/config.SIGNUM_API.SAMPLE_PERIOD)
+type Config struct {
+	AveragingDaysQuantity int
+	SamplePeriod          time.Duration
+	SaveEveryNSamples     int
+	SmoothingFactor       int
+	ScanQuantity          int
+	DelayFuncK            time.Duration
+	DelayFuncB            time.Duration
+	averageCount          int
+}
 
-func NewNetworkInfoListener(db *gorm.DB, signumClient *signumapi.SignumApiClient, wg *sync.WaitGroup, shutdownChannel chan interface{}) *NetworkInfoListener {
+func NewNetworkInfoListener(db *gorm.DB, signumClient *signumapi.SignumApiClient, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *NetworkInfoListener {
+	config.averageCount = 24 * config.AveragingDaysQuantity * int(time.Hour/config.SamplePeriod)
 	networkListener := &NetworkInfoListener{
 		db:             db,
 		signumClient:   signumClient,
 		lastMiningInfo: signumapi.DEFAULT_MINING_INFO,
+		Config:         config,
 	}
 	networkListener.readAvgValueFromDB()
 	wg.Add(1)
@@ -35,7 +46,7 @@ func NewNetworkInfoListener(db *gorm.DB, signumClient *signumapi.SignumApiClient
 
 func (ni *NetworkInfoListener) readAvgValueFromDB() {
 	var networkInfos []models.NetworkInfo
-	result := ni.db.Order("id desc").Limit(averageCount / config.SIGNUM_API.SAVE_EVERY_N_SAMPLES).Find(&networkInfos)
+	result := ni.db.Order("id desc").Limit(ni.Config.averageCount / ni.Config.SaveEveryNSamples).Find(&networkInfos)
 	if result.Error != nil {
 		log.Printf("Error getting Network Info from DB: %v", result.Error)
 		return
@@ -68,9 +79,9 @@ func (ni *NetworkInfoListener) StartNetworkInfoListener(wg *sync.WaitGroup, shut
 	defer wg.Done()
 
 	log.Printf("Start Network Info Listener")
-	ticker := time.NewTicker(config.SIGNUM_API.SAMPLE_PERIOD)
+	ticker := time.NewTicker(ni.Config.SamplePeriod)
 
-	samplesForAveraging := make([]*signumapi.MiningInfo, config.SIGNUM_API.SMOOTHING_FACTOR)
+	samplesForAveraging := make([]*signumapi.MiningInfo, ni.Config.SmoothingFactor)
 
 	sampleIndex, timeToSave, scanIndex := ni.getMiningInfo(samplesForAveraging, 0, 0, 0)
 	for {
@@ -99,13 +110,13 @@ func (ni *NetworkInfoListener) getMiningInfo(samplesForAveraging []*signumapi.Mi
 	prevCommitment := ni.lastMiningInfo.AverageCommitment
 	prevDifficulty := ni.lastMiningInfo.AverageNetworkDifficulty
 	ni.lastMiningInfo = *miningInfo
-	ni.lastMiningInfo.AverageCommitment = (prevCommitment*float64(averageCount-1) + miningInfo.ActualCommitment) / float64(averageCount)
-	ni.lastMiningInfo.AverageNetworkDifficulty = (prevDifficulty*float64(averageCount-1) + miningInfo.ActualNetworkDifficulty) / float64(averageCount)
+	ni.lastMiningInfo.AverageCommitment = (prevCommitment*float64(ni.Config.averageCount-1) + miningInfo.ActualCommitment) / float64(ni.Config.averageCount)
+	ni.lastMiningInfo.AverageNetworkDifficulty = (prevDifficulty*float64(ni.Config.averageCount-1) + miningInfo.ActualNetworkDifficulty) / float64(ni.Config.averageCount)
 	ni.Unlock()
 
 	samplesForAveraging[sampleIndex] = miningInfo
-	sampleIndex = (sampleIndex + 1) % config.SIGNUM_API.SMOOTHING_FACTOR
-	timeToSave = (timeToSave + 1) % config.SIGNUM_API.SAVE_EVERY_N_SAMPLES
+	sampleIndex = (sampleIndex + 1) % ni.Config.SmoothingFactor
+	timeToSave = (timeToSave + 1) % ni.Config.SaveEveryNSamples
 
 	if timeToSave == 0 {
 		dbNetworkInfo := models.NetworkInfo{}
@@ -124,7 +135,7 @@ func (ni *NetworkInfoListener) getMiningInfo(samplesForAveraging []*signumapi.Mi
 
 		// scan prices and thin out an old ones
 		var scannedNetworkInfos []*models.NetworkInfo
-		ni.db.Order("id asc").Limit(config.SIGNUM_API.SCAN_QUANTITY).Offset(scanIndex * config.SIGNUM_API.SCAN_QUANTITY).Find(&scannedNetworkInfos)
+		ni.db.Order("id asc").Limit(ni.Config.ScanQuantity).Offset(scanIndex * ni.Config.ScanQuantity).Find(&scannedNetworkInfos)
 		if len(scannedNetworkInfos) == 0 {
 			scanIndex = 0
 		} else {
@@ -132,7 +143,7 @@ func (ni *NetworkInfoListener) getMiningInfo(samplesForAveraging []*signumapi.Mi
 				networkInfo0 := scannedNetworkInfos[i-1]
 				networkInfo1 := scannedNetworkInfos[i]
 				X := time.Since(networkInfo0.CreatedAt) / time.Hour / 24
-				delayM := config.SIGNUM_API.DELAY_FUNC_K*X + config.SIGNUM_API.DELAY_FUNC_B
+				delayM := ni.Config.DelayFuncK*X + ni.Config.DelayFuncB
 				if networkInfo1.CreatedAt.Sub(networkInfo0.CreatedAt) < delayM {
 					networkInfo0.AverageCommitment = (networkInfo0.AverageCommitment + networkInfo1.AverageCommitment) / 2
 					networkInfo0.NetworkDifficulty = (networkInfo0.NetworkDifficulty + networkInfo1.NetworkDifficulty) / 2
@@ -154,7 +165,7 @@ func (ni *NetworkInfoListener) GetNetworkInfo() string {
 		"\n\n<b>Network statistic at the moment:</b>"+
 		"\nDifficulty: %.2f PiB"+
 		"\nCommitment: %v SIGNA / TiB",
-		config.SIGNUM_API.AVERAGING_DAYS_QUANTITY,
+		ni.Config.AveragingDaysQuantity,
 		miningInfo.AverageNetworkDifficulty/1024, common.FormatNumber(miningInfo.AverageCommitment, 0),
 		miningInfo.ActualNetworkDifficulty/1024, common.FormatNumber(miningInfo.ActualCommitment, 0))
 }

@@ -14,7 +14,7 @@ func (c *SignumApiClient) readAccountFromCache(accountS string) *Account {
 	c.localAccountCache.RLock()
 	account := c.localAccountCache.cache[accountS]
 	c.localAccountCache.RUnlock()
-	if account != nil && time.Since(account.LastUpdateTime) < c.cacheTtl {
+	if account != nil && time.Since(account.LastUpdateTime) < c.config.CacheTtl {
 		return account
 	}
 	return nil
