@@ -7,6 +7,7 @@ import (
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"log"
+	"strings"
 	"sync"
 	"time"
 )
@@ -184,6 +185,18 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 			continue
 		}
 
+		var message string
+		if transaction.Attachment.MessageIsText && transaction.Attachment.Message != "" {
+			if len([]rune(transaction.Attachment.Message)) > 32 {
+				transaction.Attachment.Message = string([]rune(transaction.Attachment.Message)[:32])
+				transaction.Attachment.Message = strings.ReplaceAll(transaction.Attachment.Message, "\n", " ")
+				transaction.Attachment.Message += "..."
+			}
+			message = fmt.Sprintf("\n<i>Message:</i> %v", transaction.Attachment.Message)
+		} else if transaction.Attachment.EncryptedMessage != nil {
+			message = fmt.Sprintf("\n<i>Message:</i> [encrypted]")
+		}
+
 		var amount float64
 		var outgoAccount string
 		var outgoAccountRS string
@@ -193,15 +206,19 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Ordinary"+
-					"\n<i>Sender:</i> %v"+name+
+					"\n<i>Sender:</i> %v"+
+					name+
 					"\n<i>Amount:</i> +%v SIGNA"+
+					message+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			} else {
 				msg += fmt.Sprintf("new outgo:"+
 					"\n<i>Payment:</i> Ordinary"+
-					"\n<i>Recipient:</i> %v"+name+
+					"\n<i>Recipient:</i> %v"+
+					name+
 					"\n<i>Amount:</i> -%v SIGNA"+
+					message+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.RecipientRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 				outgoAccount = transaction.Recipient
@@ -212,8 +229,10 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 				amount = transaction.Attachment.Recipients.FoundMyAmount(account.Account)
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out"+
-					"\n<i>Sender:</i> %v"+name+
+					"\n<i>Sender:</i> %v"+
+					name+
 					"\n<i>Amount:</i> +%v SIGNA"+
+					message+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			} else {
@@ -222,6 +241,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Payment:</i> Multi-out"+
 					"\n<i>Recipients:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
+					message+
 					"\n<i>Fee:</i> %v SIGNA",
 					len(transaction.Attachment.Recipients), common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			}
@@ -230,8 +250,10 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 				amount = transaction.AmountNQT / 1e8 / float64(len(transaction.Attachment.Recipients))
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out same"+
-					"\n<i>Sender:</i> %v"+name+
+					"\n<i>Sender:</i> %v"+
+					name+
 					"\n<i>Amount:</i> +%v SIGNA"+
+					message+
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			} else {
@@ -240,6 +262,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Payment:</i> Multi-out same"+
 					"\n<i>Recipients:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
+					message+
 					"\n<i>Fee:</i> %v SIGNA",
 					len(transaction.Attachment.Recipients), common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			}

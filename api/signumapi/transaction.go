@@ -17,10 +17,11 @@ type Transaction struct {
 	Sender        string             `json:"sender"`
 	SenderRS      string             `json:"senderRS"`
 	Attachment    struct {
-		Recipients    RecipientsType `json:"recipients"`
-		AmountNQT     float64        `json:"amountNQT"`
-		Message       string         `json:"message"`
-		MessageIsText bool           `json:"messageIsText"`
+		Recipients       RecipientsType `json:"recipients"`
+		AmountNQT        float64        `json:"amountNQT"`
+		Message          string         `json:"message"`
+		MessageIsText    bool           `json:"messageIsText"`
+		EncryptedMessage interface{}    `json:"encryptedMessage"`
 		// VersionMultiOutCreation          byte           `json:"version.MultiOutCreation"`
 		// VersionCommitmentAdd             byte           `json:"version.CommitmentAdd"`
 		// VersionRewardRecipientAssignment byte           `json:"version.RewardRecipientAssignment"`
