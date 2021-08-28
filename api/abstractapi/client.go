@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"time"
@@ -21,6 +22,10 @@ func NewAbstractApiClient(config *Config) *AbstractApiClient {
 	}
 	config.apiHostsLatencies = make([]time.Duration, len(config.ApiHosts))
 
+	if config.SortingType == RANDOM {
+		rand.Seed(time.Now().UnixNano())
+	}
+
 	return &AbstractApiClient{
 		http:   &http.Client{},
 		config: config,
@@ -28,7 +33,7 @@ func NewAbstractApiClient(config *Config) *AbstractApiClient {
 }
 
 func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
-	var bestIndex int
+	var currIndex = -1
 	var lastErr error
 	for index := 0; index < len(c.config.ApiHosts); index++ {
 		var host string
@@ -36,12 +41,12 @@ func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParam
 			log.Printf("AbstractApiClient.DoJsonReq error: %v", lastErr)
 		}
 		if index > 0 {
-			c.config.penaltyTheHost(bestIndex)
+			c.config.penaltyTheHost(currIndex)
 			if httpMethod == "POST" {
 				return lastErr
 			}
 		}
-		host, bestIndex = c.config.getBestHost()
+		host, currIndex = c.config.getNextHost(currIndex)
 
 		if c.config.Debug {
 			secretPhrase, ok := urlParams["secretPhrase"]
@@ -98,10 +103,10 @@ func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParam
 			continue
 		}
 		latency := time.Since(startTime)
-		c.config.appendLatencyToHost(latency, bestIndex)
+		c.config.appendLatencyToHost(latency, currIndex)
 
 		return nil
 	}
-	c.config.penaltyTheHost(bestIndex)
+	c.config.penaltyTheHost(currIndex)
 	return fmt.Errorf("couldn't get %v method: %v", method, lastErr)
 }

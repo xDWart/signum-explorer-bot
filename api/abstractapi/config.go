@@ -1,35 +1,62 @@
 package abstractapi
 
 import (
+	"log"
+	"math/rand"
 	"sync"
 	"time"
+)
+
+type SortingType byte
+
+const (
+	UNSORTED SortingType = iota
+	RANGING
+	RANDOM
 )
 
 type Config struct {
 	sync.Mutex
 	apiHostsLatencies []time.Duration
+	SortingType       SortingType
 	Debug             bool
 	ApiHosts          []string
 	StaticHeaders     map[string]string
 }
 
-func (c *Config) getBestHost() (string, int) {
-	c.Lock()
-	defer c.Unlock()
+func (c *Config) getNextHost(prevIndex int) (string, int) {
+	switch c.SortingType {
+	case UNSORTED:
+		nextIndex := prevIndex + 1
+		return c.ApiHosts[nextIndex], nextIndex
+	case RANDOM:
+		nextIndex := rand.Intn(len(c.ApiHosts))
+		return c.ApiHosts[nextIndex], nextIndex
+	case RANGING:
+		c.Lock()
+		defer c.Unlock()
 
-	min := 0
-	for i, lat := range c.apiHostsLatencies {
-		if lat < c.apiHostsLatencies[min] {
-			min = i
+		min := 0
+		for i, lat := range c.apiHostsLatencies {
+			if lat < c.apiHostsLatencies[min] {
+				min = i
+			}
 		}
-	}
 
-	return c.ApiHosts[min], min
+		return c.ApiHosts[min], min
+	default:
+		log.Fatal("Unknown API SortingType: %v", c.SortingType)
+		return "", 0
+	}
 }
 
 const averagingFactor = 20
 
 func (c *Config) appendLatencyToHost(lat time.Duration, i int) {
+	if c.SortingType != RANGING {
+		return // no latencies for other types
+	}
+
 	c.Lock()
 	defer c.Unlock()
 
@@ -37,6 +64,10 @@ func (c *Config) appendLatencyToHost(lat time.Duration, i int) {
 }
 
 func (c *Config) penaltyTheHost(i int) {
+	if c.SortingType != RANGING {
+		return // no penalties for other types
+	}
+
 	c.Lock()
 	defer c.Unlock()
 

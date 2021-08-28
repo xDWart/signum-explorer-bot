@@ -6,7 +6,7 @@ import (
 )
 
 const NAME = "<b>🚀 Signum Explorer Bot</b>"
-const VERSION = "<i>v.0.9.3</i>"
+const VERSION = "<i>v.0.9.4</i>"
 
 const (
 	COMMAND_START    = "/start"

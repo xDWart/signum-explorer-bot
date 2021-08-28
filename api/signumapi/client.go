@@ -36,15 +36,17 @@ type SignumApiClient struct {
 }
 
 type Config struct {
-	Debug    bool
-	ApiHosts []string
-	CacheTtl time.Duration
+	SortingType abstractapi.SortingType
+	Debug       bool
+	ApiHosts    []string
+	CacheTtl    time.Duration
 }
 
 func NewSignumApiClient(config *Config) *SignumApiClient {
 	abstractConfig := abstractapi.Config{
-		ApiHosts: config.ApiHosts,
-		Debug:    config.Debug,
+		SortingType: config.SortingType,
+		Debug:       config.Debug,
+		ApiHosts:    config.ApiHosts,
 	}
 	return &SignumApiClient{
 		AbstractApiClient:      abstractapi.NewAbstractApiClient(&abstractConfig),

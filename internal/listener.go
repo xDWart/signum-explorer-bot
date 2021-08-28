@@ -9,13 +9,13 @@ import (
 )
 
 func (bot *TelegramBot) startBotListener() {
-	defer bot.wg.Done()
+	defer bot.overallWg.Done()
 
 	log.Printf("Start Telegram Bot Listener")
 
 	for {
 		select {
-		case <-bot.shutdownChannel:
+		case <-bot.overallShutdownChannel:
 			log.Printf("Telegram Bot Listener received shutdown signal")
 			return
 

@@ -2,6 +2,7 @@ package internal
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/database"
@@ -28,8 +29,10 @@ type TelegramBot struct {
 	networkInfoListener *networkinfo.NetworkInfoListener
 	notifierCh          chan notifier.NotifierMessage
 
-	wg              *sync.WaitGroup
-	shutdownChannel chan interface{}
+	overallWg               *sync.WaitGroup
+	overallShutdownChannel  chan interface{}
+	notifierWg              *sync.WaitGroup
+	notifierShutdownChannel chan interface{}
 }
 
 func InitTelegramBot() *TelegramBot {
@@ -44,6 +47,9 @@ func InitTelegramBot() *TelegramBot {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
+
+	wg := &sync.WaitGroup{}
+	shutdownChannel := make(chan interface{})
 
 	cmcClient := cmcapi.NewCmcClient(&cmcapi.Config{
 		Host:      "https://pro-api.coinmarketcap.com/v1",
@@ -62,12 +68,10 @@ func InitTelegramBot() *TelegramBot {
 			"https://uk.signum.network",
 			"https://wallet.burstcoin.ro",
 		},
-		CacheTtl: 3 * time.Minute,
-		Debug:    true,
+		CacheTtl:    3 * time.Minute,
+		SortingType: abstractapi.RANGING,
+		Debug:       true,
 	})
-	notifierCh := make(chan notifier.NotifierMessage)
-	wg := &sync.WaitGroup{}
-	shutdownChannel := make(chan interface{})
 	priceManager := prices.NewPricesManager(db, cmcClient, wg, shutdownChannel,
 		&prices.Config{
 			SamplePeriod:      20 * time.Minute,
@@ -88,20 +92,26 @@ func InitTelegramBot() *TelegramBot {
 			DelayFuncB:            -408 * time.Minute, // 1 year ~ 3 week
 		})
 
+	// we need to stop notifier first to avoid unread channel situation
+	notifierCh := make(chan notifier.NotifierMessage)
+	notifierWg := &sync.WaitGroup{}
+	notifierShutdownChannel := make(chan interface{})
+	notifier.NewNotifier(db, signumClient, notifierCh, notifierWg, notifierShutdownChannel)
+
 	bot := &TelegramBot{
 		AbstractTelegramBot: &AbstractTelegramBot{
 			BotAPI: botApi,
 		},
-		db:                  db,
-		usersManager:        users.InitManager(db, cmcClient, signumClient, priceManager, networkInfoListener, wg, shutdownChannel),
-		priceManager:        priceManager,
-		networkInfoListener: networkInfoListener,
-		notifierCh:          notifierCh,
-		wg:                  wg,
-		shutdownChannel:     shutdownChannel,
+		db:                      db,
+		usersManager:            users.InitManager(db, cmcClient, signumClient, priceManager, networkInfoListener, wg, shutdownChannel),
+		priceManager:            priceManager,
+		networkInfoListener:     networkInfoListener,
+		notifierCh:              notifierCh,
+		overallWg:               wg,
+		overallShutdownChannel:  shutdownChannel,
+		notifierWg:              notifierWg,
+		notifierShutdownChannel: notifierShutdownChannel,
 	}
-
-	notifier.NewNotifier(db, signumClient, notifierCh, wg, shutdownChannel)
 
 	if os.Getenv("BOT_DEBUG") == "true" {
 		bot.Debug = true
@@ -129,7 +139,7 @@ func InitTelegramBot() *TelegramBot {
 
 	log.Printf("Running %v listeners", numListenGoroutines)
 	for i := 0; i < numListenGoroutines; i++ {
-		bot.wg.Add(1)
+		bot.overallWg.Add(1)
 		go bot.startBotListener()
 	}
 
@@ -139,12 +149,15 @@ func InitTelegramBot() *TelegramBot {
 }
 
 func (bot *TelegramBot) Shutdown() {
-	log.Printf("Telegram Bot received shutdown signal, will close all listeners")
+	log.Printf("Telegram Bot received shutdown signal: stop notifier at first, next will close all other listeners")
+
+	close(bot.notifierShutdownChannel)
+	bot.notifierWg.Wait()
 
 	bot.StopReceivingUpdates()
-	close(bot.shutdownChannel)
+	close(bot.overallShutdownChannel)
 
-	bot.wg.Wait()
+	bot.overallWg.Wait()
 
 	sqlDB, err := bot.db.DB()
 	if err == nil {
@@ -153,5 +166,5 @@ func (bot *TelegramBot) Shutdown() {
 }
 
 func (bot *TelegramBot) Wait() {
-	bot.wg.Wait()
+	bot.overallWg.Wait()
 }
