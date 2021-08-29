@@ -161,6 +161,12 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		if transaction.TransactionID == account.LastTransactionID {
 			break
 		}
+
+		// ignore RAFFLE
+		if transaction.SenderRS == "S-JM3M-MHWM-UVQ6-DSN3Q" {
+			continue
+		}
+
 		msg := fmt.Sprintf("💸 <b>%v</b> ", account.AccountRS)
 
 		var incomeTransaction = transaction.Sender != account.Account
@@ -319,8 +325,8 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 		return
 	}
 
-	msg := fmt.Sprintf("💽 <b>%v</b> new block <b>#%v</b> at %v  <b>+%v SIGNA</b>",
-		account.AccountRS, foundBlock.Height, common.FormatChainTimeToStringTimeUTC(foundBlock.Timestamp), foundBlock.BlockReward)
+	msg := fmt.Sprintf("💽 <b>%v</b> new block at %v <b>#%v</b> (%v SIGNA)",
+		account.AccountRS, common.FormatChainTimeToStringTimeUTC(foundBlock.Timestamp), foundBlock.Height, foundBlock.BlockReward)
 
 	account.DbAccount.LastBlockID = foundBlock.Block
 	n.db.Save(&account.DbAccount)

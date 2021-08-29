@@ -54,7 +54,7 @@ func (bot *TelegramBot) startBotListener() {
 					userAnswer.MainText = user.ProcessFaucet(message)
 				case strings.HasPrefix(message, config.COMMAND_PRICE) || message == config.BUTTON_PRICES:
 					user.ResetState()
-					userAnswer.MainText = "💵 <b>Actual prices:</b>" + bot.priceManager.GetActualPrices()
+					userAnswer.MainText = bot.priceManager.GetActualPrices()
 					userAnswer.Chart = bot.priceManager.GetPriceChart(config.WEEK)
 					userAnswer.InlineKeyboard = user.GetPriceChartKeyboard()
 				case strings.HasPrefix(message, config.COMMAND_CALC) || message == config.BUTTON_CALC:
