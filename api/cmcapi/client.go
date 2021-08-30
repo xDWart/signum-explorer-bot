@@ -2,7 +2,6 @@ package cmcapi
 
 import (
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
-	"go.uber.org/zap"
 	"os"
 	"sync"
 	"time"
@@ -22,7 +21,7 @@ type Config struct {
 	CacheTtl  time.Duration
 }
 
-func NewCmcClient(logger *zap.SugaredLogger, config *Config) *CmcClient {
+func NewCmcClient(logger abstractapi.LoggerI, config *Config) *CmcClient {
 	abstractConfig := abstractapi.Config{
 		ApiHosts:      []string{config.Host},
 		StaticHeaders: map[string]string{"X-CMC_PRO_API_KEY": os.Getenv("CMC_PRO_API_KEY")},

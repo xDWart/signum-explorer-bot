@@ -25,7 +25,7 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 			return
 
 		case <-ticker.C:
-			prices := pm.cmcClient.GetPrices()
+			prices := pm.cmcClient.GetPrices(pm.logger)
 			samplesForAveraging[sampleIndex] = &models.Price{
 				SignaPrice: prices["SIGNA"].Price,
 				BtcPrice:   prices["BTC"].Price,

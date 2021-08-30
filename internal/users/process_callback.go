@@ -81,7 +81,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		),
 	)
 
-	account, err := user.signumClient.GetCachedAccount(callbackData.Account)
+	account, err := user.signumClient.GetCachedAccount(user.logger, callbackData.Account)
 	if err != nil {
 		return nil, fmt.Errorf("🚫 Error: %v", err)
 	}
@@ -91,7 +91,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		return user.getAccountInfoMessage(account.Account)
 
 	case callbackdata.ActionType_AT_PAYMENTS:
-		accountTransactions, err := user.signumClient.GetCachedAccountOrdinaryPaymentTransactions(account.Account)
+		accountTransactions, err := user.signumClient.GetCachedAccountOrdinaryPaymentTransactions(user.logger, account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
@@ -113,7 +113,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}, nil
 
 	case callbackdata.ActionType_AT_BLOCKS:
-		accountBlocks, err := user.signumClient.GetCachedAccountBlocks(account.Account)
+		accountBlocks, err := user.signumClient.GetCachedAccountBlocks(user.logger, account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
@@ -142,7 +142,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}, nil
 
 	case callbackdata.ActionType_AT_MULTI_OUT:
-		accountTransactions, err := user.signumClient.GetCachedAccountMultiOutTransactions(account.Account)
+		accountTransactions, err := user.signumClient.GetCachedAccountMultiOutTransactions(user.logger, account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
@@ -166,7 +166,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}, nil
 
 	case callbackdata.ActionType_AT_MULTI_OUT_SAME:
-		accountTransactions, err := user.signumClient.GetCachedAccountMultiOutSameTransactions(account.Account)
+		accountTransactions, err := user.signumClient.GetCachedAccountMultiOutSameTransactions(user.logger, account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
@@ -191,7 +191,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		}, nil
 
 	case callbackdata.ActionType_AT_OTHER_TXS:
-		accountTransactions, err := user.signumClient.GetCachedAccountMiningTransactions(account.Account)
+		accountTransactions, err := user.signumClient.GetCachedAccountMiningTransactions(user.logger, account.Account)
 		if err != nil {
 			return nil, fmt.Errorf("🚫 Error: %v", err)
 		}
@@ -230,7 +230,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			}
 		}
 
-		userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(userAccount.Account)
+		userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
 
 		var txType string
 		switch callbackData.GetAction() {
@@ -288,7 +288,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 
 		if !userAccount.NotifyNewBlocks { // needs to enable
 			userAccount.NotifyNewBlocks = true
-			userAccount.LastBlockID = user.signumClient.GetLastAccountBlock(account.Account)
+			userAccount.LastBlockID = user.signumClient.GetLastAccountBlock(user.logger, account.Account)
 			user.db.Save(userAccount)
 		}
 
@@ -325,8 +325,8 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 
 		if !userAccount.NotifyOtherTXs { // needs to enable
 			userAccount.NotifyOtherTXs = true
-			userAccount.LastMiningTX = user.signumClient.GetLastAccountMiningTransaction(account.Account)
-			userAccount.LastMessageTX = user.signumClient.GetLastAccountMessageTransaction(account.Account)
+			userAccount.LastMiningTX = user.signumClient.GetLastAccountMiningTransaction(user.logger, account.Account)
+			userAccount.LastMessageTX = user.signumClient.GetLastAccountMessageTransaction(user.logger, account.Account)
 			user.db.Save(userAccount)
 		}
 

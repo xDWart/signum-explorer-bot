@@ -100,7 +100,7 @@ func (ni *NetworkInfoListener) StartNetworkInfoListener(wg *sync.WaitGroup, shut
 }
 
 func (ni *NetworkInfoListener) getMiningInfo(samplesForAveraging []*signumapi.MiningInfo, sampleIndex, timeToSave, scanIndex int) (int, int, int) {
-	miningInfo, err := ni.signumClient.GetMiningInfo()
+	miningInfo, err := ni.signumClient.GetMiningInfo(ni.logger)
 	if err != nil {
 		ni.logger.Errorf("Error getting mining info: %v", err)
 		return sampleIndex, timeToSave, scanIndex

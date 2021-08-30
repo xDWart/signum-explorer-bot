@@ -2,6 +2,7 @@ package signumapi
 
 import (
 	"fmt"
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"sync"
 	"time"
 )
@@ -39,9 +40,9 @@ func (c *SignumApiClient) storeAccountBlocksToCache(accountS string, accountBloc
 	c.localBlocksCache.Unlock()
 }
 
-func (c *SignumApiClient) GetAccountBlocks(account string) (*AccountBlocks, error) {
+func (c *SignumApiClient) GetAccountBlocks(logger abstractapi.LoggerI, account string) (*AccountBlocks, error) {
 	accountBlocks := &AccountBlocks{}
-	err := c.DoJsonReq("GET", "/burst",
+	err := c.DoJsonReq(logger, "GET", "/burst",
 		map[string]string{
 			"account":     account,
 			"requestType": "getAccountBlocks",
@@ -63,16 +64,16 @@ func (c *SignumApiClient) GetAccountBlocks(account string) (*AccountBlocks, erro
 	return accountBlocks, err
 }
 
-func (c *SignumApiClient) GetCachedAccountBlocks(account string) (*AccountBlocks, error) {
+func (c *SignumApiClient) GetCachedAccountBlocks(logger abstractapi.LoggerI, account string) (*AccountBlocks, error) {
 	accountBlocks := c.readAccountBlocksFromCache(account)
 	if accountBlocks != nil {
 		return accountBlocks, nil
 	}
-	return c.GetAccountBlocks(account)
+	return c.GetAccountBlocks(logger, account)
 }
 
-func (c *SignumApiClient) GetLastAccountBlock(account string) string {
-	accountBlocks, err := c.GetAccountBlocks(account)
+func (c *SignumApiClient) GetLastAccountBlock(logger abstractapi.LoggerI, account string) string {
+	accountBlocks, err := c.GetAccountBlocks(logger, account)
 	if err != nil || len(accountBlocks.Blocks) == 0 {
 		return ""
 	}

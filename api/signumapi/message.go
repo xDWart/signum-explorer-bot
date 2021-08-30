@@ -2,6 +2,7 @@ package signumapi
 
 import (
 	"fmt"
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 )
 
 type Message struct {
@@ -10,7 +11,7 @@ type Message struct {
 	DecryptedMessageToSelf string
 }
 
-func (c *SignumApiClient) ReadMessage(secretPhrase, transactionID string) (*Message, error) {
+func (c *SignumApiClient) ReadMessage(logger abstractapi.LoggerI, secretPhrase, transactionID string) (*Message, error) {
 	message := &Message{}
 
 	var urlParams = map[string]string{
@@ -21,31 +22,33 @@ func (c *SignumApiClient) ReadMessage(secretPhrase, transactionID string) (*Mess
 		urlParams["secretPhrase"] = secretPhrase
 	}
 
-	err := c.DoJsonReq("POST", "/burst", urlParams, nil, message)
+	err := c.DoJsonReq(logger, "POST", "/burst", urlParams, nil, message)
 	if err != nil {
 		return nil, fmt.Errorf("bad ReadMessage request: %v", err)
 	}
 	return message, nil
 }
 
-func (c *SignumApiClient) SendMessage(secretPhrase, recipient, message string, feeNQT FeeType) (*TransactionResponse, error) {
-	return c.createTransaction(&TransactionRequest{
-		RequestType:   RT_SEND_MESSAGE,
-		SecretPhrase:  secretPhrase,
-		Recipient:     recipient,
-		FeeNQT:        feeNQT,
-		Message:       message,
-		MessageIsText: true,
-	})
+func (c *SignumApiClient) SendMessage(logger abstractapi.LoggerI, secretPhrase, recipient, message string, feeNQT FeeType) (*TransactionResponse, error) {
+	return c.createTransaction(logger,
+		&TransactionRequest{
+			RequestType:   RT_SEND_MESSAGE,
+			SecretPhrase:  secretPhrase,
+			Recipient:     recipient,
+			FeeNQT:        feeNQT,
+			Message:       message,
+			MessageIsText: true,
+		})
 }
 
-func (c *SignumApiClient) SendEncryptedMessage(secretPhrase, recipient, messageToEncrypt string, feeNQT FeeType) (*TransactionResponse, error) {
-	return c.createTransaction(&TransactionRequest{
-		RequestType:            RT_SEND_MESSAGE,
-		SecretPhrase:           secretPhrase,
-		Recipient:              recipient,
-		FeeNQT:                 feeNQT,
-		MessageToEncrypt:       messageToEncrypt,
-		MessageToEncryptIsText: true,
-	})
+func (c *SignumApiClient) SendEncryptedMessage(logger abstractapi.LoggerI, secretPhrase, recipient, messageToEncrypt string, feeNQT FeeType) (*TransactionResponse, error) {
+	return c.createTransaction(logger,
+		&TransactionRequest{
+			RequestType:            RT_SEND_MESSAGE,
+			SecretPhrase:           secretPhrase,
+			Recipient:              recipient,
+			FeeNQT:                 feeNQT,
+			MessageToEncrypt:       messageToEncrypt,
+			MessageToEncryptIsText: true,
+		})
 }

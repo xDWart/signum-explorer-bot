@@ -1,5 +1,7 @@
 package signumapi
 
+import "github.com/xDWart/signum-explorer-bot/api/abstractapi"
+
 type FeeType float64
 
 type SuggestFee struct {
@@ -16,9 +18,9 @@ const (
 	DEFAULT_PRIORITY_FEE         = 0.0294 * 1e8
 )
 
-func (c *SignumApiClient) GetSuggestFee() (*SuggestFee, error) {
+func (c *SignumApiClient) GetSuggestFee(logger abstractapi.LoggerI) (*SuggestFee, error) {
 	var suggestFee = SuggestFee{}
-	err := c.DoJsonReq("GET", "/burst",
+	err := c.DoJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_SUGGEST_FEE)}, nil, &suggestFee)
 	suggestFee.Minimum = MINIMUM_FEE
 	return &suggestFee, err

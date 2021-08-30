@@ -12,12 +12,12 @@ func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
 	if !config.ValidAccountRS.MatchString(accountS) && !config.ValidAccount.MatchString(accountS) {
 		return nil, fmt.Errorf("🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>")
 	}
-	account, err := user.signumClient.GetCachedAccount(accountS)
+	account, err := user.signumClient.GetCachedAccount(user.logger, accountS)
 	if err != nil {
 		return nil, fmt.Errorf("🚫 Error: %v", err)
 	}
 
-	prices := user.cmcClient.GetPrices()
+	prices := user.cmcClient.GetPrices(user.logger)
 	signaPrice := prices["SIGNA"].Price
 	btcPrice := prices["BTC"].Price
 
@@ -60,7 +60,7 @@ func (user *User) ProcessAdd(message string) string {
 
 	userAccount, msg := user.addAccount(splittedMessage[1])
 	if userAccount != nil {
-		userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(userAccount.Account)
+		userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
 		userAccount.NotifyIncomeTransactions = true
 		user.db.Save(userAccount)
 	}
@@ -81,7 +81,7 @@ func (user *User) addAccount(newAccount string) (*models.DbAccount, string) {
 		return nil, "🚫 The maximum number of accounts has been exceeded"
 	}
 
-	signumAccount, err := user.signumClient.GetCachedAccount(newAccount)
+	signumAccount, err := user.signumClient.GetCachedAccount(user.logger, newAccount)
 	if err != nil {
 		return nil, fmt.Sprintf("🚫 Error: %v", err)
 	}

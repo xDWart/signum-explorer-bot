@@ -1,6 +1,7 @@
 package signumapi
 
 import (
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"sync"
 	"time"
 )
@@ -40,34 +41,34 @@ func (c *SignumApiClient) storeAccountTransactionsToCache(accountS string, trans
 	c.localTransactionsCache.Unlock()
 }
 
-func (c *SignumApiClient) getCachedAccountTransactionsByType(account string, transactionType TransactionType, transactionSubType TransactionSubType) (*AccountTransactions, error) {
+func (c *SignumApiClient) getCachedAccountTransactionsByType(logger abstractapi.LoggerI, account string, transactionType TransactionType, transactionSubType TransactionSubType) (*AccountTransactions, error) {
 	accountTransactions := c.readAccountTransactionsFromCache(account, transactionType, transactionSubType)
 	if accountTransactions != nil {
 		return accountTransactions, nil
 	}
-	return c.getAccountTransactionsByType(account, transactionType, transactionSubType)
+	return c.getAccountTransactionsByType(logger, account, transactionType, transactionSubType)
 }
 
-func (c *SignumApiClient) GetCachedAccountOrdinaryPaymentTransactions(account string) (*AccountTransactions, error) {
-	return c.getCachedAccountTransactionsByType(account, TT_PAYMENT, TST_ORDINARY_PAYMENT)
+func (c *SignumApiClient) GetCachedAccountOrdinaryPaymentTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getCachedAccountTransactionsByType(logger, account, TT_PAYMENT, TST_ORDINARY_PAYMENT)
 }
 
-func (c *SignumApiClient) GetCachedAccountMultiOutTransactions(account string) (*AccountTransactions, error) {
-	return c.getCachedAccountTransactionsByType(account, TT_PAYMENT, TST_MULTI_OUT_PAYMENT)
+func (c *SignumApiClient) GetCachedAccountMultiOutTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getCachedAccountTransactionsByType(logger, account, TT_PAYMENT, TST_MULTI_OUT_PAYMENT)
 }
 
-func (c *SignumApiClient) GetCachedAccountMultiOutSameTransactions(account string) (*AccountTransactions, error) {
-	return c.getCachedAccountTransactionsByType(account, TT_PAYMENT, TST_MULTI_OUT_SAME_PAYMENT)
+func (c *SignumApiClient) GetCachedAccountMultiOutSameTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getCachedAccountTransactionsByType(logger, account, TT_PAYMENT, TST_MULTI_OUT_SAME_PAYMENT)
 }
 
-func (c *SignumApiClient) GetCachedAccountPaymentTransactions(account string) (*AccountTransactions, error) {
-	return c.getCachedAccountTransactionsByType(account, TT_PAYMENT, TST_ALL_TYPES_PAYMENT)
+func (c *SignumApiClient) GetCachedAccountPaymentTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getCachedAccountTransactionsByType(logger, account, TT_PAYMENT, TST_ALL_TYPES_PAYMENT)
 }
 
-func (c *SignumApiClient) GetCachedAccountMiningTransactions(account string) (*AccountTransactions, error) {
-	return c.getCachedAccountTransactionsByType(account, TT_BURST_MINING, TST_ALL_TYPES_MINING)
+func (c *SignumApiClient) GetCachedAccountMiningTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getCachedAccountTransactionsByType(logger, account, TT_BURST_MINING, TST_ALL_TYPES_MINING)
 }
 
-func (c *SignumApiClient) GetCachedAccountMessageTransaction(account string) (*AccountTransactions, error) {
-	return c.getCachedAccountTransactionsByType(account, TT_MESSAGING, TST_ARBITRARY_MESSAGE)
+func (c *SignumApiClient) GetCachedAccountMessageTransaction(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getCachedAccountTransactionsByType(logger, account, TT_MESSAGING, TST_ARBITRARY_MESSAGE)
 }

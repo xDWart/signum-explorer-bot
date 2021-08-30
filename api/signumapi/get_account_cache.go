@@ -1,6 +1,7 @@
 package signumapi
 
 import (
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"sync"
 	"time"
 )
@@ -33,10 +34,10 @@ func (c *SignumApiClient) invalidateCache(accountS string) {
 	c.localAccountCache.Unlock()
 }
 
-func (c *SignumApiClient) GetCachedAccount(accountS string) (*Account, error) {
+func (c *SignumApiClient) GetCachedAccount(logger abstractapi.LoggerI, accountS string) (*Account, error) {
 	account := c.readAccountFromCache(accountS)
 	if account != nil {
 		return account, nil
 	}
-	return c.GetAccount(accountS)
+	return c.GetAccount(logger, accountS)
 }

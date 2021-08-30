@@ -87,7 +87,7 @@ func (pm *PriceManager) GetPriceChart(duration time.Duration) []byte {
 	}
 
 	var annotationColor = chart.ColorGreen
-	actualPrices := pm.cmcClient.GetPrices()
+	actualPrices := pm.cmcClient.GetPrices(pm.logger)
 	if actualPrices["SIGNA"].PercentChange24h < 0 {
 		annotationColor = chart.ColorRed
 	}

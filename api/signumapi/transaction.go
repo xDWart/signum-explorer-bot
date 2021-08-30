@@ -2,6 +2,7 @@ package signumapi
 
 import (
 	"fmt"
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"strconv"
 )
 
@@ -81,7 +82,7 @@ type TransactionResponse struct {
 	ErrorDescription         string
 }
 
-func (c *SignumApiClient) createTransaction(transactionRequest *TransactionRequest) (*TransactionResponse, error) {
+func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transactionRequest *TransactionRequest) (*TransactionResponse, error) {
 	if transactionRequest.SecretPhrase == "" {
 		return nil, fmt.Errorf("TransactionRequest.SecretPhrase is not set")
 	}
@@ -122,7 +123,7 @@ func (c *SignumApiClient) createTransaction(transactionRequest *TransactionReque
 	}
 
 	transactionResponse := &TransactionResponse{}
-	err := c.DoJsonReq("POST", "/burst", urlParams, nil, transactionResponse)
+	err := c.DoJsonReq(logger, "POST", "/burst", urlParams, nil, transactionResponse)
 	if err != nil {
 		return nil, fmt.Errorf("bad create transaction request: %v", err)
 	}

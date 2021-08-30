@@ -2,6 +2,7 @@ package signumapi
 
 import (
 	"fmt"
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"time"
 )
 
@@ -29,9 +30,9 @@ type Account struct {
 	//PublicKey string `json:"publicKey"`
 }
 
-func (c *SignumApiClient) GetAccount(accountS string) (*Account, error) {
+func (c *SignumApiClient) GetAccount(logger abstractapi.LoggerI, accountS string) (*Account, error) {
 	account := &Account{}
-	err := c.DoJsonReq("GET", "/burst",
+	err := c.DoJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_GET_ACCOUNT), "getCommittedAmount": "true", "account": accountS},
 		nil,
 		account)

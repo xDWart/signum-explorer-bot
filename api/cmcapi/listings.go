@@ -2,6 +2,7 @@ package cmcapi
 
 import (
 	"fmt"
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"time"
 )
 
@@ -24,9 +25,9 @@ type quote struct {
 	PercentChange24h float64 `json:"percent_change_24h"`
 }
 
-func (c *CmcClient) getListings(start int) (*listings, error) {
+func (c *CmcClient) getListings(logger abstractapi.LoggerI, start int) (*listings, error) {
 	var listings listings
-	err := c.DoJsonReq("GET", "/cryptocurrency/listings/latest",
+	err := c.DoJsonReq(logger, "GET", "/cryptocurrency/listings/latest",
 		map[string]string{"start": fmt.Sprint(start), "limit": fmt.Sprint(c.config.FreeLimit), "convert": "USD", "cryptocurrency_type": "coins"},
 		nil,
 		&listings)
@@ -39,15 +40,15 @@ func (c *CmcClient) getListings(start int) (*listings, error) {
 	return &listings, nil
 }
 
-func (c *CmcClient) updateListings() error {
-	listings, err := c.getListings(1)
+func (c *CmcClient) updateListings(logger abstractapi.LoggerI) error {
+	listings, err := c.getListings(logger, 1)
 	if err != nil {
 		return err
 	}
 
 	if !c.updateCachedValues(listings) {
-		c.Logger.Warnf("Not all symbols have been found in a first %v coins, will request more coins", c.config.FreeLimit)
-		listings, err := c.getListings(c.config.FreeLimit)
+		logger.Warnf("Not all symbols have been found in a first %v coins, will request more coins", c.config.FreeLimit)
+		listings, err := c.getListings(logger, c.config.FreeLimit)
 		if err != nil {
 			return err
 		}
@@ -75,7 +76,7 @@ func (c *CmcClient) updateCachedValues(listings *listings) bool {
 }
 
 // GetPrices - get currency quotes of SIGNA and BTC
-func (c *CmcClient) GetPrices() map[string]quote {
+func (c *CmcClient) GetPrices(logger abstractapi.LoggerI) map[string]quote {
 	prices := map[string]quote{}
 
 	c.RLock()
@@ -90,9 +91,9 @@ func (c *CmcClient) GetPrices() map[string]quote {
 	c.Lock()
 	// cache may already be updated to this moment, need check it again
 	if time.Since(c.lastReqTimestamp) > c.config.CacheTtl {
-		err := c.updateListings()
+		err := c.updateListings(logger)
 		if err != nil {
-			c.Logger.Errorf("Update CMC listenings error: %v", err)
+			logger.Errorf("Update CMC listenings error: %v", err)
 		}
 	}
 	prices["BTC"] = c.cachedValues["BTC"]

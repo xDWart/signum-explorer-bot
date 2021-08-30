@@ -74,7 +74,7 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 }
 
 func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
-	userTransactions, err := n.signumClient.GetCachedAccountMiningTransactions(account.Account)
+	userTransactions, err := n.signumClient.GetCachedAccountMiningTransactions(n.logger, account.Account)
 	if err != nil {
 		n.logger.Errorf("Can't get last account %v mining transactions: %v", account.Account, err)
 		return
@@ -95,7 +95,7 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 		msg := fmt.Sprintf("📝 <b>%v</b> ", account.AccountRS)
 
 		var totalCommitment string
-		newAccount, err := n.signumClient.GetAccount(account.Account)
+		newAccount, err := n.signumClient.GetAccount(n.logger, account.Account)
 		if err == nil {
 			totalCommitment = fmt.Sprintf("\n<b>Total commitment: %v SIGNA</b>", common.FormatNumber(newAccount.CommittedBalance, 2))
 		}
@@ -103,7 +103,7 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 		switch transaction.Subtype {
 		case signumapi.TST_REWARD_RECIPIENT_ASSIGNMENT:
 			var recipientName string
-			recipientAccount, err := n.signumClient.GetCachedAccount(transaction.Recipient)
+			recipientAccount, err := n.signumClient.GetCachedAccount(n.logger, transaction.Recipient)
 			if err == nil && recipientAccount.Name != "" {
 				recipientName = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
 			}
@@ -139,7 +139,7 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 }
 
 func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
-	userTransactions, err := n.signumClient.GetCachedAccountPaymentTransactions(account.Account)
+	userTransactions, err := n.signumClient.GetCachedAccountPaymentTransactions(n.logger, account.Account)
 	if err != nil {
 		n.logger.Errorf("Can't get last account %v payment transactions: %v", account.Account, err)
 		return
@@ -154,7 +154,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 	}
 
 	var totalBalance string
-	newAccount, err := n.signumClient.GetAccount(account.Account)
+	newAccount, err := n.signumClient.GetAccount(n.logger, account.Account)
 	if err == nil {
 		totalBalance = fmt.Sprintf("\n<b>Total balance: %v SIGNA</b>", common.FormatNumber(newAccount.TotalBalance, 2))
 	}
@@ -178,13 +178,13 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 				continue
 			}
 
-			senderAccount, err := n.signumClient.GetCachedAccount(transaction.SenderRS)
+			senderAccount, err := n.signumClient.GetCachedAccount(n.logger, transaction.SenderRS)
 			if err == nil && senderAccount.Name != "" {
 				name = fmt.Sprintf("\n<i>Name:</i> %v", senderAccount.Name)
 			}
 		} else if account.NotifyOutgoTransactions { // outgo
 			if transaction.RecipientRS != "" {
-				recipientAccount, err := n.signumClient.GetCachedAccount(transaction.RecipientRS)
+				recipientAccount, err := n.signumClient.GetCachedAccount(n.logger, transaction.RecipientRS)
 				if err == nil && recipientAccount.Name != "" {
 					name = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
 				}
@@ -312,7 +312,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 }
 
 func (n *Notifier) checkBlocks(account *MonitoredAccount) {
-	userBlocks, err := n.signumClient.GetCachedAccountBlocks(account.Account)
+	userBlocks, err := n.signumClient.GetCachedAccountBlocks(n.logger, account.Account)
 	if err != nil {
 		n.logger.Errorf("Can't get last account %v blocks: %v", account.Account, err)
 		return
@@ -341,7 +341,7 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 }
 
 func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
-	userMessages, err := n.signumClient.GetCachedAccountMessageTransaction(account.Account)
+	userMessages, err := n.signumClient.GetCachedAccountMessageTransaction(n.logger, account.Account)
 	if err != nil {
 		n.logger.Errorf("Can't get last account %v message transactions: %v", account.Account, err)
 		return
@@ -374,7 +374,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 
 			if incomeTransaction {
 				var senderName string
-				senderAccount, err := n.signumClient.GetCachedAccount(transaction.SenderRS)
+				senderAccount, err := n.signumClient.GetCachedAccount(n.logger, transaction.SenderRS)
 				if err == nil && senderAccount.Name != "" {
 					senderName = fmt.Sprintf("\n<i>Name:</i> %v", senderAccount.Name)
 				}
@@ -386,7 +386,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 					transaction.SenderRS, transaction.FeeNQT/1e8)
 			} else {
 				var recipientName string
-				recipientAccount, err := n.signumClient.GetCachedAccount(transaction.RecipientRS)
+				recipientAccount, err := n.signumClient.GetCachedAccount(n.logger, transaction.RecipientRS)
 				if err == nil && recipientAccount.Name != "" {
 					recipientName = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
 				}

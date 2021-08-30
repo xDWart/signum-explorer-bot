@@ -2,7 +2,6 @@ package signumapi
 
 import (
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
-	"go.uber.org/zap"
 	"sync"
 	"time"
 )
@@ -42,7 +41,7 @@ type Config struct {
 	CacheTtl    time.Duration
 }
 
-func NewSignumApiClient(logger *zap.SugaredLogger, config *Config) *SignumApiClient {
+func NewSignumApiClient(logger abstractapi.LoggerI, config *Config) *SignumApiClient {
 	abstractConfig := abstractapi.Config{
 		SortingType: config.SortingType,
 		ApiHosts:    config.ApiHosts,

@@ -57,7 +57,7 @@ func parseCommit(message string) (float64, error) {
 }
 
 func (user *User) calculate(tib, commit float64) string {
-	signaPrice := user.cmcClient.GetPrices()["SIGNA"].Price
+	signaPrice := user.cmcClient.GetPrices(user.logger)["SIGNA"].Price
 	lastMiningInfo := user.networkInfoListener.GetLastMiningInfo()
 
 	if commit > 0 {

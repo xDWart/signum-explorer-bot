@@ -1,5 +1,7 @@
 package signumapi
 
+import "github.com/xDWart/signum-explorer-bot/api/abstractapi"
+
 type MiningInfo struct {
 	Height                   uint32  `json:"height,string"`
 	BaseTarget               float64 `json:"baseTarget,string"`
@@ -18,8 +20,8 @@ var DEFAULT_MINING_INFO = MiningInfo{
 	LastBlockReward:      127,
 }
 
-func (c *SignumApiClient) GetMiningInfo() (*MiningInfo, error) {
+func (c *SignumApiClient) GetMiningInfo(logger abstractapi.LoggerI) (*MiningInfo, error) {
 	var miningInfo = MiningInfo{}
-	err := c.DoJsonReq("GET", "/burst", map[string]string{"requestType": string(RT_GET_MINING_INFO)}, nil, &miningInfo)
+	err := c.DoJsonReq(logger, "GET", "/burst", map[string]string{"requestType": string(RT_GET_MINING_INFO)}, nil, &miningInfo)
 	return &miningInfo, err
 }

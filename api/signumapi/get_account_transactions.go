@@ -2,6 +2,7 @@ package signumapi
 
 import (
 	"fmt"
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"strconv"
 	"time"
 )
@@ -71,7 +72,7 @@ func (r *RecipientsType) FoundMyAmount(account string) float64 {
 	return 0
 }
 
-func (c *SignumApiClient) getAccountTransactionsByType(account string, transactionType TransactionType, transactionSubType TransactionSubType) (*AccountTransactions, error) {
+func (c *SignumApiClient) getAccountTransactionsByType(logger abstractapi.LoggerI, account string, transactionType TransactionType, transactionSubType TransactionSubType) (*AccountTransactions, error) {
 	accountTransactions := &AccountTransactions{}
 
 	urlParams := map[string]string{
@@ -87,7 +88,7 @@ func (c *SignumApiClient) getAccountTransactionsByType(account string, transacti
 		urlParams["subtype"] = fmt.Sprint(transactionSubType)
 	}
 
-	err := c.DoJsonReq("GET", "/burst", urlParams, nil, accountTransactions)
+	err := c.DoJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
 	if err == nil {
 		if accountTransactions.ErrorDescription == "" {
 			c.storeAccountTransactionsToCache(account, transactionType, transactionSubType, accountTransactions)
@@ -98,48 +99,48 @@ func (c *SignumApiClient) getAccountTransactionsByType(account string, transacti
 	return accountTransactions, err
 }
 
-func (c *SignumApiClient) GetAccountOrdinaryPaymentTransactions(account string) (*AccountTransactions, error) {
-	return c.getAccountTransactionsByType(account, TT_PAYMENT, TST_ORDINARY_PAYMENT)
+func (c *SignumApiClient) GetAccountOrdinaryPaymentTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getAccountTransactionsByType(logger, account, TT_PAYMENT, TST_ORDINARY_PAYMENT)
 }
 
-func (c *SignumApiClient) GetAccountMultiOutTransactions(account string) (*AccountTransactions, error) {
-	return c.getAccountTransactionsByType(account, TT_PAYMENT, TST_MULTI_OUT_PAYMENT)
+func (c *SignumApiClient) GetAccountMultiOutTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getAccountTransactionsByType(logger, account, TT_PAYMENT, TST_MULTI_OUT_PAYMENT)
 }
 
-func (c *SignumApiClient) GetAccountMultiOutSameTransactions(account string) (*AccountTransactions, error) {
-	return c.getAccountTransactionsByType(account, TT_PAYMENT, TST_MULTI_OUT_SAME_PAYMENT)
+func (c *SignumApiClient) GetAccountMultiOutSameTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getAccountTransactionsByType(logger, account, TT_PAYMENT, TST_MULTI_OUT_SAME_PAYMENT)
 }
 
-func (c *SignumApiClient) GetAccountPaymentTransactions(account string) (*AccountTransactions, error) {
-	return c.getAccountTransactionsByType(account, TT_PAYMENT, TST_ALL_TYPES_PAYMENT)
+func (c *SignumApiClient) GetAccountPaymentTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getAccountTransactionsByType(logger, account, TT_PAYMENT, TST_ALL_TYPES_PAYMENT)
 }
 
-func (c *SignumApiClient) GetAccountMiningTransactions(account string) (*AccountTransactions, error) {
-	return c.getAccountTransactionsByType(account, TT_BURST_MINING, TST_ALL_TYPES_MINING)
+func (c *SignumApiClient) GetAccountMiningTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getAccountTransactionsByType(logger, account, TT_BURST_MINING, TST_ALL_TYPES_MINING)
 }
 
-func (c *SignumApiClient) GetAccountMessageTransaction(account string) (*AccountTransactions, error) {
-	return c.getAccountTransactionsByType(account, TT_MESSAGING, TST_ARBITRARY_MESSAGE)
+func (c *SignumApiClient) GetAccountMessageTransaction(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getAccountTransactionsByType(logger, account, TT_MESSAGING, TST_ARBITRARY_MESSAGE)
 }
 
-func (c *SignumApiClient) GetLastAccountPaymentTransaction(account string) string {
-	userTransactions, err := c.GetAccountPaymentTransactions(account)
+func (c *SignumApiClient) GetLastAccountPaymentTransaction(logger abstractapi.LoggerI, account string) string {
+	userTransactions, err := c.GetAccountPaymentTransactions(logger, account)
 	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
 		return userTransactions.Transactions[0].TransactionID
 	}
 	return ""
 }
 
-func (c *SignumApiClient) GetLastAccountMiningTransaction(account string) string {
-	userTransactions, err := c.GetAccountMiningTransactions(account)
+func (c *SignumApiClient) GetLastAccountMiningTransaction(logger abstractapi.LoggerI, account string) string {
+	userTransactions, err := c.GetAccountMiningTransactions(logger, account)
 	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
 		return userTransactions.Transactions[0].TransactionID
 	}
 	return ""
 }
 
-func (c *SignumApiClient) GetLastAccountMessageTransaction(account string) string {
-	userMessages, err := c.GetAccountMessageTransaction(account)
+func (c *SignumApiClient) GetLastAccountMessageTransaction(logger abstractapi.LoggerI, account string) string {
+	userMessages, err := c.GetAccountMessageTransaction(logger, account)
 	if err == nil && userMessages != nil && len(userMessages.Transactions) > 0 {
 		return userMessages.Transactions[0].TransactionID
 	}

@@ -3,7 +3,6 @@ package abstractapi
 import (
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -12,12 +11,11 @@ import (
 )
 
 type AbstractApiClient struct {
-	Logger *zap.SugaredLogger
 	http   *http.Client
 	config *Config
 }
 
-func NewAbstractApiClient(logger *zap.SugaredLogger, config *Config) *AbstractApiClient {
+func NewAbstractApiClient(logger LoggerI, config *Config) *AbstractApiClient {
 	if config == nil || len(config.ApiHosts) == 0 {
 		logger.Fatalf("No api hosts specified")
 	}
@@ -30,17 +28,16 @@ func NewAbstractApiClient(logger *zap.SugaredLogger, config *Config) *AbstractAp
 	return &AbstractApiClient{
 		http:   &http.Client{},
 		config: config,
-		Logger: logger,
 	}
 }
 
-func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
+func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
 	var currIndex = -1
 	var lastErr error
 	for index := 0; index < len(c.config.ApiHosts); index++ {
 		var host string
 		if lastErr != nil {
-			c.Logger.Debugf("AbstractApiClient.DoJsonReq error: %v", lastErr)
+			logger.Debugf("AbstractApiClient.DoJsonReq error: %v", lastErr)
 		}
 		if index > 0 {
 			c.config.penaltyTheHost(currIndex)
@@ -51,14 +48,14 @@ func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParam
 		var err error
 		host, currIndex, err = c.config.getNextHost(currIndex)
 		if err != nil {
-			c.Logger.Fatal(err)
+			logger.Fatalf(err.Error())
 		}
 
 		secretPhrase, ok := urlParams["secretPhrase"]
 		if ok {
 			delete(urlParams, "secretPhrase")
 		}
-		c.Logger.Debugf("Will request %v %v%v with params: %v", httpMethod, host, method, urlParams)
+		logger.Debugf("Will request %v %v%v with params: %v", httpMethod, host, method, urlParams)
 		if ok {
 			urlParams["secretPhrase"] = secretPhrase
 		}

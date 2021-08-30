@@ -40,7 +40,7 @@ func NewPricesManager(logger *zap.SugaredLogger, db *gorm.DB, cmcClient *cmcapi.
 }
 
 func (pm *PriceManager) GetActualPrices() string {
-	prices := pm.cmcClient.GetPrices()
+	prices := pm.cmcClient.GetPrices(pm.logger)
 
 	var signaSign string
 	if prices["SIGNA"].PercentChange24h < 0 {
