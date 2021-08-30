@@ -6,7 +6,6 @@ import (
 	"github.com/wcharczuk/go-chart/v2"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
-	"log"
 	"time"
 )
 
@@ -14,7 +13,7 @@ func (ni *NetworkInfoListener) GetNetworkChart(duration time.Duration) []byte {
 	var networkInfos []models.NetworkInfo
 	result := ni.db.Where("created_at > ?", time.Now().Add(-duration)).Order("id asc").Find(&networkInfos)
 	if result.Error != nil || len(networkInfos) == 0 {
-		log.Printf("Error getting Network Infos from DB for plotting chart: %v", result.Error)
+		ni.logger.Errorf("Error getting Network Infos from DB for plotting chart: %v", result.Error)
 		return nil
 	}
 
@@ -104,7 +103,7 @@ func (ni *NetworkInfoListener) GetNetworkChart(duration time.Duration) []byte {
 	buffer := bytes.NewBuffer([]byte{})
 	err := graph.Render(chart.PNG, buffer)
 	if err != nil {
-		log.Printf("Could not render chart: %v", err)
+		ni.logger.Errorf("Could not render chart: %v", err)
 		return nil
 	}
 

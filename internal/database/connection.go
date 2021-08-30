@@ -3,18 +3,18 @@ package database
 import (
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 	"net/url"
 	"os"
 	"strings"
 )
 
-func NewDatabaseConnection() *gorm.DB {
+func NewDatabaseConnection(logger *zap.SugaredLogger) *gorm.DB {
 	db, err := NewPostgreConnection()
 	if err != nil {
-		log.Fatalf("Couldn't init Postgres connection: %+v", err)
+		logger.Fatalf("Couldn't init Postgres connection: %+v", err)
 	}
 
 	autoMigrate(db)

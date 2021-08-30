@@ -10,7 +10,6 @@ import (
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/users/callbackdata"
-	"log"
 	"time"
 )
 
@@ -33,7 +32,7 @@ func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *BotMes
 	}
 	callbackData.MessageId = int64(callbackQuery.Message.MessageID)
 
-	log.Printf("Received callback from %v (Chat.ID %v): %+v",
+	user.logger.Debugf("Received callback from %v (Chat.ID %v): %+v",
 		callbackQuery.From.UserName, callbackQuery.Message.Chat.ID, callbackData)
 
 	switch callbackData.GetKeyboard() {

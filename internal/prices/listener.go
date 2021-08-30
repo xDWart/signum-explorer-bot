@@ -2,7 +2,6 @@ package prices
 
 import (
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
-	"log"
 	"sync"
 	"time"
 )
@@ -10,7 +9,7 @@ import (
 func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan interface{}) {
 	defer wg.Done()
 
-	log.Printf("Start Price Listener")
+	pm.logger.Infof("Start Price Listener")
 	ticker := time.NewTicker(pm.config.SamplePeriod)
 
 	var sampleIndex uint
@@ -21,7 +20,7 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 	for {
 		select {
 		case <-shutdownChannel:
-			log.Printf("Price Listener received shutdown signal")
+			pm.logger.Infof("Price Listener received shutdown signal")
 			ticker.Stop()
 			return
 
@@ -47,7 +46,7 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 				dbPrice.SignaPrice /= numOfPrices
 				dbPrice.BtcPrice /= numOfPrices
 				pm.db.Save(&dbPrice)
-				log.Printf("Saved new prices: SIGNA %v, BTC %v", dbPrice.SignaPrice, dbPrice.BtcPrice)
+				pm.logger.Infof("Saved new prices: SIGNA %v, BTC %v", dbPrice.SignaPrice, dbPrice.BtcPrice)
 
 				// scan prices and thin out an old ones
 				var scannedPrices []*models.Price

@@ -3,11 +3,12 @@ package internal
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/xDWart/signum-explorer-bot/internal/users"
-	"log"
+	"go.uber.org/zap"
 )
 
 type AbstractTelegramBot struct {
 	*tgbotapi.BotAPI
+	logger *zap.SugaredLogger
 }
 
 func (bot *AbstractTelegramBot) SendAnswer(chatID int64, answer *users.BotMessage) {
@@ -109,6 +110,6 @@ func (bot *AbstractTelegramBot) ConfigureAndSend(msg tgbotapi.Chattable) {
 func (bot *AbstractTelegramBot) Send(msg tgbotapi.Chattable) {
 	_, err := bot.BotAPI.Send(msg)
 	if err != nil {
-		log.Printf("Send error: %v. Msg: %#v", err, msg)
+		bot.logger.Errorf("Send error: %v. Msg: %#v", err, msg)
 	}
 }

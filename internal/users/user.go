@@ -8,6 +8,7 @@ import (
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"github.com/xDWart/signum-explorer-bot/internal/networkinfo"
 	"github.com/xDWart/signum-explorer-bot/internal/prices"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"sync"
 	"time"
@@ -17,6 +18,7 @@ type User struct {
 	*models.DbUser
 	sync.Mutex
 	db                  *gorm.DB
+	logger              *zap.SugaredLogger
 	cmcClient           *cmcapi.CmcClient
 	signumClient        *signumapi.SignumApiClient
 	priceManager        *prices.PriceManager

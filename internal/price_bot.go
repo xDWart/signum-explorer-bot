@@ -5,7 +5,7 @@ import (
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/prices"
 	"github.com/xDWart/signum-explorer-bot/internal/users"
-	"log"
+	"go.uber.org/zap"
 	"os"
 	"strings"
 	"sync"
@@ -22,21 +22,22 @@ type TelegramPriceBot struct {
 	shutdownChannel chan interface{}
 }
 
-func initTelegramPriceBot(priceManager *prices.PriceManager, wg *sync.WaitGroup, shutdownChannel chan interface{}) *TelegramPriceBot {
+func initTelegramPriceBot(logger *zap.SugaredLogger, priceManager *prices.PriceManager, wg *sync.WaitGroup, shutdownChannel chan interface{}) *TelegramPriceBot {
 	token := os.Getenv("PRICE_TELEGRAM_BOT_TOKEN")
 	if token == "" {
-		log.Printf("PRICE_TELEGRAM_BOT_TOKEN does not set")
+		logger.Errorf("PRICE_TELEGRAM_BOT_TOKEN does not set")
 		return nil
 	}
 
 	botApi, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		log.Fatalf(err.Error())
+		logger.Fatalf(err.Error())
 	}
 
 	bot := &TelegramPriceBot{
 		AbstractTelegramBot: &AbstractTelegramBot{
 			BotAPI: botApi,
+			logger: logger,
 		},
 		priceManager:    priceManager,
 		wg:              wg,
@@ -52,9 +53,9 @@ func initTelegramPriceBot(priceManager *prices.PriceManager, wg *sync.WaitGroup,
 
 	bot.updates = bot.GetUpdatesChan(updateConfig)
 
-	log.Printf("Successfully init Telegram Price Bot")
+	bot.logger.Infof("Successfully init Telegram Price Bot")
 
-	log.Printf("Running price listener")
+	bot.logger.Infof("Running price listener")
 	bot.wg.Add(1)
 	go bot.startBotListener()
 
@@ -64,12 +65,12 @@ func initTelegramPriceBot(priceManager *prices.PriceManager, wg *sync.WaitGroup,
 func (bot *TelegramPriceBot) startBotListener() {
 	defer bot.wg.Done()
 
-	log.Printf("Start Price Telegram Bot Listener")
+	bot.logger.Infof("Start Price Telegram Bot Listener")
 
 	for {
 		select {
 		case <-bot.shutdownChannel:
-			log.Printf("Telegram Price Bot Listener received shutdown signal")
+			bot.logger.Infof("Telegram Price Bot Listener received shutdown signal")
 			bot.StopReceivingUpdates()
 			return
 

@@ -7,12 +7,14 @@ import (
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"github.com/xDWart/signum-explorer-bot/internal/networkinfo"
 	"github.com/xDWart/signum-explorer-bot/internal/prices"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"sync"
 )
 
 type Manager struct {
 	sync.RWMutex
+	logger              *zap.SugaredLogger
 	db                  *gorm.DB
 	users               map[int64]*User
 	cmcClient           *cmcapi.CmcClient
@@ -21,9 +23,10 @@ type Manager struct {
 	networkInfoListener *networkinfo.NetworkInfoListener
 }
 
-func InitManager(db *gorm.DB, cmcClient *cmcapi.CmcClient, signumClient *signumapi.SignumApiClient, priceManager *prices.PriceManager, networkInfoListener *networkinfo.NetworkInfoListener, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Manager {
+func InitManager(logger *zap.SugaredLogger, db *gorm.DB, cmcClient *cmcapi.CmcClient, signumClient *signumapi.SignumApiClient, priceManager *prices.PriceManager, networkInfoListener *networkinfo.NetworkInfoListener, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Manager {
 	return &Manager{
 		db:                  db,
+		logger:              logger,
 		users:               make(map[int64]*User),
 		cmcClient:           cmcClient,
 		signumClient:        signumClient,
@@ -63,6 +66,7 @@ func (um *Manager) GetUserByChatIdFromUpdate(update *tgbotapi.Update) *User {
 		botUser = &User{
 			DbUser:              &dbUser,
 			db:                  um.db,
+			logger:              um.logger,
 			cmcClient:           um.cmcClient,
 			signumClient:        um.signumClient,
 			priceManager:        um.priceManager,

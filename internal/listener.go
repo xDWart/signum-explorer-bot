@@ -3,7 +3,6 @@ package internal
 import (
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/users"
-	"log"
 	"strings"
 	"time"
 )
@@ -11,16 +10,16 @@ import (
 func (bot *TelegramBot) startBotListener() {
 	defer bot.overallWg.Done()
 
-	log.Printf("Start Telegram Bot Listener")
+	bot.logger.Infof("Start Telegram Bot Listener")
 
 	for {
 		select {
 		case <-bot.overallShutdownChannel:
-			log.Printf("Telegram Bot Listener received shutdown signal")
+			bot.logger.Infof("Telegram Bot Listener received shutdown signal")
 			return
 
 		case notifierMessage := <-bot.notifierCh:
-			log.Printf("Send notification to user %v (Chat.ID %v): %v", notifierMessage.UserName, notifierMessage.ChatID, strings.Replace(notifierMessage.Message, "\n", " ", -1))
+			bot.logger.Infof("Send notification to user %v (Chat.ID %v): %v", notifierMessage.UserName, notifierMessage.ChatID, strings.Replace(notifierMessage.Message, "\n", " ", -1))
 			bot.SendMessage(notifierMessage.ChatID, notifierMessage.Message, nil)
 
 		case update := <-bot.updates:
@@ -34,7 +33,7 @@ func (bot *TelegramBot) startBotListener() {
 			userAnswer := &users.BotMessage{}
 
 			if message != nil && len(message.Text) > 0 {
-				log.Printf("Received message from user %v (Chat.ID %v): %v", message.From, message.Chat.ID, strings.Replace(message.Text, "\n", " ", -1))
+				bot.logger.Debugf("Received message from user %v (Chat.ID %v): %v", message.From, message.Chat.ID, strings.Replace(message.Text, "\n", " ", -1))
 
 				message := strings.TrimSpace(message.Text)
 				message = strings.Join(strings.Fields(message), " ")

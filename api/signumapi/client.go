@@ -2,6 +2,7 @@ package signumapi
 
 import (
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
+	"go.uber.org/zap"
 	"sync"
 	"time"
 )
@@ -37,19 +38,17 @@ type SignumApiClient struct {
 
 type Config struct {
 	SortingType abstractapi.SortingType
-	Debug       bool
 	ApiHosts    []string
 	CacheTtl    time.Duration
 }
 
-func NewSignumApiClient(config *Config) *SignumApiClient {
+func NewSignumApiClient(logger *zap.SugaredLogger, config *Config) *SignumApiClient {
 	abstractConfig := abstractapi.Config{
 		SortingType: config.SortingType,
-		Debug:       config.Debug,
 		ApiHosts:    config.ApiHosts,
 	}
 	return &SignumApiClient{
-		AbstractApiClient:      abstractapi.NewAbstractApiClient(&abstractConfig),
+		AbstractApiClient:      abstractapi.NewAbstractApiClient(logger, &abstractConfig),
 		localAccountCache:      AccountCache{sync.RWMutex{}, map[string]*Account{}},
 		localTransactionsCache: TransactionsCache{sync.RWMutex{}, map[string]map[TransactionType]map[TransactionSubType]*AccountTransactions{}},
 		localBlocksCache:       BlocksCache{sync.RWMutex{}, map[string]*AccountBlocks{}},

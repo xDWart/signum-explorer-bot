@@ -5,15 +5,16 @@ import (
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"log"
 	"sync"
 	"time"
 )
 
 type NetworkInfoListener struct {
-	db *gorm.DB
 	sync.RWMutex
+	db             *gorm.DB
+	logger         *zap.SugaredLogger
 	signumClient   *signumapi.SignumApiClient
 	lastMiningInfo signumapi.MiningInfo
 	Config         *Config
@@ -30,10 +31,11 @@ type Config struct {
 	averageCount          int
 }
 
-func NewNetworkInfoListener(db *gorm.DB, signumClient *signumapi.SignumApiClient, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *NetworkInfoListener {
+func NewNetworkInfoListener(logger *zap.SugaredLogger, db *gorm.DB, signumClient *signumapi.SignumApiClient, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *NetworkInfoListener {
 	config.averageCount = 24 * config.AveragingDaysQuantity * int(time.Hour/config.SamplePeriod)
 	networkListener := &NetworkInfoListener{
 		db:             db,
+		logger:         logger,
 		signumClient:   signumClient,
 		lastMiningInfo: signumapi.DEFAULT_MINING_INFO,
 		Config:         config,
@@ -48,7 +50,7 @@ func (ni *NetworkInfoListener) readAvgValueFromDB() {
 	var networkInfos []models.NetworkInfo
 	result := ni.db.Order("id desc").Limit(ni.Config.averageCount / ni.Config.SaveEveryNSamples).Find(&networkInfos)
 	if result.Error != nil {
-		log.Printf("Error getting Network Info from DB: %v", result.Error)
+		ni.logger.Errorf("Error getting Network Info from DB: %v", result.Error)
 		return
 	}
 
@@ -64,7 +66,7 @@ func (ni *NetworkInfoListener) readAvgValueFromDB() {
 	}
 	ni.lastMiningInfo.AverageCommitment = sumCommitments / float64(len(networkInfos))
 	ni.lastMiningInfo.AverageNetworkDifficulty = sumDificulties / float64(len(networkInfos))
-	log.Printf("Have loaded Average Network Info from DB: %.f TiBs + %.f SIGNA / TiB",
+	ni.logger.Infof("Have loaded Average Network Info from DB: %.f TiBs + %.f SIGNA / TiB",
 		ni.lastMiningInfo.AverageNetworkDifficulty, ni.lastMiningInfo.AverageCommitment)
 }
 
@@ -78,7 +80,7 @@ func (ni *NetworkInfoListener) GetLastMiningInfo() signumapi.MiningInfo {
 func (ni *NetworkInfoListener) StartNetworkInfoListener(wg *sync.WaitGroup, shutdownChannel chan interface{}) {
 	defer wg.Done()
 
-	log.Printf("Start Network Info Listener")
+	ni.logger.Infof("Start Network Info Listener")
 	ticker := time.NewTicker(ni.Config.SamplePeriod)
 
 	samplesForAveraging := make([]*signumapi.MiningInfo, ni.Config.SmoothingFactor)
@@ -87,7 +89,7 @@ func (ni *NetworkInfoListener) StartNetworkInfoListener(wg *sync.WaitGroup, shut
 	for {
 		select {
 		case <-shutdownChannel:
-			log.Printf("Network Info Listener received shutdown signal")
+			ni.logger.Infof("Network Info Listener received shutdown signal")
 			ticker.Stop()
 			return
 
@@ -100,7 +102,7 @@ func (ni *NetworkInfoListener) StartNetworkInfoListener(wg *sync.WaitGroup, shut
 func (ni *NetworkInfoListener) getMiningInfo(samplesForAveraging []*signumapi.MiningInfo, sampleIndex, timeToSave, scanIndex int) (int, int, int) {
 	miningInfo, err := ni.signumClient.GetMiningInfo()
 	if err != nil {
-		log.Printf("Error getting mining info: %v", err)
+		ni.logger.Errorf("Error getting mining info: %v", err)
 		return sampleIndex, timeToSave, scanIndex
 	}
 	miningInfo.ActualCommitment = miningInfo.AverageCommitmentNQT / 1e8
@@ -131,7 +133,7 @@ func (ni *NetworkInfoListener) getMiningInfo(samplesForAveraging []*signumapi.Mi
 		dbNetworkInfo.AverageCommitment /= numOfSamples
 		dbNetworkInfo.NetworkDifficulty /= numOfSamples
 		ni.db.Save(&dbNetworkInfo)
-		log.Printf("Saved new Network Info: Commitment %v, Difficulry %v", dbNetworkInfo.AverageCommitment, dbNetworkInfo.NetworkDifficulty)
+		ni.logger.Infof("Saved new Network Info: Commitment %v, Difficulry %v", dbNetworkInfo.AverageCommitment, dbNetworkInfo.NetworkDifficulty)
 
 		// scan prices and thin out an old ones
 		var scannedNetworkInfos []*models.NetworkInfo

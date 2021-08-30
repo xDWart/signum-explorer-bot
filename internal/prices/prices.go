@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"sync"
 	"time"
 )
 
 type PriceManager struct {
-	db *gorm.DB
 	sync.RWMutex
+	db        *gorm.DB
+	logger    *zap.SugaredLogger
 	cmcClient *cmcapi.CmcClient
 	config    *Config
 }
@@ -25,9 +27,10 @@ type Config struct {
 	DelayFuncB        time.Duration
 }
 
-func NewPricesManager(db *gorm.DB, cmcClient *cmcapi.CmcClient, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *PriceManager {
+func NewPricesManager(logger *zap.SugaredLogger, db *gorm.DB, cmcClient *cmcapi.CmcClient, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *PriceManager {
 	pm := PriceManager{
 		db:        db,
+		logger:    logger,
 		cmcClient: cmcClient,
 		config:    config,
 	}

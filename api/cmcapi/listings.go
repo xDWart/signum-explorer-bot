@@ -2,7 +2,6 @@ package cmcapi
 
 import (
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -47,7 +46,7 @@ func (c *CmcClient) updateListings() error {
 	}
 
 	if !c.updateCachedValues(listings) {
-		log.Printf("Not all symbols have been found in a first %v coins, will request more coins", c.config.FreeLimit)
+		c.Logger.Warnf("Not all symbols have been found in a first %v coins, will request more coins", c.config.FreeLimit)
 		listings, err := c.getListings(c.config.FreeLimit)
 		if err != nil {
 			return err
@@ -93,7 +92,7 @@ func (c *CmcClient) GetPrices() map[string]quote {
 	if time.Since(c.lastReqTimestamp) > c.config.CacheTtl {
 		err := c.updateListings()
 		if err != nil {
-			log.Printf("Update CMC listenings error: %v", err)
+			c.Logger.Errorf("Update CMC listenings error: %v", err)
 		}
 	}
 	prices["BTC"] = c.cachedValues["BTC"]

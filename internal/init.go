@@ -10,8 +10,8 @@ import (
 	"github.com/xDWart/signum-explorer-bot/internal/notifier"
 	"github.com/xDWart/signum-explorer-bot/internal/prices"
 	"github.com/xDWart/signum-explorer-bot/internal/users"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"log"
 	"os"
 	"runtime"
 	"strconv"
@@ -35,44 +35,44 @@ type TelegramBot struct {
 	notifierShutdownChannel chan interface{}
 }
 
-func InitTelegramBot() *TelegramBot {
-	db := database.NewDatabaseConnection()
+func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
+	db := database.NewDatabaseConnection(logger)
 
 	token := os.Getenv("TELEGRAM_BOT_TOKEN")
 	if token == "" {
-		log.Fatalf("TELEGRAM_BOT_TOKEN does not set")
+		logger.Fatalf("TELEGRAM_BOT_TOKEN does not set")
 	}
 
 	botApi, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		log.Fatalf(err.Error())
+		logger.Fatalf(err.Error())
 	}
 
 	wg := &sync.WaitGroup{}
 	shutdownChannel := make(chan interface{})
 
-	cmcClient := cmcapi.NewCmcClient(&cmcapi.Config{
-		Host:      "https://pro-api.coinmarketcap.com/v1",
-		FreeLimit: 200,
-		CacheTtl:  5 * time.Minute,
-		Debug:     true,
-	})
-	signumClient := signumapi.NewSignumApiClient(&signumapi.Config{
-		ApiHosts: []string{
-			"https://europe1.signum.network",
-			"https://europe.signum.network",
-			"https://europe3.signum.network",
-			"https://canada.signum.network",
-			"https://australia.signum.network",
-			"https://brazil.signum.network",
-			"https://uk.signum.network",
-			"https://wallet.burstcoin.ro",
-		},
-		CacheTtl:    3 * time.Minute,
-		SortingType: abstractapi.RANGING,
-		Debug:       true,
-	})
-	priceManager := prices.NewPricesManager(db, cmcClient, wg, shutdownChannel,
+	cmcClient := cmcapi.NewCmcClient(logger,
+		&cmcapi.Config{
+			Host:      "https://pro-api.coinmarketcap.com/v1",
+			FreeLimit: 200,
+			CacheTtl:  5 * time.Minute,
+		})
+	signumClient := signumapi.NewSignumApiClient(logger,
+		&signumapi.Config{
+			ApiHosts: []string{
+				"https://europe1.signum.network",
+				"https://europe.signum.network",
+				"https://europe3.signum.network",
+				"https://canada.signum.network",
+				"https://australia.signum.network",
+				"https://brazil.signum.network",
+				"https://uk.signum.network",
+				"https://wallet.burstcoin.ro",
+			},
+			CacheTtl:    3 * time.Minute,
+			SortingType: abstractapi.RANGING,
+		})
+	priceManager := prices.NewPricesManager(logger, db, cmcClient, wg, shutdownChannel,
 		&prices.Config{
 			SamplePeriod:      20 * time.Minute,
 			SmoothingFactor:   6, // samples for averaging
@@ -81,7 +81,7 @@ func InitTelegramBot() *TelegramBot {
 			DelayFuncK:        28 * time.Minute,   // kx + b: 1 week ~ 1 h between samples
 			DelayFuncB:        -136 * time.Minute, // 1 year ~ 1 week
 		})
-	networkInfoListener := networkinfo.NewNetworkInfoListener(db, signumClient, wg, shutdownChannel,
+	networkInfoListener := networkinfo.NewNetworkInfoListener(logger, db, signumClient, wg, shutdownChannel,
 		&networkinfo.Config{
 			SamplePeriod:          time.Hour,
 			AveragingDaysQuantity: 7, // during 7 days
@@ -96,14 +96,17 @@ func InitTelegramBot() *TelegramBot {
 	notifierCh := make(chan notifier.NotifierMessage)
 	notifierWg := &sync.WaitGroup{}
 	notifierShutdownChannel := make(chan interface{})
-	notifier.NewNotifier(db, signumClient, notifierCh, notifierWg, notifierShutdownChannel)
+	notifier.NewNotifier(logger, db, signumClient, notifierCh, notifierWg, notifierShutdownChannel)
+
+	userManager := users.InitManager(logger, db, cmcClient, signumClient, priceManager, networkInfoListener, wg, shutdownChannel)
 
 	bot := &TelegramBot{
 		AbstractTelegramBot: &AbstractTelegramBot{
 			BotAPI: botApi,
+			logger: logger,
 		},
 		db:                      db,
-		usersManager:            users.InitManager(db, cmcClient, signumClient, priceManager, networkInfoListener, wg, shutdownChannel),
+		usersManager:            userManager,
 		priceManager:            priceManager,
 		networkInfoListener:     networkInfoListener,
 		notifierCh:              notifierCh,
@@ -122,34 +125,34 @@ func InitTelegramBot() *TelegramBot {
 
 	bot.updates = bot.GetUpdatesChan(updateConfig)
 
-	log.Printf("Successfully init Telegram Bot")
+	bot.logger.Infof("Successfully init Telegram Bot")
 
 	var numListenGoroutines int
 	if os.Getenv("NUM_LISTEN_GOROUTINES") != "" {
 		numListenGoroutines, err = strconv.Atoi(os.Getenv("NUM_LISTEN_GOROUTINES"))
 		if err != nil {
-			log.Printf("Bad NUM_LISTEN_GOROUTINES env: %v", err)
+			bot.logger.Errorf("Bad NUM_LISTEN_GOROUTINES env: %v", err)
 		}
 	}
 
 	if numListenGoroutines == 0 {
 		numListenGoroutines = runtime.NumCPU()
-		log.Printf("NUM_LISTEN_GOROUTINES is not set, by default will use NumCPU(%v) goroutines", numListenGoroutines)
+		bot.logger.Infof("NUM_LISTEN_GOROUTINES is not set, by default will use NumCPU(%v) goroutines", numListenGoroutines)
 	}
 
-	log.Printf("Running %v listeners", numListenGoroutines)
+	bot.logger.Infof("Running %v listeners", numListenGoroutines)
 	for i := 0; i < numListenGoroutines; i++ {
 		bot.overallWg.Add(1)
 		go bot.startBotListener()
 	}
 
-	initTelegramPriceBot(priceManager, wg, shutdownChannel)
+	initTelegramPriceBot(logger, priceManager, wg, shutdownChannel)
 
 	return bot
 }
 
 func (bot *TelegramBot) Shutdown() {
-	log.Printf("Telegram Bot received shutdown signal: stop notifier at first, next will close all other listeners")
+	bot.logger.Infof("Telegram Bot received shutdown signal: stop notifier at first, next will close all other listeners")
 
 	close(bot.notifierShutdownChannel)
 	bot.notifierWg.Wait()

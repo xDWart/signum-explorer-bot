@@ -9,6 +9,9 @@ require (
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/wcharczuk/go-chart/v2 v2.1.0
+	go.uber.org/atomic v1.9.0 // indirect
+	go.uber.org/multierr v1.7.0 // indirect
+	go.uber.org/zap v1.19.0
 	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d // indirect
 	golang.org/x/text v0.3.6
 	gorm.io/driver/postgres v1.1.0

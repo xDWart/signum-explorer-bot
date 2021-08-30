@@ -3,13 +3,15 @@ package notifier
 import (
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"sync"
 )
 
 type Notifier struct {
-	db *gorm.DB
 	sync.RWMutex
+	db           *gorm.DB
+	logger       *zap.SugaredLogger
 	signumClient *signumapi.SignumApiClient
 	notifierCh   chan NotifierMessage
 }
@@ -26,9 +28,10 @@ type MonitoredAccount struct {
 	models.DbAccount
 }
 
-func NewNotifier(db *gorm.DB, signumClient *signumapi.SignumApiClient, notifierCh chan NotifierMessage, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Notifier {
+func NewNotifier(logger *zap.SugaredLogger, db *gorm.DB, signumClient *signumapi.SignumApiClient, notifierCh chan NotifierMessage, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Notifier {
 	notifier := &Notifier{
 		db:           db,
+		logger:       logger,
 		signumClient: signumClient,
 		notifierCh:   notifierCh,
 	}

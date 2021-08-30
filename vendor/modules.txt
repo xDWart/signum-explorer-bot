@@ -43,6 +43,20 @@ github.com/wcharczuk/go-chart/v2
 github.com/wcharczuk/go-chart/v2/drawing
 github.com/wcharczuk/go-chart/v2/matrix
 github.com/wcharczuk/go-chart/v2/roboto
+# go.uber.org/atomic v1.9.0
+## explicit
+go.uber.org/atomic
+# go.uber.org/multierr v1.7.0
+## explicit
+go.uber.org/multierr
+# go.uber.org/zap v1.19.0
+## explicit
+go.uber.org/zap
+go.uber.org/zap/buffer
+go.uber.org/zap/internal/bufferpool
+go.uber.org/zap/internal/color
+go.uber.org/zap/internal/exit
+go.uber.org/zap/zapcore
 # golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 golang.org/x/crypto/pbkdf2
 # golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d

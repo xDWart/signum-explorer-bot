@@ -6,7 +6,6 @@ import (
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -18,7 +17,7 @@ const NOTIFIER_CHECK_BLOCKS_PER = 3 // 4 min * 3 = per 12 min
 func (n *Notifier) startListener(wg *sync.WaitGroup, shutdownChannel chan interface{}) {
 	defer wg.Done()
 
-	log.Printf("Start Notifier")
+	n.logger.Infof("Start Notifier")
 	ticker := time.NewTicker(NOTIFIER_PERIOD)
 
 	var counter uint
@@ -27,14 +26,17 @@ func (n *Notifier) startListener(wg *sync.WaitGroup, shutdownChannel chan interf
 	for {
 		select {
 		case <-shutdownChannel:
-			log.Printf("Notify Listener received shutdown signal")
+			n.logger.Infof("Notify Listener received shutdown signal")
 			ticker.Stop()
 			return
 
 		case <-ticker.C:
 			counter++
 			checkBlocks := counter%NOTIFIER_CHECK_BLOCKS_PER == 0
+			n.logger.Infof("Notify Listener starts checking")
+			startTime := time.Now()
 			n.checkAccounts(checkBlocks)
+			n.logger.Infof("Notify Listener has finished checking in %v", time.Since(startTime))
 		}
 	}
 }
@@ -48,12 +50,12 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 			"OR db_accounts.notify_new_blocks = true OR db_accounts.notify_other_t_xs = true").
 		Scan(&monitoredAccounts).Error
 	if err != nil {
-		log.Printf("Can't get monitored accounts: %v", err)
+		n.logger.Errorf("Can't get monitored accounts: %v", err)
 		return
 	}
 
 	for _, account := range monitoredAccounts {
-		log.Printf("Notifier will request data for account %v (intx %v, outtx %v, block %v)", account.AccountRS,
+		n.logger.Debugf("Notifier will request data for account %v (intx %v, outtx %v, block %v)", account.AccountRS,
 			account.NotifyIncomeTransactions, account.NotifyOutgoTransactions, account.NotifyNewBlocks)
 
 		if account.NotifyIncomeTransactions || account.NotifyOutgoTransactions {
@@ -74,7 +76,7 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 	userTransactions, err := n.signumClient.GetCachedAccountMiningTransactions(account.Account)
 	if err != nil {
-		log.Printf("Can't get last account %v mining transactions: %v", account.Account, err)
+		n.logger.Errorf("Can't get last account %v mining transactions: %v", account.Account, err)
 		return
 	}
 
@@ -121,7 +123,7 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 				"\n<i>Fee:</i> %v SIGNA",
 				common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
 		default:
-			log.Printf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
+			n.logger.Errorf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
 			continue
 		}
 
@@ -139,7 +141,7 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 	userTransactions, err := n.signumClient.GetCachedAccountPaymentTransactions(account.Account)
 	if err != nil {
-		log.Printf("Can't get last account %v payment transactions: %v", account.Account, err)
+		n.logger.Errorf("Can't get last account %v payment transactions: %v", account.Account, err)
 		return
 	}
 
@@ -273,7 +275,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					len(transaction.Attachment.Recipients), common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
 			}
 		default:
-			log.Printf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
+			n.logger.Errorf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
 			continue
 		}
 
@@ -312,7 +314,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 	userBlocks, err := n.signumClient.GetCachedAccountBlocks(account.Account)
 	if err != nil {
-		log.Printf("Can't get last account %v blocks: %v", account.Account, err)
+		n.logger.Errorf("Can't get last account %v blocks: %v", account.Account, err)
 		return
 	}
 
@@ -341,7 +343,7 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 	userMessages, err := n.signumClient.GetCachedAccountMessageTransaction(account.Account)
 	if err != nil {
-		log.Printf("Can't get last account %v message transactions: %v", account.Account, err)
+		n.logger.Errorf("Can't get last account %v message transactions: %v", account.Account, err)
 		return
 	}
 
@@ -396,7 +398,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 					transaction.RecipientRS, transaction.FeeNQT/1e8)
 			}
 		default:
-			log.Printf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
+			n.logger.Errorf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
 			continue
 		}
 

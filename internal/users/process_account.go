@@ -26,7 +26,7 @@ func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
 		accountName = "\nName: " + account.Name
 	}
 
-	inlineText := fmt.Sprintf("💳 <b>%v</b>:\n"+
+	inlineText := fmt.Sprintf("💳 <b>%v</b>\n"+
 		"%v"+
 		"\nAvailable: %v SIGNA <i>($%v | %v BTC)</i>"+
 		"\nCommitment: %v SIGNA <i>($%v | %v BTC)</i>"+

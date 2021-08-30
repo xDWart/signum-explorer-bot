@@ -6,7 +6,6 @@ import (
 	"github.com/wcharczuk/go-chart/v2"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
-	"log"
 	"time"
 )
 
@@ -14,7 +13,7 @@ func (pm *PriceManager) GetPriceChart(duration time.Duration) []byte {
 	var prices []models.Price
 	result := pm.db.Where("created_at > ?", time.Now().Add(-duration)).Order("id asc").Find(&prices)
 	if result.Error != nil || len(prices) == 0 {
-		log.Printf("Error getting Prices from DB for plotting chart: %v", result.Error)
+		pm.logger.Errorf("Error getting Prices from DB for plotting chart: %v", result.Error)
 		return nil
 	}
 
@@ -126,7 +125,7 @@ func (pm *PriceManager) GetPriceChart(duration time.Duration) []byte {
 	buffer := bytes.NewBuffer([]byte{})
 	err := graph.Render(chart.PNG, buffer)
 	if err != nil {
-		log.Printf("Could not render chart: %v", err)
+		pm.logger.Errorf("Could not render chart: %v", err)
 		return nil
 	}
 

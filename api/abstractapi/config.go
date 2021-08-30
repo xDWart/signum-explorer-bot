@@ -1,7 +1,7 @@
 package abstractapi
 
 import (
-	"log"
+	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -19,19 +19,18 @@ type Config struct {
 	sync.Mutex
 	apiHostsLatencies []time.Duration
 	SortingType       SortingType
-	Debug             bool
 	ApiHosts          []string
 	StaticHeaders     map[string]string
 }
 
-func (c *Config) getNextHost(prevIndex int) (string, int) {
+func (c *Config) getNextHost(prevIndex int) (string, int, error) {
 	switch c.SortingType {
 	case UNSORTED:
 		nextIndex := prevIndex + 1
-		return c.ApiHosts[nextIndex], nextIndex
+		return c.ApiHosts[nextIndex], nextIndex, nil
 	case RANDOM:
 		nextIndex := rand.Intn(len(c.ApiHosts))
-		return c.ApiHosts[nextIndex], nextIndex
+		return c.ApiHosts[nextIndex], nextIndex, nil
 	case RANGING:
 		c.Lock()
 		defer c.Unlock()
@@ -43,10 +42,9 @@ func (c *Config) getNextHost(prevIndex int) (string, int) {
 			}
 		}
 
-		return c.ApiHosts[min], min
+		return c.ApiHosts[min], min, nil
 	default:
-		log.Fatal("Unknown API SortingType: %v", c.SortingType)
-		return "", 0
+		return "", 0, fmt.Errorf("Unknown API SortingType: %v", c.SortingType)
 	}
 }
 

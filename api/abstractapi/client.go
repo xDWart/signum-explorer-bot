@@ -3,8 +3,8 @@ package abstractapi
 import (
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -12,13 +12,14 @@ import (
 )
 
 type AbstractApiClient struct {
+	Logger *zap.SugaredLogger
 	http   *http.Client
 	config *Config
 }
 
-func NewAbstractApiClient(config *Config) *AbstractApiClient {
+func NewAbstractApiClient(logger *zap.SugaredLogger, config *Config) *AbstractApiClient {
 	if config == nil || len(config.ApiHosts) == 0 {
-		log.Fatalf("No api hosts specified")
+		logger.Fatalf("No api hosts specified")
 	}
 	config.apiHostsLatencies = make([]time.Duration, len(config.ApiHosts))
 
@@ -29,6 +30,7 @@ func NewAbstractApiClient(config *Config) *AbstractApiClient {
 	return &AbstractApiClient{
 		http:   &http.Client{},
 		config: config,
+		Logger: logger,
 	}
 }
 
@@ -37,8 +39,8 @@ func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParam
 	var lastErr error
 	for index := 0; index < len(c.config.ApiHosts); index++ {
 		var host string
-		if lastErr != nil && c.config.Debug {
-			log.Printf("AbstractApiClient.DoJsonReq error: %v", lastErr)
+		if lastErr != nil {
+			c.Logger.Debugf("AbstractApiClient.DoJsonReq error: %v", lastErr)
 		}
 		if index > 0 {
 			c.config.penaltyTheHost(currIndex)
@@ -46,17 +48,19 @@ func (c *AbstractApiClient) DoJsonReq(httpMethod string, method string, urlParam
 				return lastErr
 			}
 		}
-		host, currIndex = c.config.getNextHost(currIndex)
+		var err error
+		host, currIndex, err = c.config.getNextHost(currIndex)
+		if err != nil {
+			c.Logger.Fatal(err)
+		}
 
-		if c.config.Debug {
-			secretPhrase, ok := urlParams["secretPhrase"]
-			if ok {
-				delete(urlParams, "secretPhrase")
-			}
-			log.Printf("Will request %v %v%v with params: %v", httpMethod, host, method, urlParams)
-			if ok {
-				urlParams["secretPhrase"] = secretPhrase
-			}
+		secretPhrase, ok := urlParams["secretPhrase"]
+		if ok {
+			delete(urlParams, "secretPhrase")
+		}
+		c.Logger.Debugf("Will request %v %v%v with params: %v", httpMethod, host, method, urlParams)
+		if ok {
+			urlParams["secretPhrase"] = secretPhrase
 		}
 
 		req, err := http.NewRequest(httpMethod, host+method, nil)
