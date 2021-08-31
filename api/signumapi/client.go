@@ -18,6 +18,7 @@ const (
 	RT_READ_MESSAGE             RequestType = "readMessage"
 	RT_SUGGEST_FEE              RequestType = "suggestFee"
 	RT_GET_ACCOUNT              RequestType = "getAccount"
+	RT_GET_ACCOUNT_ID           RequestType = "getAccountId"
 	RT_GET_ACCOUNT_TRANSACTIONS RequestType = "getAccountTransactions"
 	RT_GET_MINING_INFO          RequestType = "getMiningInfo"
 	RT_GET_REWARD_RECIPIENT     RequestType = "getRewardRecipient"

@@ -37,7 +37,7 @@ func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method 
 	for index := 0; index < len(c.config.ApiHosts); index++ {
 		var host string
 		if lastErr != nil {
-			logger.Debugf("AbstractApiClient.DoJsonReq error: %v", lastErr)
+			logger.Errorf("AbstractApiClient.DoJsonReq error: %v", lastErr)
 		}
 		if index > 0 {
 			c.config.penaltyTheHost(currIndex)
@@ -100,7 +100,7 @@ func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method 
 
 		err = json.Unmarshal(body, output)
 		if err != nil {
-			lastErr = fmt.Errorf("couldn't unmarshal body of %v: %v", host+method, err)
+			lastErr = fmt.Errorf("couldn't unmarshal body of %v: %v. Body: %v", host+method, err, string(body))
 			continue
 		}
 		latency := time.Since(startTime)

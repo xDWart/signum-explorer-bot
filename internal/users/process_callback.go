@@ -132,7 +132,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			}
 			timeSinceStr += fmt.Sprintf("%vm ago", int(timeSince.Minutes())%60)
 
-			newInlineText += fmt.Sprintf("%v  <b>#%v</b>  <i>+%v SIGNA</i>\n",
+			newInlineText += fmt.Sprintf("%v  <b>#%v</b>  <i>%v SIGNA</i>\n",
 				timeSinceStr, block.Height, block.BlockReward)
 		}
 

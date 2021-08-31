@@ -49,3 +49,15 @@ func (c *SignumApiClient) GetAccount(logger abstractapi.LoggerI, accountS string
 	}
 	return account, err
 }
+
+func (c *SignumApiClient) GetAccountId(logger abstractapi.LoggerI, secretPhrase string) (*Account, error) {
+	account := &Account{}
+	err := c.DoJsonReq(logger, "POST", "/burst",
+		map[string]string{"requestType": string(RT_GET_ACCOUNT_ID), "secretPhrase": secretPhrase},
+		nil,
+		account)
+	if err == nil && account.ErrorDescription != "" {
+		err = fmt.Errorf(account.ErrorDescription)
+	}
+	return account, err
+}
