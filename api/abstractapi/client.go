@@ -51,15 +51,21 @@ func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method 
 			logger.Fatalf(err.Error())
 		}
 
-		secretPhrase, ok := urlParams["secretPhrase"]
-		if ok {
-			delete(urlParams, "secretPhrase")
+		// protect sensitive data from logging
+		var sensitiveData = map[string]string{}
+		for _, key := range []string{"secretPhrase", "messageToEncrypt"} {
+			data, ok := urlParams[key]
+			if ok {
+				sensitiveData[key] = data
+				delete(urlParams, key)
+			}
 		}
 		logger.Debugf("Will request %v %v%v with params: %v", httpMethod, host, method, urlParams)
-		if ok {
-			urlParams["secretPhrase"] = secretPhrase
+		for key, data := range sensitiveData {
+			urlParams[key] = data
 		}
 
+		// requesting
 		req, err := http.NewRequest(httpMethod, host+method, nil)
 		if err != nil {
 			lastErr = fmt.Errorf("error create req %v", host+method)
