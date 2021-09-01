@@ -35,7 +35,7 @@ func (c *SignumApiClient) SendMessage(logger abstractapi.LoggerI, secretPhrase, 
 			RequestType:   RT_SEND_MESSAGE,
 			SecretPhrase:  secretPhrase,
 			Recipient:     recipient,
-			FeeNQT:        feeNQT,
+			FeeNQT:        feeNQT * 1e8,
 			Message:       message,
 			MessageIsText: true,
 		})
@@ -47,7 +47,7 @@ func (c *SignumApiClient) SendEncryptedMessage(logger abstractapi.LoggerI, secre
 			RequestType:            RT_SEND_MESSAGE,
 			SecretPhrase:           secretPhrase,
 			Recipient:              recipient,
-			FeeNQT:                 feeNQT,
+			FeeNQT:                 feeNQT * 1e8,
 			MessageToEncrypt:       messageToEncrypt,
 			MessageToEncryptIsText: true,
 		})

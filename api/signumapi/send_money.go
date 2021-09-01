@@ -13,7 +13,7 @@ func (c *SignumApiClient) SendMoney(logger abstractapi.LoggerI, secretPhrase, re
 			SecretPhrase: secretPhrase,
 			Recipient:    recipient,
 			AmountNQT:    amount * 1e8,
-			FeeNQT:       feeNQT,
+			FeeNQT:       feeNQT * 1e8,
 		})
 }
 
@@ -27,7 +27,7 @@ func (c *SignumApiClient) SendMoneyMulti(logger abstractapi.LoggerI, secretPhras
 			RequestType:  RT_SEND_MONEY_MULTI,
 			SecretPhrase: secretPhrase,
 			Recipients:   strings.Join(recipients, ";"),
-			FeeNQT:       feeNQT,
+			FeeNQT:       feeNQT * 1e8,
 		})
 }
 
@@ -38,6 +38,6 @@ func (c *SignumApiClient) SendMoneyMultiSame(logger abstractapi.LoggerI, secretP
 			SecretPhrase: secretPhrase,
 			Recipients:   strings.Join(recipients, ";"),
 			AmountNQT:    amount * 1e8 / float64(len(recipients)),
-			FeeNQT:       feeNQT,
+			FeeNQT:       feeNQT * 1e8,
 		})
 }

@@ -21,7 +21,7 @@ func (c *SignumApiClient) SetRewardRecipient(logger abstractapi.LoggerI, secretP
 			RequestType:  RT_SET_REWARD_RECIPIENT,
 			SecretPhrase: secretPhrase,
 			Recipient:    recipient,
-			FeeNQT:       feeNQT,
+			FeeNQT:       feeNQT * 1e8,
 		})
 }
 
@@ -32,7 +32,7 @@ func (c *SignumApiClient) AddCommitment(logger abstractapi.LoggerI, secretPhrase
 			RequestType:  RT_ADD_COMMITMENT,
 			SecretPhrase: secretPhrase,
 			AmountNQT:    amountNQT,
-			FeeNQT:       feeNQT,
+			FeeNQT:       feeNQT * 1e8,
 		})
 }
 
@@ -43,6 +43,6 @@ func (c *SignumApiClient) RemoveCommitment(logger abstractapi.LoggerI, secretPhr
 			RequestType:  RT_REMOVE_COMMITMENT,
 			SecretPhrase: secretPhrase,
 			AmountNQT:    amountNQT,
-			FeeNQT:       feeNQT,
+			FeeNQT:       feeNQT * 1e8,
 		})
 }

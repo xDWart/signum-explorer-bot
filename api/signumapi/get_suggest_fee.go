@@ -12,10 +12,10 @@ type SuggestFee struct {
 }
 
 const (
-	MINIMUM_FEE          FeeType = 0.00735 * 1e8
-	DEFAULT_CHEAP_FEE            = 0.0147 * 1e8
-	DEFAULT_STANDARD_FEE         = 0.02205 * 1e8
-	DEFAULT_PRIORITY_FEE         = 0.0294 * 1e8
+	MINIMUM_FEE          FeeType = 0.00735
+	DEFAULT_CHEAP_FEE            = 0.0147
+	DEFAULT_STANDARD_FEE         = 0.02205
+	DEFAULT_PRIORITY_FEE         = 0.0294
 )
 
 func (c *SignumApiClient) GetSuggestFee(logger abstractapi.LoggerI) (*SuggestFee, error) {
