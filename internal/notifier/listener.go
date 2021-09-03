@@ -84,7 +84,9 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 		return
 	}
 
-	if userTransactions.Transactions[0].TransactionID == account.LastMiningTX {
+	lastTransaction := userTransactions.Transactions[0]
+	if lastTransaction.TransactionID == account.LastMiningTX ||
+		lastTransaction.Height <= account.LastMiningH {
 		return
 	}
 
@@ -134,7 +136,8 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 		}
 	}
 
-	account.DbAccount.LastMiningTX = userTransactions.Transactions[0].TransactionID
+	account.DbAccount.LastMiningTX = lastTransaction.TransactionID
+	account.DbAccount.LastMiningH = lastTransaction.Height
 	n.db.Save(&account.DbAccount)
 }
 
@@ -149,7 +152,9 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		return
 	}
 
-	if userTransactions.Transactions[0].TransactionID == account.LastTransactionID {
+	lastTransaction := userTransactions.Transactions[0]
+	if lastTransaction.TransactionID == account.LastTransactionID ||
+		lastTransaction.Height <= account.LastTransactionH {
 		return
 	}
 
@@ -307,7 +312,8 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		}
 	}
 
-	account.DbAccount.LastTransactionID = userTransactions.Transactions[0].TransactionID
+	account.DbAccount.LastTransactionID = lastTransaction.TransactionID
+	account.DbAccount.LastTransactionH = lastTransaction.Height
 	n.db.Save(&account.DbAccount)
 }
 
@@ -323,7 +329,8 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 	}
 
 	foundBlock := userBlocks.Blocks[0]
-	if foundBlock.Block == account.LastBlockID {
+	if foundBlock.Block == account.LastBlockID ||
+		foundBlock.Height <= account.LastBlockH {
 		return
 	}
 
@@ -331,6 +338,7 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 		account.AccountRS, common.FormatChainTimeToStringTimeUTC(foundBlock.Timestamp), foundBlock.Height, foundBlock.BlockReward)
 
 	account.DbAccount.LastBlockID = foundBlock.Block
+	account.DbAccount.LastBlockH = foundBlock.Height
 	n.db.Save(&account.DbAccount)
 
 	n.notifierCh <- NotifierMessage{
@@ -351,7 +359,9 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 		return
 	}
 
-	if userMessages.Transactions[0].TransactionID == account.LastMessageTX {
+	lastMessage := userMessages.Transactions[0]
+	if lastMessage.TransactionID == account.LastMessageTX ||
+		lastMessage.Height <= account.LastMessageH {
 		return
 	}
 
@@ -409,6 +419,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 		}
 	}
 
-	account.DbAccount.LastMessageTX = userMessages.Transactions[0].TransactionID
+	account.DbAccount.LastMessageTX = lastMessage.TransactionID
+	account.DbAccount.LastMessageH = lastMessage.Height
 	n.db.Save(&account.DbAccount)
 }
