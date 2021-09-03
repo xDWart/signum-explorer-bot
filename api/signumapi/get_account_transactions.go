@@ -99,6 +99,24 @@ func (c *SignumApiClient) getAccountTransactionsByType(logger abstractapi.Logger
 	return accountTransactions, err
 }
 
+func (c *SignumApiClient) GetAccountTransactions(logger abstractapi.LoggerI, account string, firstIndex, lastIndex int) (*AccountTransactions, error) {
+	accountTransactions := &AccountTransactions{}
+
+	urlParams := map[string]string{
+		"account":         account,
+		"requestType":     string(RT_GET_ACCOUNT_TRANSACTIONS),
+		"includeIndirect": "true",
+		"firstIndex":      fmt.Sprint(firstIndex),
+		"lastIndex":       fmt.Sprint(lastIndex),
+	}
+
+	err := c.DoJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
+	if err == nil && accountTransactions.ErrorDescription != "" {
+		err = fmt.Errorf(accountTransactions.ErrorDescription)
+	}
+	return accountTransactions, err
+}
+
 func (c *SignumApiClient) GetAccountOrdinaryPaymentTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
 	return c.getAccountTransactionsByType(logger, account, TT_PAYMENT, TST_ORDINARY_PAYMENT)
 }

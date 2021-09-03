@@ -33,6 +33,7 @@ type SignumApiClient struct {
 	localAccountCache      AccountCache
 	localTransactionsCache TransactionsCache
 	localBlocksCache       BlocksCache
+	localSuggestFeeCache   SuggestFeeCache
 	config                 *Config
 }
 
