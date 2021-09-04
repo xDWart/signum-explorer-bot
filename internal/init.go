@@ -63,7 +63,7 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 				"https://europe1.signum.network",
 				"https://europe.signum.network",
 				"https://europe3.signum.network",
-				"https://canada.signum.network",
+				// "https://canada.signum.network",
 				"https://australia.signum.network",
 				"https://brazil.signum.network",
 				"https://uk.signum.network",
