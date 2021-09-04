@@ -1,7 +1,9 @@
 package signumapi
 
 import (
+	"fmt"
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
+	"sort"
 	"sync"
 	"time"
 )
@@ -31,7 +33,7 @@ const (
 )
 
 type SignumApiClient struct {
-	*abstractapi.AbstractApiClient
+	apiClientsPool         apiClientsPool
 	localAccountCache      AccountCache
 	localTransactionsCache TransactionsCache
 	localBlocksCache       BlocksCache
@@ -39,23 +41,114 @@ type SignumApiClient struct {
 	config                 *Config
 }
 
-type Config struct {
-	SortingType abstractapi.SortingType
-	ApiHosts    []string
-	CacheTtl    time.Duration
-	LastIndex   uint
+type apiClientsPool struct {
+	sync.RWMutex
+	clients []*apiClient
 }
 
-func NewSignumApiClient(logger abstractapi.LoggerI, config *Config) *SignumApiClient {
-	abstractConfig := abstractapi.Config{
-		SortingType: config.SortingType,
-		ApiHosts:    config.ApiHosts,
+type apiClient struct {
+	*abstractapi.AbstractApiClient
+	miningInfo MiningInfo
+	latency    time.Duration
+}
+
+type Config struct {
+	ApiHosts                []string
+	CacheTtl                time.Duration
+	LastIndex               uint64
+	RebuildApiClientsPeriod time.Duration
+}
+
+func NewSignumApiClient(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *SignumApiClient {
+	apiClients := upbuildApiClients(logger, config.ApiHosts)
+	if len(apiClients) == 0 {
+		logger.Fatalf("could not upbuild api clients")
 	}
-	return &SignumApiClient{
-		AbstractApiClient:      abstractapi.NewAbstractApiClient(logger, &abstractConfig),
+	signumApiClient := &SignumApiClient{
+		apiClientsPool:         apiClientsPool{clients: apiClients},
 		localAccountCache:      AccountCache{sync.RWMutex{}, map[string]*Account{}},
 		localTransactionsCache: TransactionsCache{sync.RWMutex{}, map[string]map[TransactionType]map[TransactionSubType]*AccountTransactions{}},
 		localBlocksCache:       BlocksCache{sync.RWMutex{}, map[string]*AccountBlocks{}},
 		config:                 config,
 	}
+	wg.Add(1)
+	go signumApiClient.startApiClientsRebuilder(logger, wg, shutdownChannel)
+	return signumApiClient
+}
+
+func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdownChannel chan interface{}) {
+	defer wg.Done()
+
+	logger.Infof("Start Signum Api Clients Rebuilder")
+	ticker := time.NewTicker(c.config.RebuildApiClientsPeriod)
+
+	for {
+		select {
+		case <-shutdownChannel:
+			logger.Infof("Signum Api Clients Rebuilder received shutdown signal")
+			ticker.Stop()
+			return
+
+		case <-ticker.C:
+			logger.Infof("Start rebuilding Signum Api Clients")
+			startTime := time.Now()
+
+			newApiClients := upbuildApiClients(logger, c.config.ApiHosts)
+			if len(newApiClients) > 0 {
+				c.apiClientsPool.Lock()
+				c.apiClientsPool.clients = newApiClients
+				c.apiClientsPool.Unlock()
+			} else {
+				logger.Errorf("Could not rebuild api clients")
+			}
+
+			logger.Infof("Signum Api Clients has been rebuilt in %v", time.Since(startTime))
+		}
+	}
+}
+
+func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClient {
+	clients := make([]*apiClient, 0, len(apiHosts))
+	for _, host := range apiHosts {
+		client := &apiClient{
+			AbstractApiClient: abstractapi.NewAbstractApiClient(host, nil),
+		}
+		startTime := time.Now()
+		err := client.DoJsonReq(logger, "GET", "/burst", map[string]string{"requestType": string(RT_GET_MINING_INFO)}, nil, &client.miningInfo)
+		if err != nil {
+			logger.Errorf("Failed DoJsonReq: %v", err)
+			continue
+		}
+		client.latency = time.Since(startTime)
+		clients = append(clients, client)
+	}
+	sort.Slice(clients, func(i, j int) bool {
+		if clients[i].miningInfo.Height > clients[j].miningInfo.Height {
+			return true
+		}
+		if clients[i].miningInfo.Height < clients[j].miningInfo.Height {
+			return false
+		}
+		return clients[i].latency < clients[j].latency
+	})
+	return clients
+}
+
+func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
+	var lastErr error
+	c.apiClientsPool.RLock()
+	apiClients := c.apiClientsPool.clients
+	c.apiClientsPool.RUnlock()
+	for _, apiClient := range apiClients {
+		lastErr = apiClient.DoJsonReq(logger, httpMethod, method, urlParams, additionalHeaders, output)
+		if lastErr != nil {
+			logger.Errorf("AbstractApiClient.DoJsonReq error: %v", lastErr)
+			if httpMethod == "POST" {
+				return lastErr
+			}
+			continue
+		}
+		return nil
+	}
+	return fmt.Errorf("couldn't get %v method: %v", method, lastErr)
 }

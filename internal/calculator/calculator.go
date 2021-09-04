@@ -19,7 +19,7 @@ type CalcResult struct {
 const p = .4515449935
 
 func burstPerDay(miningInfo *signumapi.MiningInfo) float64 {
-	return 360 / miningInfo.AverageNetworkDifficulty * miningInfo.LastBlockReward
+	return 360 / miningInfo.AverageNetworkDifficulty * float64(miningInfo.LastBlockReward)
 }
 
 func Calculate(miningInfo *signumapi.MiningInfo, tib float64, commit float64) *CalcResult {

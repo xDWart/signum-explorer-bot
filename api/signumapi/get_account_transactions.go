@@ -47,31 +47,6 @@ type AccountTransactions struct {
 	// RequestProcessingTime uint64    `json:"requestProcessingTime"`
 }
 
-type RecipientsType []interface{}
-
-func (r *RecipientsType) FoundMyAmount(account string) float64 {
-	for _, v := range *r {
-		slice, ok := v.([]interface{})
-		if !ok {
-			continue
-		}
-		recipient, ok := slice[0].(string)
-		if !ok || recipient != account {
-			continue
-		}
-		amountS, ok := slice[1].(string)
-		if !ok {
-			continue
-		}
-		amount, err := strconv.ParseFloat(amountS, 64)
-		if err != nil {
-			continue
-		}
-		return amount / 1e8
-	}
-	return 0
-}
-
 func (c *SignumApiClient) getAccountTransactionsByType(logger abstractapi.LoggerI, account string, transactionType TransactionType, transactionSubType TransactionSubType) (*AccountTransactions, error) {
 	accountTransactions := &AccountTransactions{}
 
@@ -81,14 +56,14 @@ func (c *SignumApiClient) getAccountTransactionsByType(logger abstractapi.Logger
 		"includeIndirect": "true",
 		"type":            strconv.Itoa(int(transactionType)),
 		"firstIndex":      "0",
-		"lastIndex":       fmt.Sprint(c.config.LastIndex),
+		"lastIndex":       strconv.FormatUint(c.config.LastIndex, 10),
 	}
 
 	if transactionSubType != TST_ALL_TYPES_PAYMENT && transactionSubType != TST_ALL_TYPES_MINING {
 		urlParams["subtype"] = fmt.Sprint(transactionSubType)
 	}
 
-	err := c.DoJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
+	err := c.doJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
 	if err == nil {
 		if accountTransactions.ErrorDescription == "" {
 			c.storeAccountTransactionsToCache(account, transactionType, transactionSubType, accountTransactions)
@@ -107,10 +82,10 @@ func (c *SignumApiClient) GetAccountTransactions(logger abstractapi.LoggerI, acc
 		"requestType":     string(RT_GET_ACCOUNT_TRANSACTIONS),
 		"includeIndirect": "true",
 		"firstIndex":      "0",
-		"lastIndex":       fmt.Sprint(c.config.LastIndex),
+		"lastIndex":       strconv.FormatUint(c.config.LastIndex, 10),
 	}
 
-	err := c.DoJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
+	err := c.doJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
 	if err == nil && accountTransactions.ErrorDescription != "" {
 		err = fmt.Errorf(accountTransactions.ErrorDescription)
 	}

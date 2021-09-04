@@ -4,116 +4,79 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"net/url"
-	"time"
 )
 
 type AbstractApiClient struct {
-	http   *http.Client
-	config *Config
+	http          *http.Client
+	ApiHost       string
+	staticHeaders map[string]string
 }
 
-func NewAbstractApiClient(logger LoggerI, config *Config) *AbstractApiClient {
-	if config == nil || len(config.ApiHosts) == 0 {
-		logger.Fatalf("No api hosts specified")
-	}
-	config.apiHostsLatencies = make([]time.Duration, len(config.ApiHosts))
-
-	if config.SortingType == RANDOM {
-		rand.Seed(time.Now().UnixNano())
-	}
-
+func NewAbstractApiClient(apiHost string, staticHeaders map[string]string) *AbstractApiClient {
 	return &AbstractApiClient{
-		http:   &http.Client{},
-		config: config,
+		http:          &http.Client{},
+		ApiHost:       apiHost,
+		staticHeaders: staticHeaders,
 	}
 }
 
 func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
-	var currIndex = -1
-	var lastErr error
-	for index := 0; index < len(c.config.ApiHosts); index++ {
-		var host string
-		if lastErr != nil {
-			logger.Errorf("AbstractApiClient.DoJsonReq error: %v", lastErr)
+	// protect sensitive data from logging
+	var sensitiveData = map[string]string{}
+	for _, key := range []string{"secretPhrase", "messageToEncrypt"} {
+		data, ok := urlParams[key]
+		if ok {
+			sensitiveData[key] = data
+			delete(urlParams, key)
 		}
-		if index > 0 {
-			c.config.penaltyTheHost(currIndex)
-			if httpMethod == "POST" {
-				return lastErr
-			}
-		}
-		var err error
-		host, currIndex, err = c.config.getNextHost(currIndex)
-		if err != nil {
-			logger.Fatalf(err.Error())
-		}
-
-		// protect sensitive data from logging
-		var sensitiveData = map[string]string{}
-		for _, key := range []string{"secretPhrase", "messageToEncrypt"} {
-			data, ok := urlParams[key]
-			if ok {
-				sensitiveData[key] = data
-				delete(urlParams, key)
-			}
-		}
-		logger.Debugf("Will request %v %v%v with params: %v", httpMethod, host, method, urlParams)
-		for key, data := range sensitiveData {
-			urlParams[key] = data
-		}
-
-		// requesting
-		req, err := http.NewRequest(httpMethod, host+method, nil)
-		if err != nil {
-			lastErr = fmt.Errorf("error create req %v", host+method)
-			continue
-		}
-
-		req.Header.Set("Accepts", "application/json")
-		for key, value := range c.config.StaticHeaders {
-			req.Header.Add(key, value)
-		}
-		for key, value := range additionalHeaders {
-			req.Header.Add(key, value)
-		}
-
-		q := url.Values{}
-		for key, value := range urlParams {
-			q.Add(key, value)
-		}
-		req.URL.RawQuery = q.Encode()
-
-		startTime := time.Now()
-		resp, err := c.http.Do(req)
-		if err != nil {
-			lastErr = fmt.Errorf("error perform %v %v: %v", httpMethod, host+method, err)
-			continue
-		}
-
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			lastErr = fmt.Errorf("couldn't read body of %v: %v", host+method, err)
-			continue
-		}
-
-		if resp.StatusCode != 200 {
-			lastErr = fmt.Errorf("error StatusCode %v for %v: %v", resp.StatusCode, host+method, string(body))
-			continue
-		}
-
-		err = json.Unmarshal(body, output)
-		if err != nil {
-			lastErr = fmt.Errorf("couldn't unmarshal body of %v: %v. Body: %v", host+method, err, string(body))
-			continue
-		}
-		latency := time.Since(startTime)
-		c.config.appendLatencyToHost(latency, currIndex)
-
-		return nil
 	}
-	c.config.penaltyTheHost(currIndex)
-	return fmt.Errorf("couldn't get %v method: %v", method, lastErr)
+	logger.Debugf("Will request %v %v%v with params: %v", httpMethod, c.ApiHost, method, urlParams)
+	for key, data := range sensitiveData {
+		urlParams[key] = data
+	}
+
+	// requesting
+	req, err := http.NewRequest(httpMethod, c.ApiHost+method, nil)
+	if err != nil {
+		return fmt.Errorf("error create req %v", c.ApiHost+method)
+	}
+
+	req.Header.Set("Accepts", "application/json")
+	if c.staticHeaders != nil {
+		for key, value := range c.staticHeaders {
+			req.Header.Add(key, value)
+		}
+	}
+	for key, value := range additionalHeaders {
+		req.Header.Add(key, value)
+	}
+
+	q := url.Values{}
+	for key, value := range urlParams {
+		q.Add(key, value)
+	}
+	req.URL.RawQuery = q.Encode()
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return fmt.Errorf("error perform %v %v: %v", httpMethod, c.ApiHost+method, err)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("couldn't read body of %v: %v", c.ApiHost+method, err)
+	}
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("error StatusCode %v for %v: %v", resp.StatusCode, c.ApiHost+method, string(body))
+	}
+
+	err = json.Unmarshal(body, output)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal body of %v: %v. Body: %v", c.ApiHost+method, err, string(body))
+	}
+
+	return nil
 }

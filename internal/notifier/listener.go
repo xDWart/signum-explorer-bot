@@ -98,8 +98,10 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 
 		var totalCommitment string
 		newAccount, err := n.signumClient.GetAccount(n.logger, account.Account)
-		if err == nil {
-			totalCommitment = fmt.Sprintf("\n<b>Total commitment: %v SIGNA</b>", common.FormatNumber(newAccount.CommittedBalance, 2))
+		if err != nil {
+			n.logger.Errorf("Error getting account %v: %v", account.Account, err)
+		} else {
+			totalCommitment = fmt.Sprintf("\n<b>Total commitment: %v SIGNA</b>", common.FormatNQT(newAccount.CommittedBalanceNQT))
 		}
 
 		switch transaction.Subtype {
@@ -113,17 +115,17 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 			msg += fmt.Sprintf("new recipient assigned:"+
 				"\n<i>Recipient:</i> %v"+recipientName+
 				"\n<i>Fee:</i> %v SIGNA",
-				transaction.RecipientRS, transaction.FeeNQT/1e8)
+				transaction.RecipientRS, common.ConvertFeeNQT(transaction.FeeNQT))
 		case signumapi.TST_ADD_COMMITMENT:
 			msg += fmt.Sprintf("new commitment added:"+
 				"\n<i>Amount:</i> +%v SIGNA"+
 				"\n<i>Fee:</i> %v SIGNA",
-				common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
+				common.FormatNQT(transaction.Attachment.AmountNQT), common.ConvertFeeNQT(transaction.FeeNQT))
 		case signumapi.TST_REMOVE_COMMITMENT:
 			msg += fmt.Sprintf("commitment revoked:"+
 				"\n<i>Amount:</i> -%v SIGNA"+
 				"\n<i>Fee:</i> %v SIGNA",
-				common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2), transaction.FeeNQT/1e8)
+				common.FormatNQT(transaction.Attachment.AmountNQT), common.ConvertFeeNQT(transaction.FeeNQT))
 		default:
 			n.logger.Errorf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
 			continue
@@ -161,7 +163,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 	var totalBalance string
 	newAccount, err := n.signumClient.GetAccount(n.logger, account.Account)
 	if err == nil {
-		totalBalance = fmt.Sprintf("\n<b>Total balance: %v SIGNA</b>", common.FormatNumber(newAccount.TotalBalance, 2))
+		totalBalance = fmt.Sprintf("\n<b>Total balance: %v SIGNA</b>", common.FormatNQT(newAccount.TotalBalanceNQT))
 	}
 
 	for _, transaction := range userTransactions.Transactions {
@@ -215,7 +217,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		var outgoAccountRS string
 		switch transaction.Subtype {
 		case signumapi.TST_ORDINARY_PAYMENT:
-			amount = transaction.AmountNQT / 1e8
+			amount = transaction.GetAmount()
 			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Ordinary"+
@@ -224,7 +226,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Amount:</i> +%v SIGNA"+
 					message+
 					"\n<i>Fee:</i> %v SIGNA",
-					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
+					transaction.SenderRS, common.FormatNQT(transaction.GetAmountNQT()), common.ConvertFeeNQT(transaction.FeeNQT))
 			} else {
 				msg += fmt.Sprintf("new outgo:"+
 					"\n<i>Payment:</i> Ordinary"+
@@ -233,13 +235,13 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Amount:</i> -%v SIGNA"+
 					message+
 					"\n<i>Fee:</i> %v SIGNA",
-					transaction.RecipientRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
+					transaction.RecipientRS, common.FormatNQT(transaction.GetAmountNQT()), common.ConvertFeeNQT(transaction.FeeNQT))
 				outgoAccount = transaction.Recipient
 				outgoAccountRS = transaction.RecipientRS
 			}
 		case signumapi.TST_MULTI_OUT_PAYMENT:
 			if incomeTransaction {
-				amount = transaction.Attachment.Recipients.FoundMyAmount(account.Account)
+				amount = transaction.GetMyMultiOutAmount(account.Account)
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out"+
 					"\n<i>Sender:</i> %v"+
@@ -247,20 +249,20 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Amount:</i> +%v SIGNA"+
 					message+
 					"\n<i>Fee:</i> %v SIGNA",
-					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
+					transaction.SenderRS, common.FormatNQT(transaction.GetMyMultiOutAmountNQT(account.Account)), common.ConvertFeeNQT(transaction.FeeNQT))
 			} else {
-				amount = transaction.AmountNQT / 1e8
+				amount = transaction.GetAmount()
 				msg += fmt.Sprintf("new outgo:"+
 					"\n<i>Payment:</i> Multi-out"+
 					"\n<i>Recipients:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
 					message+
 					"\n<i>Fee:</i> %v SIGNA",
-					len(transaction.Attachment.Recipients), common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
+					len(transaction.Attachment.Recipients), common.FormatNQT(transaction.GetAmountNQT()), common.ConvertFeeNQT(transaction.FeeNQT))
 			}
 		case signumapi.TST_MULTI_OUT_SAME_PAYMENT:
 			if incomeTransaction {
-				amount = transaction.AmountNQT / 1e8 / float64(len(transaction.Attachment.Recipients))
+				amount = transaction.GetMultiOutSameAmount()
 				msg += fmt.Sprintf("new income:"+
 					"\n<i>Payment:</i> Multi-out same"+
 					"\n<i>Sender:</i> %v"+
@@ -268,16 +270,16 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Amount:</i> +%v SIGNA"+
 					message+
 					"\n<i>Fee:</i> %v SIGNA",
-					transaction.SenderRS, common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
+					transaction.SenderRS, common.FormatNQT(transaction.GetMultiOutSameAmountNQT()), common.ConvertFeeNQT(transaction.FeeNQT))
 			} else {
-				amount = transaction.AmountNQT / 1e8
+				amount = transaction.GetAmount()
 				msg += fmt.Sprintf("new outgo:"+
 					"\n<i>Payment:</i> Multi-out same"+
 					"\n<i>Recipients:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
 					message+
 					"\n<i>Fee:</i> %v SIGNA",
-					len(transaction.Attachment.Recipients), common.FormatNumber(amount, 2), transaction.FeeNQT/1e8)
+					len(transaction.Attachment.Recipients), common.FormatNQT(transaction.GetAmountNQT()), common.ConvertFeeNQT(transaction.FeeNQT))
 			}
 		default:
 			n.logger.Errorf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)
@@ -299,7 +301,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					AccountRS:     outgoAccountRS,
 					TransactionID: transaction.TransactionID,
 					Amount:        amount,
-					Fee:           transaction.FeeNQT / 1e8,
+					Fee:           common.ConvertFeeNQT(transaction.FeeNQT),
 				}
 				n.db.Save(&newFaucet)
 			}
@@ -393,7 +395,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Message:</i> "+message+
 					"\n<i>Fee:</i> %v SIGNA",
-					transaction.SenderRS, transaction.FeeNQT/1e8)
+					transaction.SenderRS, common.ConvertFeeNQT(transaction.FeeNQT))
 			} else {
 				var recipientName string
 				recipientAccount, err := n.signumClient.GetCachedAccount(n.logger, transaction.RecipientRS)
@@ -405,7 +407,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 					"\n<i>Recipient:</i> %v"+recipientName+
 					"\n<i>Message:</i> "+message+
 					"\n<i>Fee:</i> %v SIGNA",
-					transaction.RecipientRS, transaction.FeeNQT/1e8)
+					transaction.RecipientRS, common.ConvertFeeNQT(transaction.FeeNQT))
 			}
 		default:
 			n.logger.Errorf("%v: unknown SubType (%v) for transaction %v", account.Account, transaction.Subtype, transaction.TransactionID)

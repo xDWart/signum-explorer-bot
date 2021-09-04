@@ -100,10 +100,10 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		for _, transaction := range accountTransactions.Transactions {
 			if account.Account == transaction.Sender {
 				newInlineText += fmt.Sprintf("<i>%v</i>  Sent to <b>%v</b>  <i>-%v SIGNA</i>\n",
-					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.RecipientRS, common.FormatNumber(transaction.AmountNQT/1e8, 2))
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.RecipientRS, common.FormatNQT(transaction.GetAmountNQT()))
 			} else {
 				newInlineText += fmt.Sprintf("<i>%v</i>  Received from <b>%v</b>  <i>+%v SIGNA</i>\n",
-					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.SenderRS, common.FormatNumber(transaction.AmountNQT/1e8, 2))
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.SenderRS, common.FormatNQT(transaction.GetAmountNQT()))
 			}
 		}
 
@@ -150,13 +150,11 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last multi-out payment transactions:\n\n", account.AccountRS)
 		for _, transaction := range accountTransactions.Transactions {
 			if account.Account != transaction.Sender {
-				amount := transaction.Attachment.Recipients.FoundMyAmount(account.Account)
 				newInlineText += fmt.Sprintf("<i>%v</i>  Received from <b>%v</b>  <i>+%v SIGNA</i>\n",
-					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.SenderRS, common.FormatNumber(amount, 2))
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.SenderRS, common.FormatNQT(transaction.GetMyMultiOutAmountNQT(account.Account)))
 			} else {
-				amount := transaction.AmountNQT / 1e8
 				newInlineText += fmt.Sprintf("<i>%v</i>  Sent to %v recipients  <i>-%v SIGNA</i>\n",
-					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), len(transaction.Attachment.Recipients), common.FormatNumber(amount, 2))
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), len(transaction.Attachment.Recipients), common.FormatNQT(transaction.GetAmountNQT()))
 			}
 		}
 
@@ -176,11 +174,11 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			if account.Account != transaction.Sender {
 				newInlineText += fmt.Sprintf("<i>%v</i>  Received from <b>%v</b>  <i>+%v SIGNA</i>\n",
 					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.SenderRS,
-					common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
+					common.FormatNQT(transaction.GetMultiOutSameAmountNQT()))
 			} else {
 				newInlineText += fmt.Sprintf("<i>%v</i>  Sent to %v recipients  <i>-%v SIGNA</i>\n",
 					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), len(transaction.Attachment.Recipients),
-					common.FormatNumber(transaction.AmountNQT/1e8/float64(len(transaction.Attachment.Recipients)), 2))
+					common.FormatNQT(transaction.GetMultiOutSameAmountNQT()))
 			}
 
 		}
@@ -205,11 +203,11 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			case signumapi.TST_ADD_COMMITMENT:
 				newInlineText += fmt.Sprintf("<i>%v</i>  Add commitment  <b>+%v SIGNA</b>\n",
 					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp),
-					common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2))
+					common.FormatNQT(transaction.Attachment.AmountNQT))
 			case signumapi.TST_REMOVE_COMMITMENT:
 				newInlineText += fmt.Sprintf("<i>%v</i>  Revoke commitment  <b>-%v SIGNA</b>\n",
 					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp),
-					common.FormatNumber(transaction.Attachment.AmountNQT/1e8, 2))
+					common.FormatNQT(transaction.Attachment.AmountNQT))
 			}
 		}
 

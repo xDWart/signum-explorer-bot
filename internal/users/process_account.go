@@ -33,9 +33,9 @@ func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
 		"\n<b>Total: %v SIGNA</b> <i>($%v | %v BTC)</i>"+
 		"\n\nFor the full details visit the <a href='https://explorer.signum.network/?action=account&account=%v'>original Signum Explorer</a>",
 		account.AccountRS, accountName,
-		common.FormatNumber(account.AvailableBalance, 2), common.FormatNumber(account.AvailableBalance*signaPrice, 2), common.FormatNumber(account.AvailableBalance*signaPrice/btcPrice, 4),
-		common.FormatNumber(account.CommittedBalance, 2), common.FormatNumber(account.CommittedBalance*signaPrice, 2), common.FormatNumber(account.CommittedBalance*signaPrice/btcPrice, 4),
-		common.FormatNumber(account.TotalBalance, 2), common.FormatNumber(account.TotalBalance*signaPrice, 2), common.FormatNumber(account.TotalBalance*signaPrice/btcPrice, 4),
+		common.FormatNQT(account.AvailableBalanceNQT), common.FormatNumber(float64(account.AvailableBalanceNQT)/1e8*signaPrice, 2), common.FormatNumber(float64(account.AvailableBalanceNQT)/1e8*signaPrice/btcPrice, 4),
+		common.FormatNQT(account.CommittedBalanceNQT), common.FormatNumber(float64(account.CommittedBalanceNQT)/1e8*signaPrice, 2), common.FormatNumber(float64(account.CommittedBalanceNQT)/1e8*signaPrice/btcPrice, 4),
+		common.FormatNQT(account.TotalBalanceNQT), common.FormatNumber(float64(account.TotalBalanceNQT)/1e8*signaPrice, 2), common.FormatNumber(float64(account.TotalBalanceNQT)/1e8*signaPrice/btcPrice, 4),
 		account.Account)
 
 	inlineKeyboard := user.GetAccountKeyboard(account.Account)

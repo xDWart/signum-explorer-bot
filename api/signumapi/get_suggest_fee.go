@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type FeeType float64
+type FeeType uint64
 
 type SuggestFee struct {
 	Minimum  FeeType
@@ -22,10 +22,10 @@ type SuggestFeeCache struct {
 }
 
 const (
-	MINIMUM_FEE          FeeType = 0.00735
-	DEFAULT_CHEAP_FEE            = 0.0147
-	DEFAULT_STANDARD_FEE         = 0.02205
-	DEFAULT_PRIORITY_FEE         = 0.0294
+	MINIMUM_FEE          FeeType = 735000
+	DEFAULT_CHEAP_FEE            = 1470000
+	DEFAULT_STANDARD_FEE         = 2205000
+	DEFAULT_PRIORITY_FEE         = 2940000
 )
 
 func (c *SignumApiClient) GetSuggestFee(logger abstractapi.LoggerI) (*SuggestFee, error) {
@@ -39,12 +39,9 @@ func (c *SignumApiClient) GetSuggestFee(logger abstractapi.LoggerI) (*SuggestFee
 	}
 	c.localAccountCache.RUnlock()
 
-	err := c.DoJsonReq(logger, "GET", "/burst",
+	err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_SUGGEST_FEE)}, nil, suggestFee)
 	suggestFee.Minimum = MINIMUM_FEE
-	suggestFee.Cheap /= 1e8
-	suggestFee.Standard /= 1e8
-	suggestFee.Priority /= 1e8
 
 	c.localAccountCache.Lock()
 	c.localSuggestFeeCache.cache = suggestFee

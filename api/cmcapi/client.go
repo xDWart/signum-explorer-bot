@@ -21,13 +21,9 @@ type Config struct {
 	CacheTtl  time.Duration
 }
 
-func NewCmcClient(logger abstractapi.LoggerI, config *Config) *CmcClient {
-	abstractConfig := abstractapi.Config{
-		ApiHosts:      []string{config.Host},
-		StaticHeaders: map[string]string{"X-CMC_PRO_API_KEY": os.Getenv("CMC_PRO_API_KEY")},
-	}
+func NewCmcClient(config *Config) *CmcClient {
 	return &CmcClient{
-		AbstractApiClient: abstractapi.NewAbstractApiClient(logger, &abstractConfig),
+		AbstractApiClient: abstractapi.NewAbstractApiClient(config.Host, map[string]string{"X-CMC_PRO_API_KEY": os.Getenv("CMC_PRO_API_KEY")}),
 		RWMutex:           sync.RWMutex{},
 		lastReqTimestamp:  time.Time{},
 		cachedValues: map[string]quote{

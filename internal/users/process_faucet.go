@@ -47,7 +47,7 @@ func (user *User) ProcessFaucet(message string) string {
 			"\nFaucet sent <i>%v SIGNA</i> to %v accounts"+
 			"\n\n%v",
 			config.FAUCET_ACCOUNT,
-			common.FormatNumber(faucetAccount.TotalBalance, 2),
+			common.FormatNQT(faucetAccount.TotalBalanceNQT),
 			common.FormatNumber(totalDonation.Sum, 2),
 			common.FormatNumber(totalFaucets.Sum, 2), totalFaucets.Count,
 			usingMessage,
@@ -107,7 +107,7 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 		amount = ordinaryFaucetAmount.ValueF
 	}
 
-	_, err := user.signumClient.SendMoney(user.logger, os.Getenv("SECRET_PHRASE"), account, amount, signumapi.DEFAULT_CHEAP_FEE)
+	_, err := user.signumClient.SendMoney(user.logger, os.Getenv("SECRET_PHRASE"), account, uint64(amount*1e8), signumapi.DEFAULT_CHEAP_FEE)
 	if err != nil {
 		user.ResetState()
 		return false, fmt.Sprintf("🚫 Bad request: %v", err)
@@ -134,7 +134,7 @@ func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string 
 			user.db.Where(&extraFaucetAmountConfig).First(&extraFaucetAmountConfig)
 
 			if extraFaucetAmountConfig.ValueF > 0 {
-				_, err := user.signumClient.SendMoney(user.logger, os.Getenv("SECRET_PHRASE"), userAccount.AccountRS, extraFaucetAmountConfig.ValueF, signumapi.DEFAULT_CHEAP_FEE)
+				_, err := user.signumClient.SendMoney(user.logger, os.Getenv("SECRET_PHRASE"), userAccount.AccountRS, uint64(extraFaucetAmountConfig.ValueF*1e8), signumapi.DEFAULT_CHEAP_FEE)
 				if err == nil {
 					user.db.Model(&newUsersExtraFaucetConfig).UpdateColumn("value_i", gorm.Expr("value_i - ?", 1))
 

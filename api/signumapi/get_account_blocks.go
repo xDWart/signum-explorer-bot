@@ -3,6 +3,7 @@ package signumapi
 import (
 	"fmt"
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -10,7 +11,7 @@ import (
 type Block struct {
 	Block            string `json:"block"`
 	Timestamp        int64  `json:"timestamp"`
-	Height           int64  `json:"height"`
+	Height           uint64 `json:"height"`
 	BlockReward      string `json:"blockReward"`
 	ErrorDescription string `json:"errorDescription"`
 }
@@ -45,12 +46,12 @@ func (c *SignumApiClient) storeAccountBlocksToCache(accountS string, accountBloc
 
 func (c *SignumApiClient) GetAccountBlocks(logger abstractapi.LoggerI, account string) (*AccountBlocks, error) {
 	accountBlocks := &AccountBlocks{}
-	err := c.DoJsonReq(logger, "GET", "/burst",
+	err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{
 			"account":     account,
 			"requestType": "getAccountBlocks",
 			"firstIndex":  "0",
-			"lastIndex":   fmt.Sprint(c.config.LastIndex), // it doesn't work
+			"lastIndex":   strconv.FormatUint(c.config.LastIndex, 10), // it doesn't work
 		},
 		nil,
 		accountBlocks)
@@ -85,7 +86,7 @@ func (c *SignumApiClient) GetLastAccountBlock(logger abstractapi.LoggerI, accoun
 
 func (c *SignumApiClient) GetBlock(logger abstractapi.LoggerI, blockID string) (*Block, error) {
 	block := &Block{}
-	err := c.DoJsonReq(logger, "GET", "/burst",
+	err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_GET_BLOCK), "block": blockID},
 		nil,
 		block)

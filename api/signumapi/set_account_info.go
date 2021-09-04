@@ -9,6 +9,6 @@ func (c *SignumApiClient) SetAccountInfo(logger abstractapi.LoggerI, secretPhras
 			SecretPhrase: secretPhrase,
 			Name:         name,
 			Description:  description,
-			FeeNQT:       feeNQT * 1e8,
+			FeeNQT:       feeNQT,
 		})
 }

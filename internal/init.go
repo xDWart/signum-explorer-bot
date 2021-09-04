@@ -2,7 +2,6 @@ package internal
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/database"
@@ -51,27 +50,26 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 	wg := &sync.WaitGroup{}
 	shutdownChannel := make(chan interface{})
 
-	cmcClient := cmcapi.NewCmcClient(logger,
-		&cmcapi.Config{
-			Host:      "https://pro-api.coinmarketcap.com/v1",
-			FreeLimit: 200,
-			CacheTtl:  5 * time.Minute,
-		})
-	signumClient := signumapi.NewSignumApiClient(logger,
+	cmcClient := cmcapi.NewCmcClient(&cmcapi.Config{
+		Host:      "https://pro-api.coinmarketcap.com/v1",
+		FreeLimit: 200,
+		CacheTtl:  5 * time.Minute,
+	})
+	signumClient := signumapi.NewSignumApiClient(logger, wg, shutdownChannel,
 		&signumapi.Config{
 			ApiHosts: []string{
 				"https://europe1.signum.network",
 				"https://europe.signum.network",
 				"https://europe3.signum.network",
-				// "https://canada.signum.network",
+				"https://canada.signum.network",
 				"https://australia.signum.network",
 				"https://brazil.signum.network",
 				"https://uk.signum.network",
 				"https://wallet.burstcoin.ro",
 			},
-			CacheTtl:    3 * time.Minute,
-			SortingType: abstractapi.RANGING,
-			LastIndex:   9,
+			CacheTtl:                3 * time.Minute,
+			LastIndex:               9,
+			RebuildApiClientsPeriod: time.Hour,
 		})
 	priceManager := prices.NewPricesManager(logger, db, cmcClient, wg, shutdownChannel,
 		&prices.Config{

@@ -7,14 +7,14 @@ import (
 )
 
 type Account struct {
-	Name             string    `json:"name"`
-	Account          string    `json:"account"`
-	AccountRS        string    `json:"accountRS"`
-	TotalBalance     float64   `json:"balanceNQT,string"`
-	AvailableBalance float64   `json:"unconfirmedBalanceNQT,string"`
-	CommittedBalance float64   `json:"committedBalanceNQT,string"`
-	ErrorDescription string    `json:"errorDescription"`
-	LastUpdateTime   time.Time `json:"-"`
+	Name                string    `json:"name"`
+	Account             string    `json:"account"`
+	AccountRS           string    `json:"accountRS"`
+	TotalBalanceNQT     uint64    `json:"balanceNQT,string"`
+	AvailableBalanceNQT uint64    `json:"unconfirmedBalanceNQT,string"`
+	CommittedBalanceNQT uint64    `json:"committedBalanceNQT,string"`
+	ErrorDescription    string    `json:"errorDescription"`
+	LastUpdateTime      time.Time `json:"-"`
 	//ForgedBalanceNQT      uint64 `json:"forgedBalanceNQT,string"`
 	//EffectiveBalanceNXT   uint64 `json:"effectiveBalanceNXT,string"`
 	//GuaranteedBalanceNQT  uint64 `json:"guaranteedBalanceNQT,string"`
@@ -32,15 +32,12 @@ type Account struct {
 
 func (c *SignumApiClient) GetAccount(logger abstractapi.LoggerI, accountS string) (*Account, error) {
 	account := &Account{}
-	err := c.DoJsonReq(logger, "GET", "/burst",
+	err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_GET_ACCOUNT), "getCommittedAmount": "true", "account": accountS},
 		nil,
 		account)
 	if err == nil {
 		if account.ErrorDescription == "" {
-			account.TotalBalance /= 1e8
-			account.AvailableBalance /= 1e8
-			account.CommittedBalance /= 1e8
 			c.storeAccountToCache(account.Account, account)
 			c.storeAccountToCache(account.AccountRS, account)
 		} else {
@@ -52,7 +49,7 @@ func (c *SignumApiClient) GetAccount(logger abstractapi.LoggerI, accountS string
 
 func (c *SignumApiClient) GetAccountId(logger abstractapi.LoggerI, secretPhrase string) (*Account, error) {
 	account := &Account{}
-	err := c.DoJsonReq(logger, "POST", "/burst",
+	err := c.doJsonReq(logger, "POST", "/burst",
 		map[string]string{"requestType": string(RT_GET_ACCOUNT_ID), "secretPhrase": secretPhrase},
 		nil,
 		account)

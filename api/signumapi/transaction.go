@@ -13,14 +13,14 @@ type Transaction struct {
 	Timestamp     int64              `json:"timestamp"`
 	Recipient     string             `json:"recipient"`
 	RecipientRS   string             `json:"recipientRS"`
-	AmountNQT     float64            `json:"amountNQT,string"`
-	FeeNQT        float64            `json:"feeNQT,string"`
+	AmountNQT     uint64             `json:"amountNQT,string"`
+	FeeNQT        FeeType            `json:"feeNQT,string"`
 	Sender        string             `json:"sender"`
 	SenderRS      string             `json:"senderRS"`
-	Height        int64              `json:"height"`
+	Height        uint64             `json:"height"`
 	Attachment    struct {
 		Recipients       RecipientsType `json:"recipients"`
-		AmountNQT        float64        `json:"amountNQT"`
+		AmountNQT        uint64         `json:"amountNQT"`
 		Message          string         `json:"message"`
 		MessageIsText    bool           `json:"messageIsText"`
 		EncryptedMessage interface{}    `json:"encryptedMessage"`
@@ -42,7 +42,59 @@ type Transaction struct {
 	// EcBlockHeight  uint64 `json:"ecBlockHeight"`
 	// Block          uint64 `json:"block,string"`
 	// Confirmations  uint64 `json:"confirmations"`
-	// BlockTimestamp uint64 `json:"blockTimestamp"`
+	// BlockTimestamp int64 `json:"blockTimestamp"`
+}
+
+type RecipientsType []interface{}
+
+func (r *RecipientsType) foundMyAmountNQT(account string) uint64 {
+	for _, v := range *r {
+		slice, ok := v.([]interface{})
+		if !ok {
+			continue
+		}
+		recipient, ok := slice[0].(string)
+		if !ok || recipient != account {
+			continue
+		}
+		amountS, ok := slice[1].(string)
+		if !ok {
+			continue
+		}
+		amount, err := strconv.ParseUint(amountS, 10, 64)
+		if err != nil {
+			continue
+		}
+		return amount
+	}
+	return 0
+}
+
+func (t *Transaction) GetAmountNQT() uint64 {
+	return t.AmountNQT
+}
+
+func (t *Transaction) GetAmount() float64 {
+	return float64(t.GetAmountNQT()) / 1e8
+}
+
+func (t *Transaction) GetMultiOutSameAmountNQT() uint64 {
+	return t.AmountNQT / uint64(len(t.Attachment.Recipients))
+}
+
+func (t *Transaction) GetMultiOutSameAmount() float64 {
+	return float64(t.GetMultiOutSameAmountNQT()) / 1e8
+}
+
+func (t *Transaction) GetMyMultiOutAmountNQT(account string) uint64 {
+	if t != nil && t.Attachment.Recipients != nil {
+		return t.Attachment.Recipients.foundMyAmountNQT(account)
+	}
+	return 0
+}
+
+func (t *Transaction) GetMyMultiOutAmount(account string) float64 {
+	return float64(t.GetMyMultiOutAmountNQT(account)) / 1e8
 }
 
 type TransactionRequest struct {
@@ -52,9 +104,9 @@ type TransactionRequest struct {
 	Name                         string
 	Description                  string
 	SecretPhrase                 string // is the secret passphrase of the account (optional, but transaction neither signed nor broadcast if omitted)
-	AmountNQT                    float64
+	AmountNQT                    uint64
 	FeeNQT                       FeeType // is the fee (in NQT) for the transaction
-	Deadline                     int     // deadline (in minutes) for the transaction to be confirmed, 1440 minutes maximum
+	Deadline                     uint64  // deadline (in minutes) for the transaction to be confirmed, 1440 minutes maximum
 	PublicKey                    string  // is the public key of the account (optional if secretPhrase provided)
 	Broadcast                    bool    // is set to false to prevent broadcasting the transaction to the network (optional)
 	Message                      string  // is either UTF-8 text or a string of hex digits (perhaps previously encoded using an arbitrary algorithm) to be converted into a bytecode with a maximum length of one kilobyte
@@ -75,7 +127,7 @@ type TransactionResponse struct {
 	UnsignedTransactionBytes string      // is the unsigned transaction bytes
 	TransactionJSON          Transaction // is the transaction object (refer to Get Transaction for details)
 	Broadcasted              bool        // is the transaction was broadcasted or not
-	RequestProcessingTime    int         // is the API request processing time (in millisec)
+	RequestProcessingTime    uint64      // is the API request processing time (in millisec)
 	TransactionBytes         string      // is the signed transaction bytes
 	FullHash                 string      // is the full hash of the signed transaction
 	Transaction              string      // is the ID of the newly created transaction
@@ -91,7 +143,7 @@ func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transact
 	var urlParams = map[string]string{
 		"requestType":  string(transactionRequest.RequestType),
 		"secretPhrase": transactionRequest.SecretPhrase,
-		"feeNQT":       fmt.Sprintf("%.f", transactionRequest.FeeNQT),
+		"feeNQT":       strconv.FormatUint(uint64(transactionRequest.FeeNQT), 10),
 	}
 
 	if transactionRequest.Recipient != "" {
@@ -101,7 +153,7 @@ func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transact
 		urlParams["recipients"] = transactionRequest.Recipients
 	}
 	if transactionRequest.AmountNQT != 0 {
-		urlParams["amountNQT"] = fmt.Sprintf("%.f", transactionRequest.AmountNQT)
+		urlParams["amountNQT"] = strconv.FormatUint(transactionRequest.AmountNQT, 10)
 	}
 	if transactionRequest.Message != "" {
 		urlParams["message"] = transactionRequest.Message
@@ -120,11 +172,11 @@ func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transact
 	if transactionRequest.Deadline == 0 {
 		urlParams["deadline"] = strconv.Itoa(DEFAULT_DEADLINE)
 	} else {
-		urlParams["deadline"] = strconv.Itoa(transactionRequest.Deadline)
+		urlParams["deadline"] = strconv.FormatUint(transactionRequest.Deadline, 10)
 	}
 
 	transactionResponse := &TransactionResponse{}
-	err := c.DoJsonReq(logger, "POST", "/burst", urlParams, nil, transactionResponse)
+	err := c.doJsonReq(logger, "POST", "/burst", urlParams, nil, transactionResponse)
 	if err != nil {
 		return nil, fmt.Errorf("bad create transaction request: %v", err)
 	}
@@ -139,7 +191,7 @@ func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transact
 
 func (c *SignumApiClient) GetTransaction(logger abstractapi.LoggerI, transactionID string) (*Transaction, error) {
 	transaction := &Transaction{}
-	err := c.DoJsonReq(logger, "GET", "/burst",
+	err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_GET_TRANSACTION), "transaction": transactionID},
 		nil,
 		transaction)

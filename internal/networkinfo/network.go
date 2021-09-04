@@ -105,8 +105,8 @@ func (ni *NetworkInfoListener) getMiningInfo(samplesForAveraging []*signumapi.Mi
 		ni.logger.Errorf("Error getting mining info: %v", err)
 		return sampleIndex, timeToSave, scanIndex
 	}
-	miningInfo.ActualCommitment = miningInfo.AverageCommitmentNQT / 1e8
-	miningInfo.ActualNetworkDifficulty = 18325193796 / miningInfo.BaseTarget / 1.83
+	miningInfo.ActualCommitment = float64(miningInfo.AverageCommitmentNQT) / 1e8
+	miningInfo.ActualNetworkDifficulty = 18325193796 / float64(miningInfo.BaseTarget) / 1.83
 
 	ni.Lock() // update global value
 	prevCommitment := ni.lastMiningInfo.AverageCommitment
@@ -121,7 +121,7 @@ func (ni *NetworkInfoListener) getMiningInfo(samplesForAveraging []*signumapi.Mi
 	timeToSave = (timeToSave + 1) % ni.Config.SaveEveryNSamples
 
 	if timeToSave == 0 {
-		dbNetworkInfo := models.NetworkInfo{}
+		var dbNetworkInfo models.NetworkInfo
 		var numOfSamples float64
 		for _, ni := range samplesForAveraging {
 			if ni != nil {

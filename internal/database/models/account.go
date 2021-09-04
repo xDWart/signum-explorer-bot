@@ -12,13 +12,13 @@ type DbAccount struct {
 	NotifyIncomeTransactions bool
 	NotifyOutgoTransactions  bool
 	LastTransactionID        string `gorm:"type:varchar(255)"`
-	LastTransactionH         int64
+	LastTransactionH         uint64
 	NotifyNewBlocks          bool
 	LastBlockID              string `gorm:"type:varchar(255)"`
-	LastBlockH               int64
+	LastBlockH               uint64
 	NotifyOtherTXs           bool
 	LastMiningTX             string `gorm:"type:varchar(255)"`
-	LastMiningH              int64
+	LastMiningH              uint64
 	LastMessageTX            string `gorm:"type:varchar(255)"`
-	LastMessageH             int64
+	LastMessageH             uint64
 }

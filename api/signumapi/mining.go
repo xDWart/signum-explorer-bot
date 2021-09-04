@@ -8,7 +8,7 @@ type RewardRecipient struct {
 
 func (c *SignumApiClient) GetRewardRecipient(logger abstractapi.LoggerI, account string) (*RewardRecipient, error) {
 	var rewardRecipient = RewardRecipient{}
-	err := c.DoJsonReq(logger, "GET", "/burst", map[string]string{
+	err := c.doJsonReq(logger, "GET", "/burst", map[string]string{
 		"requestType": string(RT_GET_REWARD_RECIPIENT),
 		"account":     account,
 	}, nil, &rewardRecipient)
@@ -21,28 +21,26 @@ func (c *SignumApiClient) SetRewardRecipient(logger abstractapi.LoggerI, secretP
 			RequestType:  RT_SET_REWARD_RECIPIENT,
 			SecretPhrase: secretPhrase,
 			Recipient:    recipient,
-			FeeNQT:       feeNQT * 1e8,
+			FeeNQT:       feeNQT,
 		})
 }
 
-func (c *SignumApiClient) AddCommitment(logger abstractapi.LoggerI, secretPhrase string, amount float64, feeNQT FeeType) (*TransactionResponse, error) {
-	amountNQT := amount * 1e8
+func (c *SignumApiClient) AddCommitment(logger abstractapi.LoggerI, secretPhrase string, amountNQT uint64, feeNQT FeeType) (*TransactionResponse, error) {
 	return c.createTransaction(logger,
 		&TransactionRequest{
 			RequestType:  RT_ADD_COMMITMENT,
 			SecretPhrase: secretPhrase,
 			AmountNQT:    amountNQT,
-			FeeNQT:       feeNQT * 1e8,
+			FeeNQT:       feeNQT,
 		})
 }
 
-func (c *SignumApiClient) RemoveCommitment(logger abstractapi.LoggerI, secretPhrase string, amount float64, feeNQT FeeType) (*TransactionResponse, error) {
-	amountNQT := amount * 1e8
+func (c *SignumApiClient) RemoveCommitment(logger abstractapi.LoggerI, secretPhrase string, amountNQT uint64, feeNQT FeeType) (*TransactionResponse, error) {
 	return c.createTransaction(logger,
 		&TransactionRequest{
 			RequestType:  RT_REMOVE_COMMITMENT,
 			SecretPhrase: secretPhrase,
 			AmountNQT:    amountNQT,
-			FeeNQT:       feeNQT * 1e8,
+			FeeNQT:       feeNQT,
 		})
 }

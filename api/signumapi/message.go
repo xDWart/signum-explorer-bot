@@ -22,7 +22,7 @@ func (c *SignumApiClient) ReadMessage(logger abstractapi.LoggerI, secretPhrase, 
 		urlParams["secretPhrase"] = secretPhrase
 	}
 
-	err := c.DoJsonReq(logger, "POST", "/burst", urlParams, nil, message)
+	err := c.doJsonReq(logger, "POST", "/burst", urlParams, nil, message)
 	if err != nil {
 		return nil, fmt.Errorf("bad ReadMessage request: %v", err)
 	}
@@ -35,7 +35,7 @@ func (c *SignumApiClient) SendMessage(logger abstractapi.LoggerI, secretPhrase, 
 			RequestType:   RT_SEND_MESSAGE,
 			SecretPhrase:  secretPhrase,
 			Recipient:     recipient,
-			FeeNQT:        feeNQT * 1e8,
+			FeeNQT:        feeNQT,
 			Message:       message,
 			MessageIsText: true,
 		})
@@ -47,7 +47,7 @@ func (c *SignumApiClient) SendEncryptedMessage(logger abstractapi.LoggerI, secre
 			RequestType:            RT_SEND_MESSAGE,
 			SecretPhrase:           secretPhrase,
 			Recipient:              recipient,
-			FeeNQT:                 feeNQT * 1e8,
+			FeeNQT:                 feeNQT,
 			MessageToEncrypt:       messageToEncrypt,
 			MessageToEncryptIsText: true,
 		})
