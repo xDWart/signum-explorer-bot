@@ -39,6 +39,7 @@ type SignumApiClient struct {
 	localBlocksCache       BlocksCache
 	localSuggestFeeCache   SuggestFeeCache
 	config                 *Config
+	shutdownChannel        chan interface{}
 }
 
 type apiClientsPool struct {
@@ -69,14 +70,19 @@ func NewSignumApiClient(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdown
 		localAccountCache:      AccountCache{sync.RWMutex{}, map[string]*Account{}},
 		localTransactionsCache: TransactionsCache{sync.RWMutex{}, map[string]map[TransactionType]map[TransactionSubType]*AccountTransactions{}},
 		localBlocksCache:       BlocksCache{sync.RWMutex{}, map[string]*AccountBlocks{}},
+		shutdownChannel:        shutdownChannel,
 		config:                 config,
 	}
 	wg.Add(1)
-	go signumApiClient.startApiClientsRebuilder(logger, wg, shutdownChannel)
+	go signumApiClient.startApiClientsRebuilder(logger, wg)
 	return signumApiClient
 }
 
-func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdownChannel chan interface{}) {
+func (c *SignumApiClient) Stop() {
+	close(c.shutdownChannel)
+}
+
+func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	logger.Infof("Start Signum Api Clients Rebuilder")
@@ -84,7 +90,7 @@ func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, w
 
 	for {
 		select {
-		case <-shutdownChannel:
+		case <-c.shutdownChannel:
 			logger.Infof("Signum Api Clients Rebuilder received shutdown signal")
 			ticker.Stop()
 			return
