@@ -31,6 +31,7 @@ type Transaction struct {
 		// VersionMessage                   byte           `json:"version.Message"`
 		// RecipientPublicKey               string         `json:"recipientPublicKey"`
 	} `json:"attachment"`
+	ErrorDescription string `json:"errorDescription"`
 	// Signature       string             `json:"signature"`
 	// SignatureHash   string             `json:"signatureHash"`
 	// FullHash        string             `json:"fullHash"`
@@ -134,4 +135,16 @@ func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transact
 		return nil, fmt.Errorf("bad create transaction request: %v", transactionResponse.ErrorDescription)
 	}
 	return transactionResponse, nil
+}
+
+func (c *SignumApiClient) GetTransaction(logger abstractapi.LoggerI, transactionID string) (*Transaction, error) {
+	transaction := &Transaction{}
+	err := c.DoJsonReq(logger, "GET", "/burst",
+		map[string]string{"requestType": string(RT_GET_TRANSACTION), "transaction": transactionID},
+		nil,
+		transaction)
+	if err == nil && transaction.ErrorDescription != "" {
+		err = fmt.Errorf(transaction.ErrorDescription)
+	}
+	return transaction, err
 }

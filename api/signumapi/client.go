@@ -18,6 +18,8 @@ const (
 	RT_READ_MESSAGE             RequestType = "readMessage"
 	RT_SUGGEST_FEE              RequestType = "suggestFee"
 	RT_GET_ACCOUNT              RequestType = "getAccount"
+	RT_GET_TRANSACTION          RequestType = "getTransaction"
+	RT_GET_BLOCK                RequestType = "getBlock"
 	RT_GET_ACCOUNT_ID           RequestType = "getAccountId"
 	RT_GET_ACCOUNT_TRANSACTIONS RequestType = "getAccountTransactions"
 	RT_GET_MINING_INFO          RequestType = "getMiningInfo"
@@ -41,6 +43,7 @@ type Config struct {
 	SortingType abstractapi.SortingType
 	ApiHosts    []string
 	CacheTtl    time.Duration
+	LastIndex   uint
 }
 
 func NewSignumApiClient(logger abstractapi.LoggerI, config *Config) *SignumApiClient {

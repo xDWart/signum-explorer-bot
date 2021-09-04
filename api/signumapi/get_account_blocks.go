@@ -7,13 +7,16 @@ import (
 	"time"
 )
 
+type Block struct {
+	Block            string `json:"block"`
+	Timestamp        int64  `json:"timestamp"`
+	Height           int64  `json:"height"`
+	BlockReward      string `json:"blockReward"`
+	ErrorDescription string `json:"errorDescription"`
+}
+
 type AccountBlocks struct {
-	Blocks []struct {
-		Block       string `json:"block"`
-		Timestamp   int64  `json:"timestamp"`
-		Height      int64  `json:"height"`
-		BlockReward string `json:"blockReward"`
-	} `json:"blocks"`
+	Blocks           []Block   `json:"blocks"`
 	ErrorDescription string    `json:"errorDescription"`
 	LastUpdateTime   time.Time `json:"-"`
 }
@@ -47,7 +50,7 @@ func (c *SignumApiClient) GetAccountBlocks(logger abstractapi.LoggerI, account s
 			"account":     account,
 			"requestType": "getAccountBlocks",
 			"firstIndex":  "0",
-			"lastIndex":   "9", // it doesn't work
+			"lastIndex":   fmt.Sprint(c.config.LastIndex), // it doesn't work
 		},
 		nil,
 		accountBlocks)
@@ -78,4 +81,16 @@ func (c *SignumApiClient) GetLastAccountBlock(logger abstractapi.LoggerI, accoun
 		return ""
 	}
 	return accountBlocks.Blocks[0].Block
+}
+
+func (c *SignumApiClient) GetBlock(logger abstractapi.LoggerI, blockID string) (*Block, error) {
+	block := &Block{}
+	err := c.DoJsonReq(logger, "GET", "/burst",
+		map[string]string{"requestType": string(RT_GET_BLOCK), "block": blockID},
+		nil,
+		block)
+	if err == nil && block.ErrorDescription != "" {
+		err = fmt.Errorf(block.ErrorDescription)
+	}
+	return block, err
 }

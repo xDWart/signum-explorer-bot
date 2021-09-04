@@ -71,6 +71,7 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 			},
 			CacheTtl:    3 * time.Minute,
 			SortingType: abstractapi.RANGING,
+			LastIndex:   9,
 		})
 	priceManager := prices.NewPricesManager(logger, db, cmcClient, wg, shutdownChannel,
 		&prices.Config{

@@ -81,7 +81,7 @@ func (c *SignumApiClient) getAccountTransactionsByType(logger abstractapi.Logger
 		"includeIndirect": "true",
 		"type":            strconv.Itoa(int(transactionType)),
 		"firstIndex":      "0",
-		"lastIndex":       "9",
+		"lastIndex":       fmt.Sprint(c.config.LastIndex),
 	}
 
 	if transactionSubType != TST_ALL_TYPES_PAYMENT && transactionSubType != TST_ALL_TYPES_MINING {
@@ -99,15 +99,15 @@ func (c *SignumApiClient) getAccountTransactionsByType(logger abstractapi.Logger
 	return accountTransactions, err
 }
 
-func (c *SignumApiClient) GetAccountTransactions(logger abstractapi.LoggerI, account string, firstIndex, lastIndex int) (*AccountTransactions, error) {
+func (c *SignumApiClient) GetAccountTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
 	accountTransactions := &AccountTransactions{}
 
 	urlParams := map[string]string{
 		"account":         account,
 		"requestType":     string(RT_GET_ACCOUNT_TRANSACTIONS),
 		"includeIndirect": "true",
-		"firstIndex":      fmt.Sprint(firstIndex),
-		"lastIndex":       fmt.Sprint(lastIndex),
+		"firstIndex":      "0",
+		"lastIndex":       fmt.Sprint(c.config.LastIndex),
 	}
 
 	err := c.DoJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
