@@ -75,12 +75,12 @@ func (c *SignumApiClient) GetCachedAccountBlocks(logger abstractapi.LoggerI, acc
 	return c.GetAccountBlocks(logger, account)
 }
 
-func (c *SignumApiClient) GetLastAccountBlock(logger abstractapi.LoggerI, account string) string {
+func (c *SignumApiClient) GetLastAccountBlock(logger abstractapi.LoggerI, account string) *Block {
 	accountBlocks, err := c.GetAccountBlocks(logger, account)
-	if err != nil || len(accountBlocks.Blocks) == 0 {
-		return ""
+	if err == nil && len(accountBlocks.Blocks) > 0 {
+		return &accountBlocks.Blocks[0]
 	}
-	return accountBlocks.Blocks[0].Block
+	return nil
 }
 
 func (c *SignumApiClient) GetBlock(logger abstractapi.LoggerI, blockID string) (*Block, error) {

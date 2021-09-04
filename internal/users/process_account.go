@@ -60,7 +60,11 @@ func (user *User) ProcessAdd(message string) string {
 
 	userAccount, msg := user.addAccount(splittedMessage[1])
 	if userAccount != nil {
-		userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
+		lastAccountTransaction := user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
+		if lastAccountTransaction != nil {
+			userAccount.LastTransactionID = lastAccountTransaction.TransactionID
+			userAccount.LastTransactionH = lastAccountTransaction.Height
+		}
 		userAccount.NotifyIncomeTransactions = true
 		user.db.Save(userAccount)
 	}

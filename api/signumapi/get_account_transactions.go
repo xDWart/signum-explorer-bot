@@ -141,26 +141,26 @@ func (c *SignumApiClient) GetAccountMessageTransaction(logger abstractapi.Logger
 	return c.getAccountTransactionsByType(logger, account, TT_MESSAGING, TST_ARBITRARY_MESSAGE)
 }
 
-func (c *SignumApiClient) GetLastAccountPaymentTransaction(logger abstractapi.LoggerI, account string) string {
+func (c *SignumApiClient) GetLastAccountPaymentTransaction(logger abstractapi.LoggerI, account string) *Transaction {
 	userTransactions, err := c.GetAccountPaymentTransactions(logger, account)
 	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
-		return userTransactions.Transactions[0].TransactionID
+		return &userTransactions.Transactions[0]
 	}
-	return ""
+	return nil
 }
 
-func (c *SignumApiClient) GetLastAccountMiningTransaction(logger abstractapi.LoggerI, account string) string {
+func (c *SignumApiClient) GetLastAccountMiningTransaction(logger abstractapi.LoggerI, account string) *Transaction {
 	userTransactions, err := c.GetAccountMiningTransactions(logger, account)
 	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
-		return userTransactions.Transactions[0].TransactionID
+		return &userTransactions.Transactions[0]
 	}
-	return ""
+	return nil
 }
 
-func (c *SignumApiClient) GetLastAccountMessageTransaction(logger abstractapi.LoggerI, account string) string {
+func (c *SignumApiClient) GetLastAccountMessageTransaction(logger abstractapi.LoggerI, account string) *Transaction {
 	userMessages, err := c.GetAccountMessageTransaction(logger, account)
 	if err == nil && userMessages != nil && len(userMessages.Transactions) > 0 {
-		return userMessages.Transactions[0].TransactionID
+		return &userMessages.Transactions[0]
 	}
-	return ""
+	return nil
 }

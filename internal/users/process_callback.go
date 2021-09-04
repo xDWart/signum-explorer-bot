@@ -230,7 +230,11 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			}
 		}
 
-		userAccount.LastTransactionID = user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
+		lastAccountTransaction := user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
+		if lastAccountTransaction != nil {
+			userAccount.LastTransactionID = lastAccountTransaction.TransactionID
+			userAccount.LastTransactionH = lastAccountTransaction.Height
+		}
 
 		var txType string
 		switch callbackData.GetAction() {
@@ -288,7 +292,11 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 
 		if !userAccount.NotifyNewBlocks { // needs to enable
 			userAccount.NotifyNewBlocks = true
-			userAccount.LastBlockID = user.signumClient.GetLastAccountBlock(user.logger, account.Account)
+			lastAccountBlock := user.signumClient.GetLastAccountBlock(user.logger, account.Account)
+			if lastAccountBlock != nil {
+				userAccount.LastBlockID = lastAccountBlock.Block
+				userAccount.LastBlockH = lastAccountBlock.Height
+			}
 			user.db.Save(userAccount)
 		}
 
@@ -325,8 +333,16 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 
 		if !userAccount.NotifyOtherTXs { // needs to enable
 			userAccount.NotifyOtherTXs = true
-			userAccount.LastMiningTX = user.signumClient.GetLastAccountMiningTransaction(user.logger, account.Account)
-			userAccount.LastMessageTX = user.signumClient.GetLastAccountMessageTransaction(user.logger, account.Account)
+			lastAccountMiningTransaction := user.signumClient.GetLastAccountMiningTransaction(user.logger, account.Account)
+			if lastAccountMiningTransaction != nil {
+				userAccount.LastMiningTX = lastAccountMiningTransaction.TransactionID
+				userAccount.LastMiningH = lastAccountMiningTransaction.Height
+			}
+			lastAccountMessageTransaction := user.signumClient.GetLastAccountMessageTransaction(user.logger, account.Account)
+			if lastAccountMessageTransaction != nil {
+				userAccount.LastMessageTX = lastAccountMessageTransaction.TransactionID
+				userAccount.LastMessageH = lastAccountMessageTransaction.Height
+			}
 			user.db.Save(userAccount)
 		}
 
