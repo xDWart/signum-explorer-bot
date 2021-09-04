@@ -90,9 +90,6 @@ func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, w
 			return
 
 		case <-ticker.C:
-			logger.Infof("Start rebuilding Signum Api Clients")
-			startTime := time.Now()
-
 			newApiClients := upbuildApiClients(logger, c.config.ApiHosts)
 			if len(newApiClients) > 0 {
 				c.apiClientsPool.Lock()
@@ -101,13 +98,14 @@ func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, w
 			} else {
 				logger.Errorf("Could not rebuild api clients")
 			}
-
-			logger.Infof("Signum Api Clients has been rebuilt in %v", time.Since(startTime))
 		}
 	}
 }
 
 func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClient {
+	logger.Infof("Start rebuilding Signum Api Clients")
+	startTime := time.Now()
+
 	clients := make([]*apiClient, 0, len(apiHosts))
 	for _, host := range apiHosts {
 		client := &apiClient{
@@ -131,6 +129,8 @@ func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClie
 		}
 		return clients[i].latency < clients[j].latency
 	})
+
+	logger.Infof("Signum Api Clients has been rebuilt in %v", time.Since(startTime))
 	return clients
 }
 
