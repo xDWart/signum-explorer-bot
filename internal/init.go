@@ -69,7 +69,7 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 			},
 			CacheTtl:                3 * time.Minute,
 			LastIndex:               9,
-			RebuildApiClientsPeriod: time.Hour,
+			RebuildApiClientsPeriod: 30 * time.Minute,
 		})
 	priceManager := prices.NewPricesManager(logger, db, cmcClient, wg, shutdownChannel,
 		&prices.Config{

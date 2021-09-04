@@ -61,9 +61,11 @@ type Config struct {
 }
 
 func NewSignumApiClient(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *SignumApiClient {
-	apiClients := upbuildApiClients(logger, config.ApiHosts)
-	if len(apiClients) == 0 {
-		logger.Fatalf("could not upbuild api clients")
+	apiClients := make([]*apiClient, 0, len(config.ApiHosts))
+	for _, host := range config.ApiHosts {
+		apiClients = append(apiClients, &apiClient{
+			AbstractApiClient: abstractapi.NewAbstractApiClient(host, nil),
+		})
 	}
 	signumApiClient := &SignumApiClient{
 		apiClientsPool:         apiClientsPool{clients: apiClients},
@@ -88,6 +90,7 @@ func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, w
 	logger.Infof("Start Signum Api Clients Rebuilder")
 	ticker := time.NewTicker(c.config.RebuildApiClientsPeriod)
 
+	c.rebuildApiClients(logger)
 	for {
 		select {
 		case <-c.shutdownChannel:
@@ -96,15 +99,19 @@ func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, w
 			return
 
 		case <-ticker.C:
-			newApiClients := upbuildApiClients(logger, c.config.ApiHosts)
-			if len(newApiClients) > 0 {
-				c.apiClientsPool.Lock()
-				c.apiClientsPool.clients = newApiClients
-				c.apiClientsPool.Unlock()
-			} else {
-				logger.Errorf("Could not rebuild api clients")
-			}
+			c.rebuildApiClients(logger)
 		}
+	}
+}
+
+func (c *SignumApiClient) rebuildApiClients(logger abstractapi.LoggerI) {
+	newApiClients := upbuildApiClients(logger, c.config.ApiHosts)
+	if len(newApiClients) > 0 {
+		c.apiClientsPool.Lock()
+		c.apiClientsPool.clients = newApiClients
+		c.apiClientsPool.Unlock()
+	} else {
+		logger.Errorf("Could not rebuild api clients")
 	}
 }
 
