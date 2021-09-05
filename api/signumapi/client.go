@@ -25,6 +25,7 @@ const (
 	RT_GET_ACCOUNT_ID           RequestType = "getAccountId"
 	RT_GET_ACCOUNT_TRANSACTIONS RequestType = "getAccountTransactions"
 	RT_GET_MINING_INFO          RequestType = "getMiningInfo"
+	RT_GET_BLOCKCHAIN_STATUS    RequestType = "getBlockchainStatus"
 	RT_GET_REWARD_RECIPIENT     RequestType = "getRewardRecipient"
 	RT_SET_REWARD_RECIPIENT     RequestType = "setRewardRecipient"
 	RT_ADD_COMMITMENT           RequestType = "addCommitment"
@@ -49,8 +50,8 @@ type apiClientsPool struct {
 
 type apiClient struct {
 	*abstractapi.AbstractApiClient
-	miningInfo MiningInfo
-	latency    time.Duration
+	blockchainStatus BlockchainStatus
+	latency          time.Duration
 }
 
 type Config struct {
@@ -125,25 +126,28 @@ func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClie
 			AbstractApiClient: abstractapi.NewAbstractApiClient(host, nil),
 		}
 		startTime := time.Now()
-		err := client.DoJsonReq(logger, "GET", "/burst", map[string]string{"requestType": string(RT_GET_MINING_INFO)}, nil, &client.miningInfo)
+		err := client.DoJsonReq(logger, "GET", "/burst",
+			map[string]string{"requestType": string(RT_GET_BLOCKCHAIN_STATUS)}, nil, &client.blockchainStatus)
 		if err != nil {
 			logger.Errorf("Failed DoJsonReq: %v", err)
 			continue
 		}
 		client.latency = time.Since(startTime)
 		clients = append(clients, client)
+		logger.Debugf("Signum Api Clients Rebuilder requested %v (%v) for %v",
+			client.ApiHost, client.blockchainStatus.Height, client.latency)
 	}
 	sort.Slice(clients, func(i, j int) bool {
-		if clients[i].miningInfo.Height > clients[j].miningInfo.Height {
+		if clients[i].blockchainStatus.Height > clients[j].blockchainStatus.Height {
 			return true
 		}
-		if clients[i].miningInfo.Height < clients[j].miningInfo.Height {
+		if clients[i].blockchainStatus.Height < clients[j].blockchainStatus.Height {
 			return false
 		}
 		return clients[i].latency < clients[j].latency
 	})
 
-	logger.Infof("Signum Api Clients has been rebuilt in %v", time.Since(startTime))
+	logger.Infof("Signum Api Clients has been rebuilt in %v. The best: %+v", time.Since(startTime), clients[0].ApiHost)
 	return clients
 }
 
