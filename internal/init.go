@@ -83,9 +83,9 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 	networkInfoListener := networkinfo.NewNetworkInfoListener(logger, db, signumClient, wg, shutdownChannel,
 		&networkinfo.Config{
 			SamplePeriod:          time.Hour,
-			AveragingDaysQuantity: 7, // during 7 days
-			SaveEveryNSamples:     3, // 3 * 1 hour = 3 hours
-			SmoothingFactor:       6, // samples for averaging
+			AveragingDaysQuantity: 7,  // during 7 days
+			SaveEveryNSamples:     12, // 12 * 1 hour = 12 hours
+			SmoothingFactor:       12, // samples for averaging
 			ScanQuantity:          20,
 			DelayFuncK:            84 * time.Minute,   // kx + b: 1 week ~ 3 h between samples
 			DelayFuncB:            -408 * time.Minute, // 1 year ~ 3 week

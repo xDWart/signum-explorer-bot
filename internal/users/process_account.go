@@ -17,6 +17,15 @@ func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
 		return nil, fmt.Errorf("🚫 Error: %v", err)
 	}
 
+	var rewardRecipientName string
+	rewardRecipient, err := user.signumClient.GetRewardRecipient(user.logger, account.Account)
+	if err == nil && rewardRecipient.RewardRecipient != account.Account {
+		rewardRecipientAccount, err := user.signumClient.GetCachedAccount(user.logger, rewardRecipient.RewardRecipient)
+		if err == nil {
+			rewardRecipientName = "\nReward Recipient: " + rewardRecipientAccount.Name
+		}
+	}
+
 	prices := user.cmcClient.GetPrices(user.logger)
 	signaPrice := prices["SIGNA"].Price
 	btcPrice := prices["BTC"].Price
@@ -27,12 +36,14 @@ func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
 	}
 
 	inlineText := fmt.Sprintf("💳 <b>%v</b>\n"+
+		"\nAccount ID: <code>%v</code>"+
 		"%v"+
-		"\nAvailable: %v SIGNA <i>($%v | %v BTC)</i>"+
+		"%v"+
+		"\n\nAvailable: %v SIGNA <i>($%v | %v BTC)</i>"+
 		"\nCommitment: %v SIGNA <i>($%v | %v BTC)</i>"+
 		"\n<b>Total: %v SIGNA</b> <i>($%v | %v BTC)</i>"+
 		"\n\nFor the full details visit the <a href='https://explorer.signum.network/?action=account&account=%v'>original Signum Explorer</a>",
-		account.AccountRS, accountName,
+		account.AccountRS, account.Account, accountName, rewardRecipientName,
 		common.FormatNQT(account.AvailableBalanceNQT), common.FormatNumber(float64(account.AvailableBalanceNQT)/1e8*signaPrice, 2), common.FormatNumber(float64(account.AvailableBalanceNQT)/1e8*signaPrice/btcPrice, 4),
 		common.FormatNQT(account.CommittedBalanceNQT), common.FormatNumber(float64(account.CommittedBalanceNQT)/1e8*signaPrice, 2), common.FormatNumber(float64(account.CommittedBalanceNQT)/1e8*signaPrice/btcPrice, 4),
 		common.FormatNQT(account.TotalBalanceNQT), common.FormatNumber(float64(account.TotalBalanceNQT)/1e8*signaPrice, 2), common.FormatNumber(float64(account.TotalBalanceNQT)/1e8*signaPrice/btcPrice, 4),
