@@ -8,20 +8,19 @@ import (
 	"strings"
 )
 
-func (user *User) getAccountInfoMessage(alias string) (*BotMessage, error) {
+func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
 	var foundAccount *models.DbAccount
 	for _, account := range user.Accounts {
-		if account.Account == alias || account.AccountRS == alias || account.Alias == alias {
+		if account.Account == accountS || account.AccountRS == accountS || account.Alias == accountS {
 			foundAccount = account
 			break
 		}
 	}
 
-	if foundAccount == nil && !config.ValidAccountRS.MatchString(alias) && !config.ValidAccount.MatchString(alias) {
+	if foundAccount == nil && !config.ValidAccountRS.MatchString(accountS) && !config.ValidAccount.MatchString(accountS) {
 		return nil, fmt.Errorf("🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>")
 	}
 
-	accountS := alias
 	if foundAccount != nil {
 		accountS = foundAccount.Account
 	}
