@@ -3,6 +3,7 @@ package signumapi
 import (
 	"fmt"
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
+	"math/rand"
 	"sort"
 	"sync"
 	"time"
@@ -34,13 +35,14 @@ const (
 )
 
 type SignumApiClient struct {
-	apiClientsPool         apiClientsPool
-	localAccountCache      AccountCache
-	localTransactionsCache TransactionsCache
-	localBlocksCache       BlocksCache
-	localSuggestFeeCache   SuggestFeeCache
-	config                 *Config
-	shutdownChannel        chan interface{}
+	apiClientsPool           apiClientsPool
+	localAccountCache        AccountCache
+	localTransactionsCache   TransactionsCache
+	localBlocksCache         BlocksCache
+	localSuggestFeeCache     SuggestFeeCache
+	localBigWalletNamesCache BigWalletNamesCache
+	config                   *Config
+	shutdownChannel          chan interface{}
 }
 
 type apiClientsPool struct {
@@ -62,22 +64,28 @@ type Config struct {
 }
 
 func NewSignumApiClient(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *SignumApiClient {
+	rand.Seed(time.Now().UnixNano())
+
 	apiClients := make([]*apiClient, 0, len(config.ApiHosts))
 	for _, host := range config.ApiHosts {
 		apiClients = append(apiClients, &apiClient{
 			AbstractApiClient: abstractapi.NewAbstractApiClient(host, nil),
 		})
 	}
+
 	signumApiClient := &SignumApiClient{
-		apiClientsPool:         apiClientsPool{clients: apiClients},
-		localAccountCache:      AccountCache{sync.RWMutex{}, map[string]*Account{}},
-		localTransactionsCache: TransactionsCache{sync.RWMutex{}, map[string]map[TransactionType]map[TransactionSubType]*AccountTransactions{}},
-		localBlocksCache:       BlocksCache{sync.RWMutex{}, map[string]*AccountBlocks{}},
-		shutdownChannel:        shutdownChannel,
-		config:                 config,
+		apiClientsPool:           apiClientsPool{clients: apiClients},
+		localAccountCache:        AccountCache{sync.RWMutex{}, map[string]*Account{}},
+		localTransactionsCache:   TransactionsCache{sync.RWMutex{}, map[string]map[TransactionType]map[TransactionSubType]*AccountTransactions{}},
+		localBlocksCache:         BlocksCache{sync.RWMutex{}, map[string]*AccountBlocks{}},
+		localBigWalletNamesCache: BigWalletNamesCache{sync.RWMutex{}, map[string]string{}},
+		shutdownChannel:          shutdownChannel,
+		config:                   config,
 	}
+
 	wg.Add(1)
 	go signumApiClient.startApiClientsRebuilder(logger, wg)
+
 	return signumApiClient
 }
 
@@ -92,6 +100,7 @@ func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, w
 	ticker := time.NewTicker(c.config.RebuildApiClientsPeriod)
 
 	c.rebuildApiClients(logger)
+	c.preloadNamesForBigWallets(logger)
 	for {
 		select {
 		case <-c.shutdownChannel:
@@ -147,7 +156,7 @@ func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClie
 		return clients[i].latency < clients[j].latency
 	})
 
-	logger.Infof("Signum Api Clients has been rebuilt in %v. The best: %+v", time.Since(startTime), clients[0].ApiHost)
+	logger.Infof("Signum Api Clients has been rebuilt in %v", time.Since(startTime))
 	return clients
 }
 
@@ -156,6 +165,9 @@ func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod strin
 	c.apiClientsPool.RLock()
 	apiClients := c.apiClientsPool.clients
 	c.apiClientsPool.RUnlock()
+
+	rand.Shuffle(len(apiClients)/2, func(i, j int) { apiClients[i], apiClients[j] = apiClients[j], apiClients[i] })
+
 	for _, apiClient := range apiClients {
 		lastErr = apiClient.DoJsonReq(logger, httpMethod, method, urlParams, additionalHeaders, output)
 		if lastErr != nil {

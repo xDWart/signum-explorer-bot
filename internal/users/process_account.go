@@ -33,9 +33,9 @@ func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
 	var rewardRecipientName string
 	rewardRecipient, err := user.signumClient.GetRewardRecipient(user.logger, account.Account)
 	if err == nil && rewardRecipient.RewardRecipient != account.Account {
-		rewardRecipientAccount, err := user.signumClient.GetCachedAccount(user.logger, rewardRecipient.RewardRecipient)
-		if err == nil {
-			rewardRecipientName = "\nReward Recipient: " + rewardRecipientAccount.Name
+		rewardRecipientName = user.signumClient.GetCachedAccountName(user.logger, rewardRecipient.RewardRecipient)
+		if rewardRecipientName != "" {
+			rewardRecipientName = "\nReward Recipient: " + rewardRecipientName
 		}
 	}
 

@@ -12,7 +12,7 @@ import (
 func (user *User) ProcessCalc(message string) string {
 	if message == config.COMMAND_CALC || message == config.BUTTON_CALC {
 		user.state = CALC_TIB_STATE
-		return "💽 Please send me a <b>plot size</b> in TiB or TB (1 TB = 0.909 TiB) for calculation:"
+		return "💽 Please send me a <b>plot size</b> in TiB or TB (1 TiB = 1.1 TB) for calculation:"
 	}
 
 	splittedMessage := strings.Split(message, " ")

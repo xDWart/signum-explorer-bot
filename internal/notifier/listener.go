@@ -106,10 +106,9 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 
 		switch transaction.Subtype {
 		case signumapi.TST_REWARD_RECIPIENT_ASSIGNMENT:
-			var recipientName string
-			recipientAccount, err := n.signumClient.GetCachedAccount(n.logger, transaction.Recipient)
-			if err == nil && recipientAccount.Name != "" {
-				recipientName = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
+			recipientName := n.signumClient.GetCachedAccountName(n.logger, transaction.Recipient)
+			if recipientName != "" {
+				recipientName = "\n<i>Name:</i> " + recipientName
 			}
 
 			msg += fmt.Sprintf("new recipient assigned:"+
@@ -185,15 +184,15 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 				continue
 			}
 
-			senderAccount, err := n.signumClient.GetCachedAccount(n.logger, transaction.SenderRS)
-			if err == nil && senderAccount.Name != "" {
-				name = fmt.Sprintf("\n<i>Name:</i> %v", senderAccount.Name)
+			name = n.signumClient.GetCachedAccountName(n.logger, transaction.Sender)
+			if name != "" {
+				name = "\n<i>Name:</i> " + name
 			}
 		} else if account.NotifyOutgoTransactions { // outgo
-			if transaction.RecipientRS != "" {
-				recipientAccount, err := n.signumClient.GetCachedAccount(n.logger, transaction.RecipientRS)
-				if err == nil && recipientAccount.Name != "" {
-					name = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
+			if transaction.Recipient != "" {
+				name = n.signumClient.GetCachedAccountName(n.logger, transaction.Recipient)
+				if name != "" {
+					name = "\n<i>Name:</i> " + name
 				}
 			}
 		} else {
@@ -385,10 +384,9 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 			}
 
 			if incomeTransaction {
-				var senderName string
-				senderAccount, err := n.signumClient.GetCachedAccount(n.logger, transaction.SenderRS)
-				if err == nil && senderAccount.Name != "" {
-					senderName = fmt.Sprintf("\n<i>Name:</i> %v", senderAccount.Name)
+				senderName := n.signumClient.GetCachedAccountName(n.logger, transaction.Sender)
+				if senderName != "" {
+					senderName = "\n<i>Name:</i> " + senderName
 				}
 
 				msg += fmt.Sprintf("new message received:"+
@@ -397,10 +395,9 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.ConvertFeeNQT(transaction.FeeNQT))
 			} else {
-				var recipientName string
-				recipientAccount, err := n.signumClient.GetCachedAccount(n.logger, transaction.RecipientRS)
-				if err == nil && recipientAccount.Name != "" {
-					recipientName = fmt.Sprintf("\n<i>Name:</i> %v", recipientAccount.Name)
+				recipientName := n.signumClient.GetCachedAccountName(n.logger, transaction.Recipient)
+				if recipientName != "" {
+					recipientName = "\n<i>Name:</i> " + recipientName
 				}
 
 				msg += fmt.Sprintf("new message sent:"+
