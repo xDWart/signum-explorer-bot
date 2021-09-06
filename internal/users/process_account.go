@@ -21,7 +21,12 @@ func (user *User) getAccountInfoMessage(alias string) (*BotMessage, error) {
 		return nil, fmt.Errorf("🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>")
 	}
 
-	account, err := user.signumClient.GetCachedAccount(user.logger, foundAccount.Account)
+	accountS := alias
+	if foundAccount != nil {
+		accountS = foundAccount.Account
+	}
+
+	account, err := user.signumClient.GetCachedAccount(user.logger, accountS)
 	if err != nil {
 		return nil, fmt.Errorf("🚫 Error: %v", err)
 	}
