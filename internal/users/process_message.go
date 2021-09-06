@@ -25,9 +25,12 @@ func (user *User) ProcessMessage(message string) *BotMessage {
 			return &BotMessage{MainText: err.Error()}
 		}
 		user.ResetState()
+		if user.tbSelected {
+			user.lastTib *= 0.909495
+		}
 		return &BotMessage{MainText: user.calculate(user.lastTib, commit)}
 	case ADD_STATE:
-		userAccount, msg := user.addAccount(message)
+		userAccount, msg := user.addAccount(message, "")
 		if userAccount != nil {
 			lastAccountTransaction := user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
 			if lastAccountTransaction != nil {

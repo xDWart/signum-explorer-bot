@@ -58,7 +58,8 @@ func (bot *TelegramBot) startBotListener() {
 					userAnswer.InlineKeyboard = user.GetPriceChartKeyboard()
 				case strings.HasPrefix(message, config.COMMAND_CALC) || message == config.BUTTON_CALC:
 					user.ResetState()
-					userAnswer.MainText = user.ProcessCalc(message)
+					userAnswer.InlineText = user.ProcessCalc(message)
+					userAnswer.InlineKeyboard = user.GetCalcKeyboard()
 				case strings.HasPrefix(message, config.COMMAND_NETWORK) || message == config.BUTTON_NETWORK:
 					user.ResetState()
 					userAnswer.MainText = bot.networkInfoListener.GetNetworkInfo()

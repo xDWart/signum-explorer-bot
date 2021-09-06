@@ -15,6 +15,7 @@ enum KeyboardType {
     KT_ACCOUNT = 1;
     KT_PRICE_CHART = 2;
     KT_NETWORK_CHART = 3;
+    KT_CALC = 4;
 }
 
 enum ActionType {
@@ -42,4 +43,6 @@ enum ActionType {
     AT_OTHER_TXS = 21;
     AT_ENABLE_OTHER_TX_NOTIFICATIONS = 22;
     AT_DISABLE_OTHER_TX_NOTIFICATIONS = 23;
+    AT_CALC_TIB = 24;
+    AT_CALC_TB = 25;
 }

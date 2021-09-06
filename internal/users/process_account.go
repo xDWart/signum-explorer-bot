@@ -8,11 +8,20 @@ import (
 	"strings"
 )
 
-func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
-	if !config.ValidAccountRS.MatchString(accountS) && !config.ValidAccount.MatchString(accountS) {
+func (user *User) getAccountInfoMessage(alias string) (*BotMessage, error) {
+	var foundAccount *models.DbAccount
+	for _, account := range user.Accounts {
+		if account.Account == alias || account.AccountRS == alias || account.Alias == alias {
+			foundAccount = account
+			break
+		}
+	}
+
+	if foundAccount == nil && !config.ValidAccountRS.MatchString(alias) && !config.ValidAccount.MatchString(alias) {
 		return nil, fmt.Errorf("🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>")
 	}
-	account, err := user.signumClient.GetCachedAccount(user.logger, accountS)
+
+	account, err := user.signumClient.GetCachedAccount(user.logger, foundAccount.Account)
 	if err != nil {
 		return nil, fmt.Errorf("🚫 Error: %v", err)
 	}
@@ -64,12 +73,18 @@ func (user *User) ProcessAdd(message string) string {
 	}
 
 	splittedMessage := strings.Split(message, " ")
-	if len(splittedMessage) != 2 || splittedMessage[0] != config.COMMAND_ADD {
+	if len(splittedMessage) < 2 || splittedMessage[0] != config.COMMAND_ADD {
 		return fmt.Sprintf("🚫 Incorrect command format, please send just %v and follow the instruction "+
-			"or <b>%v ACCOUNT</b> to constantly add an account into your main menu", config.COMMAND_ADD, config.COMMAND_ADD)
+			"or <b>%v ACCOUNT [alias]</b> to constantly add an account into your main menu", config.COMMAND_ADD, config.COMMAND_ADD)
 	}
 
-	userAccount, msg := user.addAccount(splittedMessage[1])
+	var accountS = splittedMessage[1]
+	var alias string
+	if len(splittedMessage) > 2 {
+		alias = strings.Join(splittedMessage[2:], " ")
+	}
+
+	userAccount, msg := user.addAccount(accountS, alias)
 	if userAccount != nil {
 		lastAccountTransaction := user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
 		if lastAccountTransaction != nil {
@@ -82,7 +97,7 @@ func (user *User) ProcessAdd(message string) string {
 	return msg
 }
 
-func (user *User) addAccount(newAccount string) (*models.DbAccount, string) {
+func (user *User) addAccount(newAccount, alias string) (*models.DbAccount, string) {
 	if !config.ValidAccountRS.MatchString(newAccount) && !config.ValidAccount.MatchString(newAccount) {
 		return nil, "🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>"
 	}
@@ -105,6 +120,7 @@ func (user *User) addAccount(newAccount string) (*models.DbAccount, string) {
 		DbUserID:  user.ID,
 		Account:   signumAccount.Account,
 		AccountRS: signumAccount.AccountRS,
+		Alias:     alias,
 	}
 	user.db.Save(&newDbAccount)
 	user.Accounts = append(user.Accounts, &newDbAccount)
@@ -112,32 +128,34 @@ func (user *User) addAccount(newAccount string) (*models.DbAccount, string) {
 
 	extraFaucetMessage := user.sendExtraFaucetIfNeeded(&newDbAccount)
 
-	return &newDbAccount, fmt.Sprintf("✅ New account <b>%v</b> has been successfully added to the menu"+extraFaucetMessage, newAccount)
+	return &newDbAccount, fmt.Sprintf("✅ New account <b>%v</b> has been successfully added to the menu"+extraFaucetMessage, newDbAccount.AccountRS)
 }
 
 func (user *User) ProcessDel(message string) string {
 	if message == config.COMMAND_DEL {
 		user.state = DEL_STATE
-		return "📌 Please send me a <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) which you want to del from your main menu:"
+		return "📌 Please send me a <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) which you want to delete from your main menu:"
 	}
 
 	splittedMessage := strings.Split(message, " ")
-	if len(splittedMessage) != 2 || splittedMessage[0] != config.COMMAND_DEL {
+	if len(splittedMessage) < 2 || splittedMessage[0] != config.COMMAND_DEL {
 		return fmt.Sprintf("🚫 Incorrect command format, please send just %v and follow the instruction "+
-			"or <b>%v ACCOUNT</b> to del an account from your main menu", config.COMMAND_DEL, config.COMMAND_DEL)
+			"or <b>%v ACCOUNT</b> or <b>%v ALIAS</b> to delete an account from your main menu", config.COMMAND_DEL, config.COMMAND_DEL, config.COMMAND_DEL)
 	}
 
-	return user.delAccount(splittedMessage[1])
+	var alias = splittedMessage[1]
+	if len(splittedMessage) > 2 {
+		alias = strings.Join(splittedMessage[1:], " ")
+	}
+
+	return user.delAccount(alias)
 }
 
-func (user *User) delAccount(newAccount string) string {
-	if !config.ValidAccountRS.MatchString(newAccount) && !config.ValidAccount.MatchString(newAccount) {
-		return "🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>"
-	}
+func (user *User) delAccount(alias string) string {
 	var foundAccount *models.DbAccount
 	var foundAccountIndex int
 	for index, account := range user.Accounts {
-		if newAccount == account.Account || newAccount == account.AccountRS {
+		if account.Account == alias || account.AccountRS == alias || account.Alias == alias {
 			foundAccount = account
 			foundAccountIndex = index
 			break
@@ -151,5 +169,5 @@ func (user *User) delAccount(newAccount string) string {
 	user.db.Unscoped().Delete(foundAccount)
 	user.Accounts = append(user.Accounts[:foundAccountIndex], user.Accounts[foundAccountIndex+1:]...)
 	user.ResetState()
-	return fmt.Sprintf("❎ Account <b>%v</b> has been deleted from the menu", newAccount)
+	return fmt.Sprintf("❎ Account <b>%v</b> has been deleted from the menu", foundAccount.AccountRS)
 }

@@ -170,3 +170,32 @@ func (user *User) GetNetworkChartKeyboard() *tgbotapi.InlineKeyboardMarkup {
 	)
 	return &inlineKeyboard
 }
+
+func (user *User) GetCalcKeyboard() *tgbotapi.InlineKeyboardMarkup {
+	var tibIcon, tbIcon string
+	if user.tbSelected {
+		tibIcon = "◻"
+		tbIcon = "☑"
+	} else {
+		tibIcon = "☑"
+		tbIcon = "◻"
+	}
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				tibIcon+" TiB",
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_CALC,
+					Action:   callbackdata.ActionType_AT_CALC_TIB,
+				}.GetBase64ProtoString()),
+			tgbotapi.NewInlineKeyboardButtonData(
+				tbIcon+" TB",
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_CALC,
+					Action:   callbackdata.ActionType_AT_CALC_TB,
+				}.GetBase64ProtoString()),
+		),
+	)
+	return &inlineKeyboard
+}

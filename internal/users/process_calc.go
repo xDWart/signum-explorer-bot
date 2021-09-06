@@ -2,7 +2,7 @@ package users
 
 import (
 	"fmt"
-	calculator2 "github.com/xDWart/signum-explorer-bot/internal/calculator"
+	"github.com/xDWart/signum-explorer-bot/internal/calculator"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"strconv"
@@ -12,7 +12,7 @@ import (
 func (user *User) ProcessCalc(message string) string {
 	if message == config.COMMAND_CALC || message == config.BUTTON_CALC {
 		user.state = CALC_TIB_STATE
-		return "💽 Please send me a <b>plot size in TiB</b> (1 TB = 0.909 TiB) for calculation:"
+		return "💽 Please send me a <b>plot size</b> in TiB or TB (1 TB = 0.909 TiB) for calculation:"
 	}
 
 	splittedMessage := strings.Split(message, " ")
@@ -61,8 +61,8 @@ func (user *User) calculate(tib, commit float64) string {
 	lastMiningInfo := user.networkInfoListener.GetLastMiningInfo()
 
 	if commit > 0 {
-		calcResult := calculator2.Calculate(&lastMiningInfo, tib, commit)
-		reinvestmentCalcResult := calculator2.CalculateReinvestment(&lastMiningInfo, calcResult)
+		calcResult := calculator.Calculate(&lastMiningInfo, tib, commit)
+		reinvestmentCalcResult := calculator.CalculateReinvestment(&lastMiningInfo, calcResult)
 
 		return fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB (%.2f TB) with %v SIGNA ($%v) commitment:</b>"+
 			"\nAverage Network Commitment during the last %v days: %v SIGNA / TiB"+
@@ -94,13 +94,13 @@ func (user *User) calculate(tib, commit float64) string {
 		)
 	}
 
-	entireRangeCalculation := calculator2.CalculateEntireRange(&lastMiningInfo, tib)
+	entireRangeCalculation := calculator.CalculateEntireRange(&lastMiningInfo, tib)
 	result := fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB (%.2f TB) for the entire commitment range:</b>"+
 		"\nAverage Network Commitment during the last %v days: %v SIGNA / TiB"+
 		"\n\n<b>Capacity multipliers, commitment and mining rewards:</b>", tib, tib/0.909495,
 		user.networkInfoListener.Config.AveragingDaysQuantity, common.FormatNumber(lastMiningInfo.AverageCommitment, 0))
 
-	for _, multiplier := range calculator2.MultipliersList {
+	for _, multiplier := range calculator.MultipliersList {
 		var minMax string
 		if multiplier == 0.125 {
 			minMax = " (min)"

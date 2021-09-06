@@ -9,6 +9,7 @@ type DbAccount struct {
 	DbUserID                 uint
 	Account                  string `gorm:"type:varchar(255)"`
 	AccountRS                string `gorm:"type:varchar(255)"`
+	Alias                    string `gorm:"type:varchar(255)"`
 	NotifyIncomeTransactions bool
 	NotifyOutgoTransactions  bool
 	LastTransactionID        string `gorm:"type:varchar(255)"`

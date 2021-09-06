@@ -1,5 +1,5 @@
-add - Constantly add a Signum Account to your main menu /add ACCOUNT
-del - Remove an account from the menu /del ACCOUNT
+add - Constantly add a Signum Account to your main menu /add ACCOUNT [ALIAS]
+del - Remove an account from the menu /del [ACCOUNT|ALIAS]
 calc - Calculate mining rewards /calc TiB COMMITMENT or /calc TiB
 crossing - Check your plots crossing
 price - Actual currency quotes of SIGNA and BTC

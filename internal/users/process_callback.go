@@ -57,6 +57,14 @@ func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *BotMes
 		}
 		answerBotMessage.Chart = user.networkInfoListener.GetNetworkChart(duration)
 		answerBotMessage.InlineKeyboard = user.GetNetworkChartKeyboard()
+	case callbackdata.KeyboardType_KT_CALC:
+		switch callbackData.Action {
+		case callbackdata.ActionType_AT_CALC_TIB:
+			user.tbSelected = false
+		case callbackdata.ActionType_AT_CALC_TB:
+			user.tbSelected = true
+		}
+		answerBotMessage.InlineKeyboard = user.GetCalcKeyboard()
 	}
 
 	if err != nil {
@@ -222,7 +230,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		if userAccount == nil {
 			// needs to add it at first
 			var msg string
-			userAccount, msg = user.addAccount(account.Account)
+			userAccount, msg = user.addAccount(account.Account, "")
 			if userAccount == nil {
 				return nil, errors.New(msg)
 			}
@@ -282,7 +290,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		if userAccount == nil {
 			// needs to add it at first
 			var msg string
-			userAccount, msg = user.addAccount(account.Account)
+			userAccount, msg = user.addAccount(account.Account, "")
 			if userAccount == nil {
 				return nil, errors.New(msg)
 			}
@@ -323,7 +331,7 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 		if userAccount == nil {
 			// needs to add it at first
 			var msg string
-			userAccount, msg = user.addAccount(account.Account)
+			userAccount, msg = user.addAccount(account.Account, "")
 			if userAccount == nil {
 				return nil, errors.New(msg)
 			}

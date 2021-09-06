@@ -26,6 +26,7 @@ type User struct {
 
 	state            StateType
 	lastTib          float64
+	tbSelected       bool
 	lastCallbackData string
 	lastCallbackTime time.Time
 }
@@ -83,7 +84,11 @@ func (user *User) GetMainMenu() *tgbotapi.ReplyKeyboardMarkup {
 		if len(keyboardButtonRows) <= row {
 			keyboardButtonRows = append(keyboardButtonRows, make([]tgbotapi.KeyboardButton, 0, numCols))
 		}
-		keyboardButtonRows[row] = append(keyboardButtonRows[row], tgbotapi.NewKeyboardButton(account.AccountRS))
+		accountAlias := account.AccountRS
+		if account.Alias != "" {
+			accountAlias = account.Alias
+		}
+		keyboardButtonRows[row] = append(keyboardButtonRows[row], tgbotapi.NewKeyboardButton(accountAlias))
 	}
 
 	keyboardButtonRows = append(keyboardButtonRows, tgbotapi.NewKeyboardButtonRow(

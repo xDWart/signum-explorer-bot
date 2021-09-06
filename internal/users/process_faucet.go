@@ -83,7 +83,7 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 		if !(err != nil && err.Error() == "Unknown account") {
 			userAccount = user.GetDbAccount(account)
 			if userAccount == nil { // needs to add it at first
-				userAccount, addedMessage = user.addAccount(account)
+				userAccount, addedMessage = user.addAccount(account, "")
 				if userAccount == nil {
 					return false, addedMessage
 				}
