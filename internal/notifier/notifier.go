@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"sync"
+	"time"
 )
 
 type Notifier struct {
@@ -14,6 +15,11 @@ type Notifier struct {
 	logger       *zap.SugaredLogger
 	signumClient *signumapi.SignumApiClient
 	notifierCh   chan NotifierMessage
+	config       *Config
+}
+
+type Config struct {
+	NotifierPeriod time.Duration
 }
 
 type NotifierMessage struct {
@@ -28,12 +34,13 @@ type MonitoredAccount struct {
 	models.DbAccount
 }
 
-func NewNotifier(logger *zap.SugaredLogger, db *gorm.DB, signumClient *signumapi.SignumApiClient, notifierCh chan NotifierMessage, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Notifier {
+func NewNotifier(logger *zap.SugaredLogger, db *gorm.DB, signumClient *signumapi.SignumApiClient, notifierCh chan NotifierMessage, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *Notifier {
 	notifier := &Notifier{
 		db:           db,
 		logger:       logger,
 		signumClient: signumClient,
 		notifierCh:   notifierCh,
+		config:       config,
 	}
 	wg.Add(1)
 	go notifier.startListener(wg, shutdownChannel)

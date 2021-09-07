@@ -11,18 +11,15 @@ import (
 	"time"
 )
 
-const NOTIFIER_PERIOD = 4 * time.Minute
-const NOTIFIER_CHECK_BLOCKS_PER = 3 // 4 min * 3 = per 12 min
-
 func (n *Notifier) startListener(wg *sync.WaitGroup, shutdownChannel chan interface{}) {
 	defer wg.Done()
 
 	n.logger.Infof("Start Notifier")
-	ticker := time.NewTicker(NOTIFIER_PERIOD)
+	ticker := time.NewTicker(n.config.NotifierPeriod)
 
 	var counter uint
 
-	n.checkAccounts(true)
+	n.checkAccounts()
 	for {
 		select {
 		case <-shutdownChannel:
@@ -32,16 +29,15 @@ func (n *Notifier) startListener(wg *sync.WaitGroup, shutdownChannel chan interf
 
 		case <-ticker.C:
 			counter++
-			checkBlocks := counter%NOTIFIER_CHECK_BLOCKS_PER == 0
 			n.logger.Infof("Notify Listener starts checking")
 			startTime := time.Now()
-			n.checkAccounts(checkBlocks)
+			n.checkAccounts()
 			n.logger.Infof("Notify Listener has finished checking in %v", time.Since(startTime))
 		}
 	}
 }
 
-func (n *Notifier) checkAccounts(checkBlocks bool) {
+func (n *Notifier) checkAccounts() {
 	var monitoredAccounts []MonitoredAccount
 
 	err := n.db.Model(&models.DbUser{}).Select("*").
@@ -67,7 +63,7 @@ func (n *Notifier) checkAccounts(checkBlocks bool) {
 			n.checkMessageTransactions(&account)
 		}
 
-		if checkBlocks && account.NotifyNewBlocks {
+		if account.NotifyNewBlocks {
 			n.checkBlocks(&account)
 		}
 	}
