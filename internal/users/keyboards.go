@@ -172,13 +172,11 @@ func (user *User) GetNetworkChartKeyboard() *tgbotapi.InlineKeyboardMarkup {
 }
 
 func (user *User) GetCalcKeyboard() *tgbotapi.InlineKeyboardMarkup {
-	var tibIcon, tbIcon string
+	var tibIcon, tbIcon = "◻", "◻"
 	if user.tbSelected {
-		tibIcon = "◻"
 		tbIcon = "☑"
 	} else {
 		tibIcon = "☑"
-		tbIcon = "◻"
 	}
 
 	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
@@ -194,6 +192,42 @@ func (user *User) GetCalcKeyboard() *tgbotapi.InlineKeyboardMarkup {
 				callbackdata.QueryDataType{
 					Keyboard: callbackdata.KeyboardType_KT_CALC,
 					Action:   callbackdata.ActionType_AT_CALC_TB,
+				}.GetBase64ProtoString()),
+		),
+	)
+	return &inlineKeyboard
+}
+
+func (user *User) GetConvertKeyboard() *tgbotapi.InlineKeyboardMarkup {
+	var signaIcon, usdIcon, btcIcon = "◻", "◻", "◻"
+	switch user.currencySelected {
+	case CT_SIGNA:
+		signaIcon = "☑"
+	case CT_USD:
+		usdIcon = "☑"
+	case CT_BTC:
+		btcIcon = "☑"
+	}
+
+	inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(
+				signaIcon+" SIGNA",
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_CONVERT,
+					Action:   callbackdata.ActionType_AT_CONVERT_SIGNA,
+				}.GetBase64ProtoString()),
+			tgbotapi.NewInlineKeyboardButtonData(
+				usdIcon+" USD",
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_CONVERT,
+					Action:   callbackdata.ActionType_AT_CONVERT_USD,
+				}.GetBase64ProtoString()),
+			tgbotapi.NewInlineKeyboardButtonData(
+				btcIcon+" BTC",
+				callbackdata.QueryDataType{
+					Keyboard: callbackdata.KeyboardType_KT_CONVERT,
+					Action:   callbackdata.ActionType_AT_CONVERT_BTC,
 				}.GetBase64ProtoString()),
 		),
 	)

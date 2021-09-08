@@ -90,7 +90,13 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 		if transaction.TransactionID == account.LastMiningTX {
 			break
 		}
-		msg := fmt.Sprintf("📝 <b>%v</b> ", account.AccountRS)
+
+		var msg string
+		if account.Alias != "" {
+			msg = fmt.Sprintf("📝 <b>%v | %v</b>", account.Alias, account.AccountRS)
+		} else {
+			msg = fmt.Sprintf("📝 <b>%v</b> ", account.AccountRS)
+		}
 
 		var totalCommitment string
 		newAccount, err := n.signumClient.GetAccount(n.logger, account.Account)
@@ -171,7 +177,12 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 			continue
 		}
 
-		msg := fmt.Sprintf("💸 <b>%v</b> ", account.AccountRS)
+		var msg string
+		if account.Alias != "" {
+			msg = fmt.Sprintf("💸 <b>%v | %v</b>", account.Alias, account.AccountRS)
+		} else {
+			msg = fmt.Sprintf("💸 <b>%v</b> ", account.AccountRS)
+		}
 
 		var incomeTransaction = transaction.Sender != account.Account
 		var name string
@@ -331,8 +342,15 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 		return
 	}
 
-	msg := fmt.Sprintf("💽 <b>%v</b> new block at %v <b>#%v</b> (%v SIGNA)",
-		account.AccountRS, common.FormatChainTimeToStringTimeUTC(foundBlock.Timestamp), foundBlock.Height, foundBlock.BlockReward)
+	var msg string
+	if account.Alias != "" {
+		msg = fmt.Sprintf("💽 <b>%v | %v</b>", account.Alias, account.AccountRS)
+	} else {
+		msg = fmt.Sprintf("💽 <b>%v</b> ", account.AccountRS)
+	}
+
+	msg += fmt.Sprintf("new block at %v <b>#%v</b> (%v SIGNA)",
+		common.FormatChainTimeToStringTimeUTC(foundBlock.Timestamp), foundBlock.Height, foundBlock.BlockReward)
 
 	account.DbAccount.LastBlockID = foundBlock.Block
 	account.DbAccount.LastBlockH = foundBlock.Height
@@ -368,7 +386,12 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 		}
 		var incomeTransaction = transaction.Sender != account.Account
 
-		msg := fmt.Sprintf("📝 <b>%v</b> ", account.AccountRS)
+		var msg string
+		if account.Alias != "" {
+			msg = fmt.Sprintf("📝 <b>%v | %v</b>", account.Alias, account.AccountRS)
+		} else {
+			msg = fmt.Sprintf("📝 <b>%v</b> ", account.AccountRS)
+		}
 
 		switch transaction.Subtype {
 		case signumapi.TST_ARBITRARY_MESSAGE:

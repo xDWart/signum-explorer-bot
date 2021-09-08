@@ -8,21 +8,28 @@ import (
 	"strings"
 )
 
-func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
-	var foundAccount *models.DbAccount
-	for _, account := range user.Accounts {
+func (user *User) tryFoundAccountInMenu(accountS string) (*models.DbAccount, int) {
+	for index, account := range user.Accounts {
 		if account.Account == accountS || account.AccountRS == accountS || account.Alias == accountS {
-			foundAccount = account
-			break
+			return account, index
 		}
 	}
+	return nil, 0
+}
+
+func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
+	foundAccount, _ := user.tryFoundAccountInMenu(accountS)
 
 	if foundAccount == nil && !config.ValidAccountRS.MatchString(accountS) && !config.ValidAccount.MatchString(accountS) {
 		return nil, fmt.Errorf("🚫 Incorrect account format, please use the <b>S-XXXX-XXXX-XXXX-XXXXX</b> or <b>numeric AccountID</b>")
 	}
 
+	var alias string
 	if foundAccount != nil {
 		accountS = foundAccount.Account
+		if foundAccount.Alias != "" {
+			alias = fmt.Sprintf(" alias: <i>%v</i>", foundAccount.Alias)
+		}
 	}
 
 	account, err := user.signumClient.GetCachedAccount(user.logger, accountS)
@@ -48,7 +55,7 @@ func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
 		accountName = "\nName: " + account.Name
 	}
 
-	inlineText := fmt.Sprintf("💳 <b>%v</b>\n"+
+	inlineText := fmt.Sprintf("💳 <b>%v</b>%v\n"+
 		"\nAccount ID: <code>%v</code>"+
 		"%v"+
 		"%v"+
@@ -56,7 +63,7 @@ func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
 		"\nCommitment: %v SIGNA <i>($%v | %v BTC)</i>"+
 		"\n<b>Total: %v SIGNA</b> <i>($%v | %v BTC)</i>"+
 		"\n\nFor the full details visit the <a href='https://explorer.signum.network/?action=account&account=%v'>original Signum Explorer</a>",
-		account.AccountRS, account.Account, accountName, rewardRecipientName,
+		account.AccountRS, alias, account.Account, accountName, rewardRecipientName,
 		common.FormatNQT(account.AvailableBalanceNQT), common.FormatNumber(float64(account.AvailableBalanceNQT)/1e8*signaPrice, 2), common.FormatNumber(float64(account.AvailableBalanceNQT)/1e8*signaPrice/btcPrice, 4),
 		common.FormatNQT(account.CommittedBalanceNQT), common.FormatNumber(float64(account.CommittedBalanceNQT)/1e8*signaPrice, 2), common.FormatNumber(float64(account.CommittedBalanceNQT)/1e8*signaPrice/btcPrice, 4),
 		common.FormatNQT(account.TotalBalanceNQT), common.FormatNumber(float64(account.TotalBalanceNQT)/1e8*signaPrice, 2), common.FormatNumber(float64(account.TotalBalanceNQT)/1e8*signaPrice/btcPrice, 4),
@@ -156,15 +163,8 @@ func (user *User) ProcessDel(message string) string {
 }
 
 func (user *User) delAccount(alias string) string {
-	var foundAccount *models.DbAccount
-	var foundAccountIndex int
-	for index, account := range user.Accounts {
-		if account.Account == alias || account.AccountRS == alias || account.Alias == alias {
-			foundAccount = account
-			foundAccountIndex = index
-			break
-		}
-	}
+	foundAccount, foundAccountIndex := user.tryFoundAccountInMenu(alias)
+
 	if foundAccount == nil {
 		user.ResetState()
 		return "🚫 This account not found in the menu"

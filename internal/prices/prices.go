@@ -54,7 +54,7 @@ func (pm *PriceManager) GetActualPrices() string {
 		btcSign = "+"
 	}
 
-	return fmt.Sprintf("\nSIGNA/USD: $%v (%v%.1f%% daily)"+
+	return fmt.Sprintf("SIGNA/USD: $%v (%v%.1f%% daily)"+
 		"\nSIGNA/BTC: %v BTC"+
 		"\nBTC/USD: $%v (%v%.1f%% daily)",
 		common.FormatNumber(prices["SIGNA"].Price, 5), signaSign, prices["SIGNA"].PercentChange24h,

@@ -8,8 +8,10 @@ import (
 
 var p = message.NewPrinter(language.English)
 
-func FormatNumber(number float64, decimals byte) string {
+func FormatNumber(number float64, decimals int) string {
 	switch decimals {
+	case 0:
+		return p.Sprintf("%.f", number)
 	case 1:
 		return p.Sprintf("%.1f", number)
 	case 2:
@@ -27,7 +29,7 @@ func FormatNumber(number float64, decimals byte) string {
 	case 8:
 		return p.Sprintf("%.8f", number)
 	default:
-		return p.Sprintf("%.f", number)
+		return p.Sprintf("%v", number)
 	}
 }
 

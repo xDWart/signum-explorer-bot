@@ -16,6 +16,7 @@ enum KeyboardType {
     KT_PRICE_CHART = 2;
     KT_NETWORK_CHART = 3;
     KT_CALC = 4;
+    KT_CONVERT = 5;
 }
 
 enum ActionType {
@@ -45,4 +46,7 @@ enum ActionType {
     AT_DISABLE_OTHER_TX_NOTIFICATIONS = 23;
     AT_CALC_TIB = 24;
     AT_CALC_TB = 25;
+    AT_CONVERT_SIGNA = 26;
+    AT_CONVERT_USD = 27;
+    AT_CONVERT_BTC = 28;
 }

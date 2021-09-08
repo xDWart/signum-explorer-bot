@@ -65,6 +65,16 @@ func (user *User) ProcessCallback(callbackQuery *tgbotapi.CallbackQuery) *BotMes
 			user.tbSelected = true
 		}
 		answerBotMessage.InlineKeyboard = user.GetCalcKeyboard()
+	case callbackdata.KeyboardType_KT_CONVERT:
+		switch callbackData.Action {
+		case callbackdata.ActionType_AT_CONVERT_SIGNA:
+			user.currencySelected = CT_SIGNA
+		case callbackdata.ActionType_AT_CONVERT_USD:
+			user.currencySelected = CT_USD
+		case callbackdata.ActionType_AT_CONVERT_BTC:
+			user.currencySelected = CT_BTC
+		}
+		answerBotMessage.InlineKeyboard = user.GetConvertKeyboard()
 	}
 
 	if err != nil {

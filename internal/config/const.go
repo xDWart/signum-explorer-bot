@@ -6,7 +6,7 @@ import (
 )
 
 const NAME = "<b>🚀 Signum Explorer Bot</b>"
-const VERSION = "<i>v.1.1.9</i>"
+const VERSION = "<i>v.1.2.0</i>"
 
 const (
 	COMMAND_START    = "/start"
@@ -14,6 +14,7 @@ const (
 	COMMAND_DEL      = "/del"
 	COMMAND_PRICE    = "/price"
 	COMMAND_CALC     = "/calc"
+	COMMAND_CONVERT  = "/convert"
 	COMMAND_NETWORK  = "/network"
 	COMMAND_CROSSING = "/crossing"
 	COMMAND_FAUCET   = "/faucet"
@@ -27,18 +28,20 @@ const (
 	BUTTON_PRICES  = "💵 Price"
 	BUTTON_NETWORK = "💻 Network"
 	BUTTON_CALC    = "📃 Calc"
+	BUTTON_CONVERT = "💱 Convert"
 	BUTTON_INFO    = "ℹ Info"
-	BUTTON_REFRESH = "↪ Refresh"
 	BUTTON_BACK    = "⬅ Back"
+	BUTTON_REFRESH = "↪ Refresh"
 	BUTTON_NEXT    = "Next ⏩"
 	BUTTON_PREV    = "⏪ Prev"
 )
 
 const INSTRUCTION_TEXT = `
 Send any <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) to explore it once.
-Send <b>` + COMMAND_ADD + ` ACCOUNT [ALIAS]</b> to constantly add an account into your main menu and <b>` + COMMAND_DEL + ` [ACCOUNT|ALIAS]</b> to remove it from there.
+Send <b>` + COMMAND_ADD + ` ACCOUNT [ALIAS]</b> to constantly add an account into your main menu and <b>` + COMMAND_DEL + ` [ACCOUNT or ALIAS]</b> to remove it from there.
 Send <b>` + COMMAND_CALC + ` TiB COMMITMENT</b> (or just <b>` + COMMAND_CALC + ` TiB</b>) to calculate your expected mining rewards.
 Send <b>` + COMMAND_PRICE + `</b> to get up-to-date currency quotes.
+Send <b>` + COMMAND_CONVERT + `</b> for currency converter SIGNA / USD / BTC
 Send <b>` + COMMAND_NETWORK + `</b> to get Signum Network statistic.
 Send <b>` + COMMAND_CROSSING + `</b> to check your plots crossing (they should not overlap to maximize mining profit).
 Send <b>` + COMMAND_FAUCET + `</b> to get some free SIGNA.

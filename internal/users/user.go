@@ -24,12 +24,21 @@ type User struct {
 	priceManager        *prices.PriceManager
 	networkInfoListener *networkinfo.NetworkInfoListener
 
-	state            StateType
+	state            stateType
 	lastTib          float64
 	tbSelected       bool
+	currencySelected currencyType
 	lastCallbackData string
 	lastCallbackTime time.Time
 }
+
+type currencyType byte
+
+const (
+	CT_SIGNA currencyType = iota
+	CT_USD
+	CT_BTC
+)
 
 type BotMessage struct {
 	MessageID int // for edit existing message
@@ -43,16 +52,17 @@ type BotMessage struct {
 	Chart []byte
 }
 
-type StateType byte
+type stateType byte
 
 const (
-	NIL_STATE StateType = iota
+	NIL_STATE stateType = iota
 	ADD_STATE
 	DEL_STATE
 	CALC_TIB_STATE
 	CALC_COMMIT_STATE
 	CROSSING_STATE
 	FAUCET_STATE
+	CONVERT_STATE
 )
 
 func (user *User) ResetState() {
@@ -94,7 +104,7 @@ func (user *User) GetMainMenu() *tgbotapi.ReplyKeyboardMarkup {
 	keyboardButtonRows = append(keyboardButtonRows, tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton(config.BUTTON_PRICES),
 		tgbotapi.NewKeyboardButton(config.BUTTON_CALC),
-		tgbotapi.NewKeyboardButton(config.BUTTON_NETWORK),
+		tgbotapi.NewKeyboardButton(config.BUTTON_CONVERT),
 		tgbotapi.NewKeyboardButton(config.BUTTON_INFO),
 	))
 

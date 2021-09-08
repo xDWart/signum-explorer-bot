@@ -9,51 +9,54 @@ import (
 	"strings"
 )
 
-func (user *User) ProcessCalc(message string) string {
+func (user *User) ProcessCalc(message string) *BotMessage {
 	if message == config.COMMAND_CALC || message == config.BUTTON_CALC {
 		user.state = CALC_TIB_STATE
-		return "💽 Please send me a <b>plot size</b> in TiB or TB (1 TiB = 1.1 TB) for calculation:"
+		return &BotMessage{
+			InlineText:     "💽 Please select the <b>unit of information</b> (1 TiB = 1.1 TB) and send me the <b>plot size</b> for calculation:",
+			InlineKeyboard: user.GetCalcKeyboard(),
+		}
 	}
 
 	splittedMessage := strings.Split(message, " ")
 	if (len(splittedMessage) != 2 && len(splittedMessage) != 3) || splittedMessage[0] != config.COMMAND_CALC {
-		return "🚫 Incorrect command format, please send just /calc and follow the instructions " +
-			"or <b>/calc TiB COMMITMENT</b> to calculate your expected mining rewards" +
-			"or just <b>/calc TiB</b> to calculate the entire possible commitment range"
+		return &BotMessage{
+			MainText: fmt.Sprintf("🚫 Incorrect command format, please send just %v and follow the instructions "+
+				"or <b>%v TiB COMMITMENT</b> to calculate your expected mining rewards"+
+				"or just <b>%v TiB</b> to calculate the entire possible commitment range",
+				config.COMMAND_CALC, config.COMMAND_CALC, config.COMMAND_CALC),
+		}
 	}
 
-	tib, err := parseTib(splittedMessage[1])
+	tib, err := parseNumber(splittedMessage[1])
 	if err != nil {
-		return err.Error()
+		return &BotMessage{
+			MainText: err.Error(),
+		}
 	}
 
 	var commit float64
 	if len(splittedMessage) == 3 {
-		commit, err = parseCommit(splittedMessage[2])
+		commit, err = parseNumber(splittedMessage[2])
 		if err != nil {
-			return err.Error()
+			return &BotMessage{
+				MainText: err.Error(),
+			}
 		}
 	}
 
-	return user.calculate(tib, commit)
+	return &BotMessage{
+		MainText: user.calculate(tib, commit),
+	}
 }
 
-func parseTib(message string) (float64, error) {
+func parseNumber(message string) (float64, error) {
 	message = strings.Replace(message, ",", ".", -1)
 	tib, err := strconv.ParseFloat(message, 64)
 	if err != nil {
 		return tib, fmt.Errorf("🚫 Couldn't parse <b>%v</b> to number: %v", message, err)
 	}
 	return tib, err
-}
-
-func parseCommit(message string) (float64, error) {
-	message = strings.Replace(message, ",", ".", -1)
-	commit, err := strconv.ParseFloat(message, 64)
-	if err != nil {
-		return commit, fmt.Errorf("🚫 Couldn't parse <b>%v</b> to number: %v", message, err)
-	}
-	return commit, err
 }
 
 func (user *User) calculate(tib, commit float64) string {

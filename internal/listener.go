@@ -51,6 +51,9 @@ func (bot *TelegramBot) startBotListener() {
 				case strings.HasPrefix(message, config.COMMAND_FAUCET):
 					user.ResetState()
 					userAnswer.MainText = user.ProcessFaucet(message)
+				case strings.HasPrefix(message, config.COMMAND_CONVERT) || message == config.BUTTON_CONVERT:
+					user.ResetState()
+					userAnswer = user.ProcessConvert(message)
 				case strings.HasPrefix(message, config.COMMAND_PRICE) || message == config.BUTTON_PRICES:
 					user.ResetState()
 					userAnswer.MainText = bot.priceManager.GetActualPrices()
@@ -58,8 +61,7 @@ func (bot *TelegramBot) startBotListener() {
 					userAnswer.InlineKeyboard = user.GetPriceChartKeyboard()
 				case strings.HasPrefix(message, config.COMMAND_CALC) || message == config.BUTTON_CALC:
 					user.ResetState()
-					userAnswer.InlineText = user.ProcessCalc(message)
-					userAnswer.InlineKeyboard = user.GetCalcKeyboard()
+					userAnswer = user.ProcessCalc(message)
 				case strings.HasPrefix(message, config.COMMAND_NETWORK) || message == config.BUTTON_NETWORK:
 					user.ResetState()
 					userAnswer.MainText = bot.networkInfoListener.GetNetworkInfo()

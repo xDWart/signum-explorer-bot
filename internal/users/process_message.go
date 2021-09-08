@@ -5,13 +5,17 @@ import (
 )
 
 func (user *User) ProcessMessage(message string) *BotMessage {
-	if (user.state == CALC_TIB_STATE || user.state == CALC_COMMIT_STATE) && config.ValidAccountRS.MatchString(message) {
+	foundAccount, _ := user.tryFoundAccountInMenu(message)
+
+	if (user.state == CALC_TIB_STATE || user.state == CALC_COMMIT_STATE ||
+		user.state == CONVERT_STATE || user.state == CROSSING_STATE) &&
+		(foundAccount != nil || config.ValidAccountRS.MatchString(message)) {
 		user.ResetState()
 	}
 
 	switch user.state {
 	case CALC_TIB_STATE:
-		tib, err := parseTib(message)
+		tib, err := parseNumber(message)
 		if err != nil {
 			return &BotMessage{MainText: err.Error()}
 		}
@@ -20,7 +24,7 @@ func (user *User) ProcessMessage(message string) *BotMessage {
 		return &BotMessage{MainText: "💵 Please send me a <b>commitment</b> (number of SIGNA coins frozen on the account) " +
 			"or submit <b>0</b> if you want to calculate the entire possible commitment range:"}
 	case CALC_COMMIT_STATE:
-		commit, err := parseCommit(message)
+		commit, err := parseNumber(message)
 		if err != nil {
 			return &BotMessage{MainText: err.Error()}
 		}
@@ -46,6 +50,13 @@ func (user *User) ProcessMessage(message string) *BotMessage {
 	case CROSSING_STATE:
 		user.ResetState()
 		return &BotMessage{MainText: user.checkCrossing(message)}
+	case CONVERT_STATE:
+		user.ResetState()
+		amount, err := parseNumber(message)
+		if err != nil {
+			return &BotMessage{MainText: err.Error()}
+		}
+		return &BotMessage{MainText: user.convert(amount, user.currencySelected)}
 	case FAUCET_STATE:
 		user.ResetState()
 		_, msg := user.sendOrdinaryFaucet(message)
