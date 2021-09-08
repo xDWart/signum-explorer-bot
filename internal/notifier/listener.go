@@ -91,9 +91,10 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 			break
 		}
 
-		var msg string
+		var msg, accountIfAlias string
 		if account.Alias != "" {
-			msg = fmt.Sprintf("📝 <b>%v | %v</b>", account.Alias, account.AccountRS)
+			msg = fmt.Sprintf("📝 <b>%v</b> ", account.Alias)
+			accountIfAlias = "\n<i>Account:</i> " + account.AccountRS
 		} else {
 			msg = fmt.Sprintf("📝 <b>%v</b> ", account.AccountRS)
 		}
@@ -113,17 +114,17 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 				recipientName = "\n<i>Name:</i> " + recipientName
 			}
 
-			msg += fmt.Sprintf("new recipient assigned:"+
+			msg += fmt.Sprintf("new recipient assigned:"+accountIfAlias+
 				"\n<i>Recipient:</i> %v"+recipientName+
 				"\n<i>Fee:</i> %v SIGNA",
 				transaction.RecipientRS, common.ConvertFeeNQT(transaction.FeeNQT))
 		case signumapi.TST_ADD_COMMITMENT:
-			msg += fmt.Sprintf("new commitment added:"+
+			msg += fmt.Sprintf("new commitment added:"+accountIfAlias+
 				"\n<i>Amount:</i> +%v SIGNA"+
 				"\n<i>Fee:</i> %v SIGNA",
 				common.FormatNQT(transaction.Attachment.AmountNQT), common.ConvertFeeNQT(transaction.FeeNQT))
 		case signumapi.TST_REMOVE_COMMITMENT:
-			msg += fmt.Sprintf("commitment revoked:"+
+			msg += fmt.Sprintf("commitment revoked:"+accountIfAlias+
 				"\n<i>Amount:</i> -%v SIGNA"+
 				"\n<i>Fee:</i> %v SIGNA",
 				common.FormatNQT(transaction.Attachment.AmountNQT), common.ConvertFeeNQT(transaction.FeeNQT))
@@ -177,9 +178,10 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 			continue
 		}
 
-		var msg string
+		var msg, accountIfAlias string
 		if account.Alias != "" {
-			msg = fmt.Sprintf("💸 <b>%v | %v</b>", account.Alias, account.AccountRS)
+			msg = fmt.Sprintf("💸 <b>%v</b> ", account.Alias)
+			accountIfAlias = "\n<i>Account:</i> " + account.AccountRS
 		} else {
 			msg = fmt.Sprintf("💸 <b>%v</b> ", account.AccountRS)
 		}
@@ -225,7 +227,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		case signumapi.TST_ORDINARY_PAYMENT:
 			amount = transaction.GetAmount()
 			if incomeTransaction {
-				msg += fmt.Sprintf("new income:"+
+				msg += fmt.Sprintf("new income:"+accountIfAlias+
 					"\n<i>Payment:</i> Ordinary"+
 					"\n<i>Sender:</i> %v"+
 					name+
@@ -234,7 +236,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Fee:</i> %v SIGNA",
 					transaction.SenderRS, common.FormatNQT(transaction.GetAmountNQT()), common.ConvertFeeNQT(transaction.FeeNQT))
 			} else {
-				msg += fmt.Sprintf("new outgo:"+
+				msg += fmt.Sprintf("new outgo:"+accountIfAlias+
 					"\n<i>Payment:</i> Ordinary"+
 					"\n<i>Recipient:</i> %v"+
 					name+
@@ -248,7 +250,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		case signumapi.TST_MULTI_OUT_PAYMENT:
 			if incomeTransaction {
 				amount = transaction.GetMyMultiOutAmount(account.Account)
-				msg += fmt.Sprintf("new income:"+
+				msg += fmt.Sprintf("new income:"+accountIfAlias+
 					"\n<i>Payment:</i> Multi-out"+
 					"\n<i>Sender:</i> %v"+
 					name+
@@ -258,7 +260,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					transaction.SenderRS, common.FormatNQT(transaction.GetMyMultiOutAmountNQT(account.Account)), common.ConvertFeeNQT(transaction.FeeNQT))
 			} else {
 				amount = transaction.GetAmount()
-				msg += fmt.Sprintf("new outgo:"+
+				msg += fmt.Sprintf("new outgo:"+accountIfAlias+
 					"\n<i>Payment:</i> Multi-out"+
 					"\n<i>Recipients:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
@@ -269,7 +271,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		case signumapi.TST_MULTI_OUT_SAME_PAYMENT:
 			if incomeTransaction {
 				amount = transaction.GetMultiOutSameAmount()
-				msg += fmt.Sprintf("new income:"+
+				msg += fmt.Sprintf("new income:"+accountIfAlias+
 					"\n<i>Payment:</i> Multi-out same"+
 					"\n<i>Sender:</i> %v"+
 					name+
@@ -279,7 +281,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					transaction.SenderRS, common.FormatNQT(transaction.GetMultiOutSameAmountNQT()), common.ConvertFeeNQT(transaction.FeeNQT))
 			} else {
 				amount = transaction.GetAmount()
-				msg += fmt.Sprintf("new outgo:"+
+				msg += fmt.Sprintf("new outgo:"+accountIfAlias+
 					"\n<i>Payment:</i> Multi-out same"+
 					"\n<i>Recipients:</i> %v"+
 					"\n<i>Amount:</i> -%v SIGNA"+
@@ -344,7 +346,7 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 
 	var msg string
 	if account.Alias != "" {
-		msg = fmt.Sprintf("💽 <b>%v | %v</b>", account.Alias, account.AccountRS)
+		msg = fmt.Sprintf("💽 <b>%v</b> (%v) ", account.Alias, account.AccountRS)
 	} else {
 		msg = fmt.Sprintf("💽 <b>%v</b> ", account.AccountRS)
 	}
@@ -386,9 +388,10 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 		}
 		var incomeTransaction = transaction.Sender != account.Account
 
-		var msg string
+		var msg, accountIfAlias string
 		if account.Alias != "" {
-			msg = fmt.Sprintf("📝 <b>%v | %v</b>", account.Alias, account.AccountRS)
+			msg = fmt.Sprintf("📝 <b>%v</b> ", account.Alias)
+			accountIfAlias = "\n<i>Account:</i> " + account.AccountRS
 		} else {
 			msg = fmt.Sprintf("📝 <b>%v</b> ", account.AccountRS)
 		}
@@ -408,7 +411,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 					senderName = "\n<i>Name:</i> " + senderName
 				}
 
-				msg += fmt.Sprintf("new message received:"+
+				msg += fmt.Sprintf("new message received:"+accountIfAlias+
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Message:</i> "+message+
 					"\n<i>Fee:</i> %v SIGNA",
@@ -419,7 +422,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 					recipientName = "\n<i>Name:</i> " + recipientName
 				}
 
-				msg += fmt.Sprintf("new message sent:"+
+				msg += fmt.Sprintf("new message sent:"+accountIfAlias+
 					"\n<i>Recipient:</i> %v"+recipientName+
 					"\n<i>Message:</i> "+message+
 					"\n<i>Fee:</i> %v SIGNA",
