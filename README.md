@@ -32,13 +32,15 @@ Add to a group and text `/pc@signa_price_bot` to view the prices:
   - Ordinary Payments
   - Multi-Out Payments
   - Multi-Out Same Payments
-  - Notify about new transactions
-- Show last blocks:
-  - Notify about new blocks
+- Show last blocks
 - Show mining transactions
   - Add / revoke commitment
   - Reward recipient assignment
-- Notify mining and message transactions
+- Notifications:
+  - New payment transactions
+  - New blocks
+  - Mining transactions
+  - Message transactions
 - Show actual prices:
   - SIGNA/USD (+ daily percentage change)
   - SIGNA/BTC
@@ -48,6 +50,7 @@ Add to a group and text `/pc@signa_price_bot` to view the prices:
   - Basic rewards
   - Rewards for the entire commitment range
   - Reinvestment calc
+- Currency converter SIGNA / USD / BTC
 - Show network info
   - Current values of difficulty and commitment
   - Average values during the last 7 days
