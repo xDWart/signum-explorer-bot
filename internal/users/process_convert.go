@@ -42,11 +42,26 @@ func (user *User) convert(amount float64, currencySelected currencyType) string 
 
 	switch currencySelected {
 	case CT_SIGNA:
-		return fmt.Sprintf("%v SIGNA\n\t= %v USD\n\t= %v BTC", common.FormatNumber(amount, -1), common.FormatNumber(amount*prices["SIGNA"].Price, 2), common.FormatNumber(amount*prices["SIGNA"].Price/prices["BTC"].Price, 8))
+		return fmt.Sprintf("%v SIGNA"+
+			"\n\t= %v USD"+
+			"\n\t= %v BTC",
+			common.FormatNumber(amount, -1),
+			common.FormatNumber(amount*prices["SIGNA"].Price, 2),
+			common.FormatNumber(amount*prices["SIGNA"].Price/prices["BTC"].Price, 8))
 	case CT_USD:
-		return fmt.Sprintf("%v USD\n\t= %v SIGNA\n\t= %v BTC", common.FormatNumber(amount, -1), common.FormatNumber(amount/prices["SIGNA"].Price, 0), common.FormatNumber(amount/prices["BTC"].Price, 8))
+		return fmt.Sprintf("%v USD"+
+			"\n\t= %v SIGNA"+
+			"\n\t= %v BTC",
+			common.FormatNumber(amount, -1),
+			common.FormatNumber(amount/prices["SIGNA"].Price, 0),
+			common.FormatNumber(amount/prices["BTC"].Price, 8))
 	case CT_BTC:
-		return fmt.Sprintf("%v BTC\n\t= %v SIGNA\n\t= %v USD", common.FormatNumber(amount, -1), common.FormatNumber(amount*prices["BTC"].Price/prices["SIGNA"].Price, 0), common.FormatNumber(amount*prices["BTC"].Price, 2))
+		return fmt.Sprintf("%v BTC"+
+			"\n\t= %v SIGNA"+
+			"\n\t= %v USD",
+			common.FormatNumber(amount, -1),
+			common.FormatNumber(amount*prices["BTC"].Price/prices["SIGNA"].Price, 0),
+			common.FormatNumber(amount*prices["BTC"].Price, 2))
 	}
 	return ""
 }

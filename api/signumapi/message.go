@@ -29,7 +29,7 @@ func (c *SignumApiClient) ReadMessage(logger abstractapi.LoggerI, secretPhrase, 
 	return message, nil
 }
 
-func (c *SignumApiClient) SendMessage(logger abstractapi.LoggerI, secretPhrase, recipient, message string, feeNQT FeeType) (*TransactionResponse, error) {
+func (c *SignumApiClient) SendMessage(logger abstractapi.LoggerI, secretPhrase, recipient, message string, feeNQT uint64) (*TransactionResponse, error) {
 	return c.createTransaction(logger,
 		&TransactionRequest{
 			RequestType:   RT_SEND_MESSAGE,
@@ -41,7 +41,7 @@ func (c *SignumApiClient) SendMessage(logger abstractapi.LoggerI, secretPhrase, 
 		})
 }
 
-func (c *SignumApiClient) SendEncryptedMessage(logger abstractapi.LoggerI, secretPhrase, recipient, messageToEncrypt string, feeNQT FeeType) (*TransactionResponse, error) {
+func (c *SignumApiClient) SendEncryptedMessage(logger abstractapi.LoggerI, secretPhrase, recipient, messageToEncrypt string, feeNQT uint64) (*TransactionResponse, error) {
 	return c.createTransaction(logger,
 		&TransactionRequest{
 			RequestType:            RT_SEND_MESSAGE,

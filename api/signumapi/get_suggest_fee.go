@@ -6,13 +6,11 @@ import (
 	"time"
 )
 
-type FeeType uint64
-
 type SuggestFee struct {
-	Minimum  FeeType
-	Cheap    FeeType
-	Standard FeeType
-	Priority FeeType
+	Minimum  uint64
+	Cheap    uint64
+	Standard uint64
+	Priority uint64
 }
 
 type SuggestFeeCache struct {
@@ -22,10 +20,10 @@ type SuggestFeeCache struct {
 }
 
 const (
-	MINIMUM_FEE          FeeType = 735000
-	DEFAULT_CHEAP_FEE            = 1470000
-	DEFAULT_STANDARD_FEE         = 2205000
-	DEFAULT_PRIORITY_FEE         = 2940000
+	MINIMUM_FEE          uint64 = 735000
+	DEFAULT_CHEAP_FEE    uint64 = 1470000
+	DEFAULT_STANDARD_FEE uint64 = 2205000
+	DEFAULT_PRIORITY_FEE uint64 = 2940000
 )
 
 func (c *SignumApiClient) GetSuggestFee(logger abstractapi.LoggerI) (*SuggestFee, error) {

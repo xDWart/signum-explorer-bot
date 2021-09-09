@@ -351,8 +351,7 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 		msg = fmt.Sprintf("💽 <b>%v</b> ", account.AccountRS)
 	}
 
-	msg += fmt.Sprintf("new block at %v <b>#%v</b> (%v SIGNA)",
-		common.FormatChainTimeToStringTimeUTC(foundBlock.Timestamp), foundBlock.Height, foundBlock.BlockReward)
+	msg += fmt.Sprintf("found new block <b>#%v</b> (%v SIGNA)", foundBlock.Height, foundBlock.BlockReward)
 
 	account.DbAccount.LastBlockID = foundBlock.Block
 	account.DbAccount.LastBlockH = foundBlock.Height

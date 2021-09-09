@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (c *SignumApiClient) SendMoney(logger abstractapi.LoggerI, secretPhrase, recipient string, amountNQT uint64, feeNQT FeeType) (*TransactionResponse, error) {
+func (c *SignumApiClient) SendMoney(logger abstractapi.LoggerI, secretPhrase, recipient string, amountNQT uint64, feeNQT uint64) (*TransactionResponse, error) {
 	return c.createTransaction(logger,
 		&TransactionRequest{
 			RequestType:  RT_SEND_MONEY,
@@ -17,7 +17,7 @@ func (c *SignumApiClient) SendMoney(logger abstractapi.LoggerI, secretPhrase, re
 		})
 }
 
-func (c *SignumApiClient) SendMoneyMulti(logger abstractapi.LoggerI, secretPhrase string, recipientsAmount map[string]uint64, feeNQT FeeType) (*TransactionResponse, error) {
+func (c *SignumApiClient) SendMoneyMulti(logger abstractapi.LoggerI, secretPhrase string, recipientsAmount map[string]uint64, feeNQT uint64) (*TransactionResponse, error) {
 	recipients := make([]string, 0, len(recipientsAmount))
 	for numid, amount := range recipientsAmount {
 		recipients = append(recipients, fmt.Sprintf("%v:%v", numid, amount))
@@ -31,7 +31,7 @@ func (c *SignumApiClient) SendMoneyMulti(logger abstractapi.LoggerI, secretPhras
 		})
 }
 
-func (c *SignumApiClient) SendMoneyMultiSame(logger abstractapi.LoggerI, secretPhrase string, recipients []string, amount uint64, feeNQT FeeType) (*TransactionResponse, error) {
+func (c *SignumApiClient) SendMoneyMultiSame(logger abstractapi.LoggerI, secretPhrase string, recipients []string, amount uint64, feeNQT uint64) (*TransactionResponse, error) {
 	return c.createTransaction(logger,
 		&TransactionRequest{
 			RequestType:  RT_SEND_MONEY_MULTI_SAME,

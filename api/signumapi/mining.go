@@ -15,7 +15,7 @@ func (c *SignumApiClient) GetRewardRecipient(logger abstractapi.LoggerI, account
 	return &rewardRecipient, err
 }
 
-func (c *SignumApiClient) SetRewardRecipient(logger abstractapi.LoggerI, secretPhrase, recipient string, feeNQT FeeType) (*TransactionResponse, error) {
+func (c *SignumApiClient) SetRewardRecipient(logger abstractapi.LoggerI, secretPhrase, recipient string, feeNQT uint64) (*TransactionResponse, error) {
 	return c.createTransaction(logger,
 		&TransactionRequest{
 			RequestType:  RT_SET_REWARD_RECIPIENT,
@@ -25,7 +25,7 @@ func (c *SignumApiClient) SetRewardRecipient(logger abstractapi.LoggerI, secretP
 		})
 }
 
-func (c *SignumApiClient) AddCommitment(logger abstractapi.LoggerI, secretPhrase string, amountNQT uint64, feeNQT FeeType) (*TransactionResponse, error) {
+func (c *SignumApiClient) AddCommitment(logger abstractapi.LoggerI, secretPhrase string, amountNQT uint64, feeNQT uint64) (*TransactionResponse, error) {
 	return c.createTransaction(logger,
 		&TransactionRequest{
 			RequestType:  RT_ADD_COMMITMENT,
@@ -35,7 +35,7 @@ func (c *SignumApiClient) AddCommitment(logger abstractapi.LoggerI, secretPhrase
 		})
 }
 
-func (c *SignumApiClient) RemoveCommitment(logger abstractapi.LoggerI, secretPhrase string, amountNQT uint64, feeNQT FeeType) (*TransactionResponse, error) {
+func (c *SignumApiClient) RemoveCommitment(logger abstractapi.LoggerI, secretPhrase string, amountNQT uint64, feeNQT uint64) (*TransactionResponse, error) {
 	return c.createTransaction(logger,
 		&TransactionRequest{
 			RequestType:  RT_REMOVE_COMMITMENT,

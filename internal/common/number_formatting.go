@@ -1,7 +1,6 @@
 package common
 
 import (
-	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -37,6 +36,6 @@ func FormatNQT(number uint64) string {
 	return p.Sprintf("%.2f", float64(number)/1e8)
 }
 
-func ConvertFeeNQT(fee signumapi.FeeType) float64 {
+func ConvertFeeNQT(fee uint64) float64 {
 	return float64(fee) / 1e8
 }
