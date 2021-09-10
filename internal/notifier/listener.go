@@ -210,11 +210,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 
 		var message string
 		if transaction.Attachment.MessageIsText && transaction.Attachment.Message != "" {
-			if len([]rune(transaction.Attachment.Message)) > 32 {
-				transaction.Attachment.Message = string([]rune(transaction.Attachment.Message)[:32])
-				transaction.Attachment.Message = strings.ReplaceAll(transaction.Attachment.Message, "\n", " ")
-				transaction.Attachment.Message += "..."
-			}
+			transaction.Attachment.Message = strings.ReplaceAll(transaction.Attachment.Message, "\n", " ")
 			message = fmt.Sprintf("\n<i>Message:</i> %v", transaction.Attachment.Message)
 		} else if transaction.Attachment.EncryptedMessage != nil {
 			message = fmt.Sprintf("\n<i>Message:</i> [encrypted]")
