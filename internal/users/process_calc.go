@@ -2,7 +2,7 @@ package users
 
 import (
 	"fmt"
-	"github.com/xDWart/signum-explorer-bot/internal/calculator"
+	"github.com/xDWart/signum-explorer-bot/calculator"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"strconv"
