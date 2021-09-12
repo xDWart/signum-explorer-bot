@@ -32,7 +32,8 @@ func Calculate(miningInfo *signumapi.MiningInfo, tib float64, commit float64) *C
 	e := calcResult.MyCommitmentPerTiB / miningInfo.AverageCommitment
 	n := math.Pow(e, p)
 	n = math.Min(8, n)
-	calcResult.CapacityMultiplier = math.Max(.125, n)
+	n = math.Max(.125, n)
+	calcResult.CapacityMultiplier = n
 
 	calcResult.EffectiveCapacity = calcResult.CapacityMultiplier * calcResult.TiB
 	calcResult.MyDaily = burstPerDay(miningInfo) * calcResult.EffectiveCapacity
@@ -40,6 +41,14 @@ func Calculate(miningInfo *signumapi.MiningInfo, tib float64, commit float64) *C
 	calcResult.MyYearly = calcResult.MyMonthly * 12
 
 	return &calcResult
+}
+
+func ReverseCalculate(miningInfo *signumapi.MiningInfo, myDaily float64, commit float64) (tib float64, capacityMultiplier float64) {
+	effectiveCapacity := myDaily / burstPerDay(miningInfo)
+	tib = math.Pow(math.Pow(commit, p)/math.Pow(miningInfo.AverageCommitment, p)/effectiveCapacity, 1/(p-1))
+	capacityMultiplier = math.Max(0.125, math.Min(8, effectiveCapacity/tib))
+	tib = effectiveCapacity / capacityMultiplier
+	return
 }
 
 var MultipliersList = [...]float64{0.125, 0.25, 0.5, 1, 2, 4, 8}

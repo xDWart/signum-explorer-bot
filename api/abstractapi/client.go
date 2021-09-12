@@ -63,6 +63,7 @@ func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method 
 	if err != nil {
 		return fmt.Errorf("error perform %v %v: %v", httpMethod, c.ApiHost+method, err)
 	}
+	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

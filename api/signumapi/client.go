@@ -5,6 +5,7 @@ import (
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"math/rand"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -172,7 +173,9 @@ func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod strin
 		lastErr = apiClient.DoJsonReq(logger, httpMethod, method, urlParams, additionalHeaders, output)
 		if lastErr != nil {
 			logger.Errorf("AbstractApiClient.DoJsonReq error: %v", lastErr)
-			if httpMethod == "POST" {
+			if httpMethod == "POST" &&
+				!strings.Contains(lastErr.Error(), "connection refused") &&
+				!strings.Contains(lastErr.Error(), "host unreachable") {
 				return lastErr
 			}
 			continue
