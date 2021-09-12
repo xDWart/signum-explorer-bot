@@ -67,7 +67,7 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 				"https://uk.signum.network",
 				"https://wallet.burstcoin.ro",
 			},
-			CacheTtl:                60 * time.Second, // 2/3 of NotifierPeriod
+			CacheTtl:                2 * time.Minute, // 2/3 of NotifierPeriod
 			LastIndex:               9,
 			RebuildApiClientsPeriod: 30 * time.Minute,
 		})
@@ -97,7 +97,7 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 	notifierShutdownChannel := make(chan interface{})
 	notifier.NewNotifier(logger, db, signumClient, notifierCh, notifierWg, notifierShutdownChannel,
 		&notifier.Config{
-			NotifierPeriod: 90 * time.Second,
+			NotifierPeriod: 3 * time.Minute,
 		})
 
 	userManager := users.InitManager(logger, db, cmcClient, signumClient, priceManager, networkInfoListener, wg, shutdownChannel)
