@@ -5,7 +5,6 @@ import (
 	"github.com/xDWart/signum-explorer-bot/calculator"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
-	"strconv"
 	"strings"
 )
 
@@ -28,7 +27,7 @@ func (user *User) ProcessCalc(message string) *BotMessage {
 		}
 	}
 
-	tib, err := parseNumber(splittedMessage[1])
+	tib, err := common.ParseNumber(splittedMessage[1])
 	if err != nil {
 		return &BotMessage{
 			MainText: err.Error(),
@@ -37,7 +36,7 @@ func (user *User) ProcessCalc(message string) *BotMessage {
 
 	var commit float64
 	if len(splittedMessage) == 3 {
-		commit, err = parseNumber(splittedMessage[2])
+		commit, err = common.ParseNumber(splittedMessage[2])
 		if err != nil {
 			return &BotMessage{
 				MainText: err.Error(),
@@ -48,15 +47,6 @@ func (user *User) ProcessCalc(message string) *BotMessage {
 	return &BotMessage{
 		MainText: user.calculate(tib, commit),
 	}
-}
-
-func parseNumber(message string) (float64, error) {
-	message = strings.Replace(message, ",", ".", -1)
-	tib, err := strconv.ParseFloat(message, 64)
-	if err != nil {
-		return tib, fmt.Errorf("🚫 Couldn't parse <b>%v</b> to number: %v", message, err)
-	}
-	return tib, err
 }
 
 func (user *User) calculate(tib, commit float64) string {

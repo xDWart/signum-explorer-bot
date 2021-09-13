@@ -25,7 +25,7 @@ func (user *User) ProcessConvert(message string) *BotMessage {
 		}
 	}
 
-	amount, err := parseNumber(splittedMessage[1])
+	amount, err := common.ParseNumber(splittedMessage[1])
 	if err != nil {
 		return &BotMessage{
 			MainText: err.Error(),

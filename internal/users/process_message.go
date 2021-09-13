@@ -1,6 +1,7 @@
 package users
 
 import (
+	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 )
 
@@ -15,7 +16,7 @@ func (user *User) ProcessMessage(message string) *BotMessage {
 
 	switch user.state {
 	case CALC_TIB_STATE:
-		tib, err := parseNumber(message)
+		tib, err := common.ParseNumber(message)
 		if err != nil {
 			return &BotMessage{MainText: err.Error()}
 		}
@@ -24,7 +25,7 @@ func (user *User) ProcessMessage(message string) *BotMessage {
 		return &BotMessage{MainText: "💵 Please send me a <b>commitment</b> (number of SIGNA coins frozen on the account) " +
 			"or submit <b>0</b> if you want to calculate the entire possible commitment range:"}
 	case CALC_COMMIT_STATE:
-		commit, err := parseNumber(message)
+		commit, err := common.ParseNumber(message)
 		if err != nil {
 			return &BotMessage{MainText: err.Error()}
 		}
@@ -52,7 +53,7 @@ func (user *User) ProcessMessage(message string) *BotMessage {
 		return &BotMessage{MainText: user.checkCrossing(message)}
 	case CONVERT_STATE:
 		user.ResetState()
-		amount, err := parseNumber(message)
+		amount, err := common.ParseNumber(message)
 		if err != nil {
 			return &BotMessage{MainText: err.Error()}
 		}

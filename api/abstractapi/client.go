@@ -71,7 +71,7 @@ func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method 
 	}
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("error StatusCode %v for %v: %v", resp.StatusCode, c.ApiHost+method, string(body))
+		return fmt.Errorf("error StatusCode %v for %v. Body: %v", resp.StatusCode, c.ApiHost+method, string(body))
 	}
 
 	err = json.Unmarshal(body, output)
