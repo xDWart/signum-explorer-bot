@@ -17,9 +17,14 @@ type MiningInfo struct {
 }
 
 var DEFAULT_MINING_INFO = MiningInfo{
-	AverageCommitmentNQT: 2500,
-	BaseTarget:           280000,
-	LastBlockReward:      127,
+	Height:                   927000,
+	BaseTarget:               280000,
+	LastBlockReward:          127,
+	AverageCommitmentNQT:     2500 * 1e8,
+	ActualNetworkDifficulty:  18325193796 / 280000 / 1.83,
+	ActualCommitment:         2500,
+	AverageNetworkDifficulty: 18325193796 / 280000 / 1.83,
+	AverageCommitment:        2500,
 }
 
 func (c *SignumApiClient) GetMiningInfo(logger abstractapi.LoggerI) (*MiningInfo, error) {
