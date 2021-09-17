@@ -148,10 +148,11 @@ func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClie
 			client.ApiHost, client.blockchainStatus.Height, client.latency)
 	}
 	sort.Slice(clients, func(i, j int) bool {
-		if clients[i].blockchainStatus.Height > clients[j].blockchainStatus.Height {
+		// "allow" out of sync in 5 blocks
+		if clients[i].blockchainStatus.Height-5 > clients[j].blockchainStatus.Height {
 			return true
 		}
-		if clients[i].blockchainStatus.Height < clients[j].blockchainStatus.Height {
+		if clients[i].blockchainStatus.Height < clients[j].blockchainStatus.Height-5 {
 			return false
 		}
 		return clients[i].latency < clients[j].latency
