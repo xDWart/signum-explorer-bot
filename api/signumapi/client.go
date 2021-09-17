@@ -58,10 +58,11 @@ type apiClient struct {
 }
 
 type Config struct {
-	ApiHosts                []string
-	CacheTtl                time.Duration
-	LastIndex               uint64
-	RebuildApiClientsPeriod time.Duration
+	ApiHosts                  []string
+	CacheTtl                  time.Duration
+	LastIndex                 uint64
+	RebuildApiClientsPeriod   time.Duration
+	PreloadNamesForBigWallets bool
 }
 
 func NewSignumApiClient(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *SignumApiClient {
@@ -101,7 +102,10 @@ func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, w
 	ticker := time.NewTicker(c.config.RebuildApiClientsPeriod)
 
 	c.rebuildApiClients(logger)
-	c.preloadNamesForBigWallets(logger)
+	if c.config.PreloadNamesForBigWallets {
+		c.preloadNamesForBigWallets(logger)
+	}
+
 	for {
 		select {
 		case <-c.shutdownChannel:

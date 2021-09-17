@@ -67,9 +67,10 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 				"https://uk.signum.network",
 				"https://wallet.burstcoin.ro",
 			},
-			CacheTtl:                2 * time.Minute, // 2/3 of NotifierPeriod
-			LastIndex:               9,
-			RebuildApiClientsPeriod: 30 * time.Minute,
+			CacheTtl:                  2 * time.Minute, // 2/3 of NotifierPeriod
+			LastIndex:                 9,
+			RebuildApiClientsPeriod:   30 * time.Minute,
+			PreloadNamesForBigWallets: true,
 		})
 	priceManager := prices.NewPricesManager(logger, db, cmcClient, wg, shutdownChannel,
 		&prices.Config{
