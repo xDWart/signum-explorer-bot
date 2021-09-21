@@ -181,6 +181,7 @@ func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod strin
 			if httpMethod == "POST" &&
 				!strings.Contains(lastErr.Error(), "connection refused") &&
 				!strings.Contains(lastErr.Error(), "host unreachable") &&
+				!strings.Contains(lastErr.Error(), "TLS handshake timeout") &&
 				!strings.Contains(lastErr.Error(), "StatusCode") {
 				return lastErr
 			}

@@ -162,6 +162,10 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		return
 	}
 
+	n.logger.Debugf("Account %v: lastTransaction.TransactionID = %v (%v), account.LastTransactionID = %v (%v)",
+		account.Account, lastTransaction.TransactionID, lastTransaction.Height,
+		account.LastTransactionID, account.LastTransactionH)
+
 	var totalBalance string
 	newAccount, err := n.signumClient.GetAccount(n.logger, account.Account)
 	if err == nil {
