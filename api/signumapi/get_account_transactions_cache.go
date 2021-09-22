@@ -72,3 +72,7 @@ func (c *SignumApiClient) GetCachedAccountMiningTransactions(logger abstractapi.
 func (c *SignumApiClient) GetCachedAccountMessageTransaction(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
 	return c.getCachedAccountTransactionsByType(logger, account, TT_MESSAGING, TST_ARBITRARY_MESSAGE)
 }
+
+func (c *SignumApiClient) GetCachedAccountATPaymentTransaction(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getCachedAccountTransactionsByType(logger, account, TT_AUTOMATED_TRANSACTIONS, TST_AT_PAYMENT)
+}

@@ -22,4 +22,6 @@ type DbAccount struct {
 	LastMiningH              uint64
 	LastMessageTX            string `gorm:"type:varchar(255)"`
 	LastMessageH             uint64
+	LastATPaymentTX          string `gorm:"type:varchar(255)"`
+	LastATPaymentH           uint64
 }

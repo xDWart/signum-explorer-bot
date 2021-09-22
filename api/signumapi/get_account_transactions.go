@@ -40,6 +40,10 @@ const (
 	TST_ARBITRARY_MESSAGE TransactionSubType = 0
 )
 
+const (
+	TST_AT_PAYMENT TransactionSubType = 1
+)
+
 type AccountTransactions struct {
 	Transactions     []Transaction `json:"transactions"`
 	ErrorDescription string        `json:"errorDescription"`
@@ -116,6 +120,10 @@ func (c *SignumApiClient) GetAccountMessageTransaction(logger abstractapi.Logger
 	return c.getAccountTransactionsByType(logger, account, TT_MESSAGING, TST_ARBITRARY_MESSAGE)
 }
 
+func (c *SignumApiClient) GetAccountATPaymentTransaction(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getAccountTransactionsByType(logger, account, TT_AUTOMATED_TRANSACTIONS, TST_AT_PAYMENT)
+}
+
 func (c *SignumApiClient) GetLastAccountPaymentTransaction(logger abstractapi.LoggerI, account string) *Transaction {
 	userTransactions, err := c.GetAccountPaymentTransactions(logger, account)
 	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
@@ -136,6 +144,14 @@ func (c *SignumApiClient) GetLastAccountMessageTransaction(logger abstractapi.Lo
 	userMessages, err := c.GetAccountMessageTransaction(logger, account)
 	if err == nil && userMessages != nil && len(userMessages.Transactions) > 0 {
 		return &userMessages.Transactions[0]
+	}
+	return nil
+}
+
+func (c *SignumApiClient) GetLastAccountATPaymentTransaction(logger abstractapi.LoggerI, account string) *Transaction {
+	atPaymentTransactions, err := c.GetAccountATPaymentTransaction(logger, account)
+	if err == nil && atPaymentTransactions != nil && len(atPaymentTransactions.Transactions) > 0 {
+		return &atPaymentTransactions.Transactions[0]
 	}
 	return nil
 }
