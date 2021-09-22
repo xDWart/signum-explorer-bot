@@ -251,6 +251,11 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			userAccount.LastTransactionID = lastAccountTransaction.TransactionID
 			userAccount.LastTransactionH = lastAccountTransaction.Height
 		}
+		lastAccountATPaymentTransaction := user.signumClient.GetLastAccountATPaymentTransaction(user.logger, account.Account)
+		if lastAccountATPaymentTransaction != nil {
+			userAccount.LastATPaymentTX = lastAccountATPaymentTransaction.TransactionID
+			userAccount.LastATPaymentH = lastAccountATPaymentTransaction.Height
+		}
 
 		var txType string
 		switch callbackData.GetAction() {
@@ -358,11 +363,6 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			if lastAccountMessageTransaction != nil {
 				userAccount.LastMessageTX = lastAccountMessageTransaction.TransactionID
 				userAccount.LastMessageH = lastAccountMessageTransaction.Height
-			}
-			lastAccountATPaymentTransaction := user.signumClient.GetLastAccountATPaymentTransaction(user.logger, account.Account)
-			if lastAccountATPaymentTransaction != nil {
-				userAccount.LastATPaymentTX = lastAccountATPaymentTransaction.TransactionID
-				userAccount.LastATPaymentH = lastAccountATPaymentTransaction.Height
 			}
 			user.db.Save(userAccount)
 		}

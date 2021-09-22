@@ -51,12 +51,12 @@ func (n *Notifier) checkAccounts() {
 
 		if account.NotifyIncomeTransactions || account.NotifyOutgoTransactions {
 			n.checkPaymentTransactions(&account)
+			n.checkATPaymentTransactions(&account)
 		}
 
 		if account.NotifyOtherTXs {
 			n.checkMiningTransactions(&account)
 			n.checkMessageTransactions(&account)
-			n.checkATPaymentTransactions(&account)
 		}
 
 		if account.NotifyNewBlocks {

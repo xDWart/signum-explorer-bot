@@ -24,11 +24,28 @@ func (n *Notifier) checkATPaymentTransactions(account *MonitoredAccount) {
 		return
 	}
 
+	n.logger.Debugf("Account %v: lastATPayment.TransactionID = %v (%v), account.LastATPaymentTX = %v (%v)",
+		account.Account, lastATPayment.TransactionID, lastATPayment.Height,
+		account.LastATPaymentTX, account.LastATPaymentH)
+
+	var totalBalance string
+	newAccount, err := n.signumClient.GetAccount(n.logger, account.Account)
+	if err == nil {
+		totalBalance = fmt.Sprintf("\n<b>Total balance: %v SIGNA</b>", common.FormatNQT(newAccount.TotalBalanceNQT))
+	}
+
 	for _, transaction := range atPaymentTransactions.Transactions {
 		if transaction.TransactionID == account.LastATPaymentTX {
 			break
 		}
 		var incomeTransaction = transaction.Sender != account.Account
+
+		if incomeTransaction && !account.NotifyIncomeTransactions {
+			continue
+		}
+		if !incomeTransaction && !account.NotifyOutgoTransactions {
+			continue
+		}
 
 		var msg, accountIfAlias string
 		if account.Alias != "" {
@@ -77,11 +94,7 @@ func (n *Notifier) checkATPaymentTransactions(account *MonitoredAccount) {
 		n.notifierCh <- NotifierMessage{
 			UserName: account.UserName,
 			ChatID:   account.ChatID,
-			Message:  msg,
-		}
-
-		if account.LastATPaymentTX == "" {
-			break
+			Message:  msg + totalBalance,
 		}
 	}
 
