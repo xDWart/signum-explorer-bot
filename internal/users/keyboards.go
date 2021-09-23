@@ -52,6 +52,13 @@ func (user *User) GetAccountKeyboard(account string) *tgbotapi.InlineKeyboardMar
 					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
 					Action:   callbackdata.ActionType_AT_PAYMENTS,
 				}.GetBase64ProtoString()),
+			tgbotapi.NewInlineKeyboardButtonData(
+				"AT Payments",
+				callbackdata.QueryDataType{
+					Account:  account,
+					Keyboard: callbackdata.KeyboardType_KT_ACCOUNT,
+					Action:   callbackdata.ActionType_AT_AT_PAYMENTS,
+				}.GetBase64ProtoString()),
 		),
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData(

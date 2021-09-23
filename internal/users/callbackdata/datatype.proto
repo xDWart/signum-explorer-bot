@@ -49,4 +49,5 @@ enum ActionType {
     AT_CONVERT_SIGNA = 26;
     AT_CONVERT_USD = 27;
     AT_CONVERT_BTC = 28;
+    AT_AT_PAYMENTS = 29;
 }

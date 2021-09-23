@@ -130,6 +130,28 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			InlineKeyboard: &backInlineKeyboard,
 		}, nil
 
+	case callbackdata.ActionType_AT_AT_PAYMENTS:
+		accountTransactions, err := user.signumClient.GetCachedAccountATPaymentTransactions(user.logger, account.Account)
+		if err != nil {
+			return nil, fmt.Errorf("🚫 Error: %v", err)
+		}
+
+		var newInlineText = fmt.Sprintf("💳 <b>%v</b> last AT payment transactions:\n\n", account.AccountRS)
+		for _, transaction := range accountTransactions.Transactions {
+			if account.Account == transaction.Sender {
+				newInlineText += fmt.Sprintf("<i>%v</i>  Sent to <b>%v</b>  <i>-%v SIGNA</i>\n",
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.RecipientRS, common.FormatNQT(transaction.GetAmountNQT()))
+			} else {
+				newInlineText += fmt.Sprintf("<i>%v</i>  Received from <b>%v</b>  <i>+%v SIGNA</i>\n",
+					common.FormatChainTimeToStringDatetimeUTC(transaction.Timestamp), transaction.SenderRS, common.FormatNQT(transaction.GetAmountNQT()))
+			}
+		}
+
+		return &BotMessage{
+			InlineText:     newInlineText,
+			InlineKeyboard: &backInlineKeyboard,
+		}, nil
+
 	case callbackdata.ActionType_AT_BLOCKS:
 		accountBlocks, err := user.signumClient.GetCachedAccountBlocks(user.logger, account.Account)
 		if err != nil {

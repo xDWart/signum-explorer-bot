@@ -8,7 +8,7 @@ import (
 )
 
 func (n *Notifier) checkATPaymentTransactions(account *MonitoredAccount) {
-	atPaymentTransactions, err := n.signumClient.GetCachedAccountATPaymentTransaction(n.logger, account.Account)
+	atPaymentTransactions, err := n.signumClient.GetCachedAccountATPaymentTransactions(n.logger, account.Account)
 	if err != nil {
 		n.logger.Errorf("Can't get last account %v AT payment transactions: %v", account.Account, err)
 		return
@@ -71,7 +71,7 @@ func (n *Notifier) checkATPaymentTransactions(account *MonitoredAccount) {
 					senderName = "\n<i>Name:</i> " + senderName
 				}
 
-				msg += fmt.Sprintf("new AT Payment received:"+accountIfAlias+
+				msg += fmt.Sprintf("new AT payment received:"+accountIfAlias+
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Amount:</i> +%v SIGNA"+message,
 					transaction.SenderRS, common.FormatNQT(transaction.GetAmountNQT()))
@@ -81,7 +81,7 @@ func (n *Notifier) checkATPaymentTransactions(account *MonitoredAccount) {
 					recipientName = "\n<i>Name:</i> " + recipientName
 				}
 
-				msg += fmt.Sprintf("new AT Payment sent:"+accountIfAlias+
+				msg += fmt.Sprintf("new AT payment sent:"+accountIfAlias+
 					"\n<i>Recipient:</i> %v"+recipientName+
 					"\n<i>Amount:</i> -%v SIGNA"+message,
 					transaction.RecipientRS, common.FormatNQT(transaction.GetAmountNQT()))

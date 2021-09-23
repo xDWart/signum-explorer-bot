@@ -69,10 +69,10 @@ func (c *SignumApiClient) GetCachedAccountMiningTransactions(logger abstractapi.
 	return c.getCachedAccountTransactionsByType(logger, account, TT_BURST_MINING, TST_ALL_TYPES_MINING)
 }
 
-func (c *SignumApiClient) GetCachedAccountMessageTransaction(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+func (c *SignumApiClient) GetCachedAccountMessageTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
 	return c.getCachedAccountTransactionsByType(logger, account, TT_MESSAGING, TST_ARBITRARY_MESSAGE)
 }
 
-func (c *SignumApiClient) GetCachedAccountATPaymentTransaction(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+func (c *SignumApiClient) GetCachedAccountATPaymentTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
 	return c.getCachedAccountTransactionsByType(logger, account, TT_AUTOMATED_TRANSACTIONS, TST_AT_PAYMENT)
 }

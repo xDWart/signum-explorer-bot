@@ -7,7 +7,7 @@ import (
 )
 
 func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
-	userMessages, err := n.signumClient.GetCachedAccountMessageTransaction(n.logger, account.Account)
+	userMessages, err := n.signumClient.GetCachedAccountMessageTransactions(n.logger, account.Account)
 	if err != nil {
 		n.logger.Errorf("Can't get last account %v message transactions: %v", account.Account, err)
 		return
