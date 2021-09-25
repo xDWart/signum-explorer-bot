@@ -149,14 +149,14 @@ func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClie
 		client.latency = time.Since(startTime)
 		clients = append(clients, client)
 		logger.Debugf("Signum Api Clients Rebuilder requested %v (%v) for %v",
-			client.ApiHost, client.blockchainStatus.Height, client.latency)
+			client.ApiHost, client.blockchainStatus.NumberOfBlocks, client.latency)
 	}
 	sort.Slice(clients, func(i, j int) bool {
 		// allow out of sync in 1 block
-		if clients[i].blockchainStatus.Height-1 > clients[j].blockchainStatus.Height {
+		if clients[i].blockchainStatus.NumberOfBlocks-1 > clients[j].blockchainStatus.NumberOfBlocks {
 			return true
 		}
-		if clients[i].blockchainStatus.Height < clients[j].blockchainStatus.Height-1 {
+		if clients[i].blockchainStatus.NumberOfBlocks < clients[j].blockchainStatus.NumberOfBlocks-1 {
 			return false
 		}
 		return clients[i].latency < clients[j].latency
