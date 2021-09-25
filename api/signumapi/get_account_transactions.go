@@ -140,6 +140,14 @@ func (c *SignumApiClient) GetLastAccountMiningTransaction(logger abstractapi.Log
 	return nil
 }
 
+func (c *SignumApiClient) GetLastAccountAddCommitmentTransaction(logger abstractapi.LoggerI, account string) *Transaction {
+	userTransactions, err := c.getAccountTransactionsByType(logger, account, TT_BURST_MINING, TST_ADD_COMMITMENT)
+	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
+		return &userTransactions.Transactions[0]
+	}
+	return nil
+}
+
 func (c *SignumApiClient) GetLastAccountMessageTransaction(logger abstractapi.LoggerI, account string) *Transaction {
 	userMessages, err := c.GetAccountMessageTransaction(logger, account)
 	if err == nil && userMessages != nil && len(userMessages.Transactions) > 0 {
