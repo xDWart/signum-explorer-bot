@@ -28,13 +28,15 @@ func (n *Notifier) checkBlocks(account *MonitoredAccount) {
 
 	msg += fmt.Sprintf("found new block <b>#%v</b> (%v SIGNA)", foundBlock.Height, foundBlock.BlockReward)
 
-	account.DbAccount.LastBlockID = foundBlock.Block
-	account.DbAccount.LastBlockH = foundBlock.Height
-	n.db.Save(&account.DbAccount)
-
 	n.notifierCh <- NotifierMessage{
 		UserName: account.UserName,
 		ChatID:   account.ChatID,
 		Message:  msg,
+	}
+
+	account.DbAccount.LastBlockID = foundBlock.Block
+	account.DbAccount.LastBlockH = foundBlock.Height
+	if err := n.db.Save(&account.DbAccount).Error; err != nil {
+		n.logger.Errorf("Error saving account: %v", err)
 	}
 }

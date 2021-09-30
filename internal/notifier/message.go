@@ -83,5 +83,7 @@ func (n *Notifier) checkMessageTransactions(account *MonitoredAccount) {
 
 	account.DbAccount.LastMessageTX = lastMessage.TransactionID
 	account.DbAccount.LastMessageH = lastMessage.Height
-	n.db.Save(&account.DbAccount)
+	if err := n.db.Save(&account.DbAccount).Error; err != nil {
+		n.logger.Errorf("Error saving account: %v", err)
+	}
 }

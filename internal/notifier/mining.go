@@ -79,5 +79,7 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 
 	account.DbAccount.LastMiningTX = lastTransaction.TransactionID
 	account.DbAccount.LastMiningH = lastTransaction.Height
-	n.db.Save(&account.DbAccount)
+	if err := n.db.Save(&account.DbAccount).Error; err != nil {
+		n.logger.Errorf("Error saving account: %v", err)
+	}
 }

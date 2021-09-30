@@ -32,7 +32,7 @@ func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method 
 			delete(urlParams, key)
 		}
 	}
-	logger.Debugf("Will request %v %v%v with params: %v", httpMethod, c.ApiHost, method, urlParams)
+	logger.Debugf("Request %v %v%v with params: %v", httpMethod, c.ApiHost, method, urlParams)
 	for key, data := range sensitiveData {
 		urlParams[key] = data
 	}
