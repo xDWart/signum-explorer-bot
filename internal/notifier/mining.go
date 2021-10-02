@@ -51,7 +51,7 @@ func (n *Notifier) checkMiningTransactions(account *MonitoredAccount) {
 				recipientName = "\n<i>Name:</i> " + recipientName
 			}
 
-			msg += fmt.Sprintf("new recipient assigned:"+accountIfAlias+
+			msg += fmt.Sprintf("new reward recipient assigned:"+accountIfAlias+
 				"\n<i>Recipient:</i> %v"+recipientName+
 				"\n<i>Fee:</i> %v SIGNA",
 				transaction.RecipientRS, common.ConvertFeeNQT(transaction.FeeNQT))
