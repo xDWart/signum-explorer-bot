@@ -17,9 +17,9 @@ type Block struct {
 }
 
 type AccountBlocks struct {
-	Blocks           []Block   `json:"blocks"`
-	ErrorDescription string    `json:"errorDescription"`
-	LastUpdateTime   time.Time `json:"-"`
+	Blocks           []Block `json:"blocks"`
+	ErrorDescription string  `json:"errorDescription"`
+	lastUpdateTime   time.Time
 }
 
 type BlocksCache struct {
@@ -31,7 +31,7 @@ func (c *SignumApiClient) readAccountBlocksFromCache(account string) *AccountBlo
 	c.localBlocksCache.RLock()
 	accountBlocks := c.localBlocksCache.cache[account]
 	c.localBlocksCache.RUnlock()
-	if accountBlocks != nil && time.Since(accountBlocks.LastUpdateTime) < c.config.CacheTtl {
+	if accountBlocks != nil && time.Since(accountBlocks.lastUpdateTime) < c.config.CacheTtl {
 		return accountBlocks
 	}
 	return nil
@@ -39,7 +39,7 @@ func (c *SignumApiClient) readAccountBlocksFromCache(account string) *AccountBlo
 
 func (c *SignumApiClient) storeAccountBlocksToCache(accountS string, accountBlocks *AccountBlocks) {
 	c.localBlocksCache.Lock()
-	accountBlocks.LastUpdateTime = time.Now()
+	accountBlocks.lastUpdateTime = time.Now()
 	c.localBlocksCache.cache[accountS] = accountBlocks
 	c.localBlocksCache.Unlock()
 }

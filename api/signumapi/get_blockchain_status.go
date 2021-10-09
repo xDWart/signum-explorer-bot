@@ -1,7 +1,10 @@
 package signumapi
 
 import (
+	"fmt"
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
+	"sync"
+	"time"
 )
 
 type BlockchainStatus struct {
@@ -17,11 +20,50 @@ type BlockchainStatus struct {
 	//LastBlockchainFeederHeight int    `json:"lastBlockchainFeederHeight"`
 	//IsScanning                 bool   `json:"isScanning"`
 	//RequestProcessingTime      int    `json:"requestProcessingTime"`
+	ErrorDescription string `json:"errorDescription"`
+	lastUpdateTime   time.Time
+}
+
+type BlockchainStatusCache struct {
+	sync.RWMutex
+	cache *BlockchainStatus
+}
+
+func (c *SignumApiClient) readBlockchainStatusFromCache() *BlockchainStatus {
+	c.localBlockchainStatusCache.RLock()
+	blockchainStatus := c.localBlockchainStatusCache.cache
+	c.localBlockchainStatusCache.RUnlock()
+	if blockchainStatus != nil && time.Since(blockchainStatus.lastUpdateTime) < c.config.CacheTtl {
+		return blockchainStatus
+	}
+	return nil
+}
+
+func (c *SignumApiClient) storeBlockchainStatusToCache(blockchainStatus *BlockchainStatus) {
+	c.localBlockchainStatusCache.Lock()
+	blockchainStatus.lastUpdateTime = time.Now()
+	c.localBlockchainStatusCache.cache = blockchainStatus
+	c.localBlockchainStatusCache.Unlock()
 }
 
 func (c *SignumApiClient) GetBlockchainStatus(logger abstractapi.LoggerI) (*BlockchainStatus, error) {
-	var blockchainStatus BlockchainStatus
+	blockchainStatus := &BlockchainStatus{}
 	err := c.doJsonReq(logger, "GET", "/burst",
-		map[string]string{"requestType": string(RT_GET_BLOCKCHAIN_STATUS)}, nil, &blockchainStatus)
-	return &blockchainStatus, err
+		map[string]string{"requestType": string(RT_GET_BLOCKCHAIN_STATUS)}, nil, blockchainStatus)
+	if err == nil {
+		if blockchainStatus.ErrorDescription == "" {
+			c.storeBlockchainStatusToCache(blockchainStatus)
+		} else {
+			err = fmt.Errorf(blockchainStatus.ErrorDescription)
+		}
+	}
+	return blockchainStatus, err
+}
+
+func (c *SignumApiClient) GetCachedBlockchainStatus(logger abstractapi.LoggerI) (*BlockchainStatus, error) {
+	blockchainStatus := c.readBlockchainStatusFromCache()
+	if blockchainStatus != nil {
+		return blockchainStatus, nil
+	}
+	return c.GetBlockchainStatus(logger)
 }

@@ -36,14 +36,15 @@ const (
 )
 
 type SignumApiClient struct {
-	apiClientsPool           apiClientsPool
-	localAccountCache        AccountCache
-	localTransactionsCache   TransactionsCache
-	localBlocksCache         BlocksCache
-	localSuggestFeeCache     SuggestFeeCache
-	localBigWalletNamesCache BigWalletNamesCache
-	config                   *Config
-	shutdownChannel          chan interface{}
+	apiClientsPool             apiClientsPool
+	localAccountCache          AccountCache
+	localTransactionsCache     TransactionsCache
+	localBlocksCache           BlocksCache
+	localSuggestFeeCache       SuggestFeeCache
+	localBigWalletNamesCache   BigWalletNamesCache
+	localBlockchainStatusCache BlockchainStatusCache
+	config                     *Config
+	shutdownChannel            chan interface{}
 }
 
 type apiClientsPool struct {

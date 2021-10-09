@@ -7,14 +7,14 @@ import (
 )
 
 type Account struct {
-	Name                string    `json:"name"`
-	Account             string    `json:"account"`
-	AccountRS           string    `json:"accountRS"`
-	TotalBalanceNQT     uint64    `json:"balanceNQT,string"`
-	AvailableBalanceNQT uint64    `json:"unconfirmedBalanceNQT,string"`
-	CommittedBalanceNQT uint64    `json:"committedBalanceNQT,string"`
-	ErrorDescription    string    `json:"errorDescription"`
-	LastUpdateTime      time.Time `json:"-"`
+	Name                string `json:"name"`
+	Account             string `json:"account"`
+	AccountRS           string `json:"accountRS"`
+	TotalBalanceNQT     uint64 `json:"balanceNQT,string"`
+	AvailableBalanceNQT uint64 `json:"unconfirmedBalanceNQT,string"`
+	CommittedBalanceNQT uint64 `json:"committedBalanceNQT,string"`
+	ErrorDescription    string `json:"errorDescription"`
+	lastUpdateTime      time.Time
 	//ForgedBalanceNQT      uint64 `json:"forgedBalanceNQT,string"`
 	//EffectiveBalanceNXT   uint64 `json:"effectiveBalanceNXT,string"`
 	//GuaranteedBalanceNQT  uint64 `json:"guaranteedBalanceNQT,string"`
