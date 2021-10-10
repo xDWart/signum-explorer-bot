@@ -76,3 +76,43 @@ func (c *SignumApiClient) GetCachedAccountMessageTransactions(logger abstractapi
 func (c *SignumApiClient) GetCachedAccountATPaymentTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
 	return c.getCachedAccountTransactionsByType(logger, account, TT_AUTOMATED_TRANSACTIONS, TST_AT_PAYMENT)
 }
+
+func (c *SignumApiClient) GetLastCachedAccountPaymentTransaction(logger abstractapi.LoggerI, account string) *Transaction {
+	userTransactions, err := c.GetCachedAccountPaymentTransactions(logger, account)
+	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
+		return &userTransactions.Transactions[0]
+	}
+	return nil
+}
+
+func (c *SignumApiClient) GetLastCachedAccountMiningTransaction(logger abstractapi.LoggerI, account string) *Transaction {
+	userTransactions, err := c.GetCachedAccountMiningTransactions(logger, account)
+	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
+		return &userTransactions.Transactions[0]
+	}
+	return nil
+}
+
+func (c *SignumApiClient) GetLastCachedAccountAddCommitmentTransaction(logger abstractapi.LoggerI, account string) *Transaction {
+	userTransactions, err := c.getCachedAccountTransactionsByType(logger, account, TT_BURST_MINING, TST_ADD_COMMITMENT)
+	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
+		return &userTransactions.Transactions[0]
+	}
+	return nil
+}
+
+func (c *SignumApiClient) GetLastCachedAccountMessageTransaction(logger abstractapi.LoggerI, account string) *Transaction {
+	userMessages, err := c.GetCachedAccountMessageTransactions(logger, account)
+	if err == nil && userMessages != nil && len(userMessages.Transactions) > 0 {
+		return &userMessages.Transactions[0]
+	}
+	return nil
+}
+
+func (c *SignumApiClient) GetLastCachedAccountATPaymentTransaction(logger abstractapi.LoggerI, account string) *Transaction {
+	atPaymentTransactions, err := c.GetCachedAccountATPaymentTransactions(logger, account)
+	if err == nil && atPaymentTransactions != nil && len(atPaymentTransactions.Transactions) > 0 {
+		return &atPaymentTransactions.Transactions[0]
+	}
+	return nil
+}

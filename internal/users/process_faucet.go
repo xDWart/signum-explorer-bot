@@ -90,7 +90,7 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 				addedMessage += "\n\n"
 			}
 
-			lastAccountTransaction := user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
+			lastAccountTransaction := user.signumClient.GetLastCachedAccountPaymentTransaction(user.logger, userAccount.Account)
 			if lastAccountTransaction != nil {
 				userAccount.LastTransactionID = lastAccountTransaction.TransactionID
 				userAccount.LastTransactionH = lastAccountTransaction.Height

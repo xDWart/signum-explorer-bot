@@ -268,12 +268,12 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 			}
 		}
 
-		lastAccountTransaction := user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
+		lastAccountTransaction := user.signumClient.GetLastCachedAccountPaymentTransaction(user.logger, userAccount.Account)
 		if lastAccountTransaction != nil {
 			userAccount.LastTransactionID = lastAccountTransaction.TransactionID
 			userAccount.LastTransactionH = lastAccountTransaction.Height
 		}
-		lastAccountATPaymentTransaction := user.signumClient.GetLastAccountATPaymentTransaction(user.logger, account.Account)
+		lastAccountATPaymentTransaction := user.signumClient.GetLastCachedAccountATPaymentTransaction(user.logger, account.Account)
 		if lastAccountATPaymentTransaction != nil {
 			userAccount.LastATPaymentTX = lastAccountATPaymentTransaction.TransactionID
 			userAccount.LastATPaymentH = lastAccountATPaymentTransaction.Height
@@ -376,12 +376,12 @@ func (user *User) processAccountKeyboard(callbackData *callbackdata.QueryDataTyp
 
 		if !userAccount.NotifyOtherTXs { // needs to enable
 			userAccount.NotifyOtherTXs = true
-			lastAccountMiningTransaction := user.signumClient.GetLastAccountMiningTransaction(user.logger, account.Account)
+			lastAccountMiningTransaction := user.signumClient.GetLastCachedAccountMiningTransaction(user.logger, account.Account)
 			if lastAccountMiningTransaction != nil {
 				userAccount.LastMiningTX = lastAccountMiningTransaction.TransactionID
 				userAccount.LastMiningH = lastAccountMiningTransaction.Height
 			}
-			lastAccountMessageTransaction := user.signumClient.GetLastAccountMessageTransaction(user.logger, account.Account)
+			lastAccountMessageTransaction := user.signumClient.GetLastCachedAccountMessageTransaction(user.logger, account.Account)
 			if lastAccountMessageTransaction != nil {
 				userAccount.LastMessageTX = lastAccountMessageTransaction.TransactionID
 				userAccount.LastMessageH = lastAccountMessageTransaction.Height

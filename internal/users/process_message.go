@@ -37,7 +37,7 @@ func (user *User) ProcessMessage(message string) *BotMessage {
 	case ADD_STATE:
 		userAccount, msg := user.addAccount(message, "")
 		if userAccount != nil {
-			lastAccountTransaction := user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
+			lastAccountTransaction := user.signumClient.GetLastCachedAccountPaymentTransaction(user.logger, userAccount.Account)
 			if lastAccountTransaction != nil {
 				userAccount.LastTransactionID = lastAccountTransaction.TransactionID
 				userAccount.LastTransactionH = lastAccountTransaction.Height

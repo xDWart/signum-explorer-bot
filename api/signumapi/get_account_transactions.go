@@ -116,11 +116,11 @@ func (c *SignumApiClient) GetAccountMiningTransactions(logger abstractapi.Logger
 	return c.getAccountTransactionsByType(logger, account, TT_BURST_MINING, TST_ALL_TYPES_MINING)
 }
 
-func (c *SignumApiClient) GetAccountMessageTransaction(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+func (c *SignumApiClient) GetAccountMessageTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
 	return c.getAccountTransactionsByType(logger, account, TT_MESSAGING, TST_ARBITRARY_MESSAGE)
 }
 
-func (c *SignumApiClient) GetAccountATPaymentTransaction(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+func (c *SignumApiClient) GetAccountATPaymentTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
 	return c.getAccountTransactionsByType(logger, account, TT_AUTOMATED_TRANSACTIONS, TST_AT_PAYMENT)
 }
 
@@ -149,7 +149,7 @@ func (c *SignumApiClient) GetLastAccountAddCommitmentTransaction(logger abstract
 }
 
 func (c *SignumApiClient) GetLastAccountMessageTransaction(logger abstractapi.LoggerI, account string) *Transaction {
-	userMessages, err := c.GetAccountMessageTransaction(logger, account)
+	userMessages, err := c.GetAccountMessageTransactions(logger, account)
 	if err == nil && userMessages != nil && len(userMessages.Transactions) > 0 {
 		return &userMessages.Transactions[0]
 	}
@@ -157,7 +157,7 @@ func (c *SignumApiClient) GetLastAccountMessageTransaction(logger abstractapi.Lo
 }
 
 func (c *SignumApiClient) GetLastAccountATPaymentTransaction(logger abstractapi.LoggerI, account string) *Transaction {
-	atPaymentTransactions, err := c.GetAccountATPaymentTransaction(logger, account)
+	atPaymentTransactions, err := c.GetAccountATPaymentTransactions(logger, account)
 	if err == nil && atPaymentTransactions != nil && len(atPaymentTransactions.Transactions) > 0 {
 		return &atPaymentTransactions.Transactions[0]
 	}

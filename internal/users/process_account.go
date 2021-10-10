@@ -97,7 +97,7 @@ func (user *User) ProcessAdd(message string) string {
 
 	userAccount, msg := user.addAccount(accountS, alias)
 	if userAccount != nil {
-		lastAccountTransaction := user.signumClient.GetLastAccountPaymentTransaction(user.logger, userAccount.Account)
+		lastAccountTransaction := user.signumClient.GetLastCachedAccountPaymentTransaction(user.logger, userAccount.Account)
 		if lastAccountTransaction != nil {
 			userAccount.LastTransactionID = lastAccountTransaction.TransactionID
 			userAccount.LastTransactionH = lastAccountTransaction.Height
