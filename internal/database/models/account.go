@@ -6,8 +6,8 @@ import (
 
 type DbAccount struct {
 	gorm.Model
-	DbUserID                 uint
-	Account                  string `gorm:"type:varchar(255)"`
+	DbUserID                 uint   `gorm:"index:unique_acc_per_user,unique"`
+	Account                  string `gorm:"type:varchar(255);index:unique_acc_per_user,unique"`
 	AccountRS                string `gorm:"type:varchar(255)"`
 	Alias                    string `gorm:"type:varchar(255)"`
 	NotifyIncomeTransactions bool
