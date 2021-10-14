@@ -102,6 +102,11 @@ func (user *User) ProcessAdd(message string) string {
 			userAccount.LastTransactionID = lastAccountTransaction.TransactionID
 			userAccount.LastTransactionH = lastAccountTransaction.Height
 		}
+		lastAccountATPaymentTransaction := user.signumClient.GetLastCachedAccountATPaymentTransaction(user.logger, userAccount.Account)
+		if lastAccountATPaymentTransaction != nil {
+			userAccount.LastATPaymentTX = lastAccountATPaymentTransaction.TransactionID
+			userAccount.LastATPaymentH = lastAccountATPaymentTransaction.Height
+		}
 		userAccount.NotifyIncomeTransactions = true
 		user.db.Save(userAccount)
 	}
