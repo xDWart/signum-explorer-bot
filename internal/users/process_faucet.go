@@ -1,6 +1,7 @@
 package users
 
 import (
+	"errors"
 	"fmt"
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
@@ -139,12 +140,19 @@ func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string 
 			user.db.Where(&extraFaucetAmountConfig).First(&extraFaucetAmountConfig)
 
 			if extraFaucetAmountConfig.ValueF > 0 {
-				_, err := user.signumClient.SendMoney(user.logger, os.Getenv("SECRET_PHRASE"), userAccount.AccountRS, uint64(extraFaucetAmountConfig.ValueF*1e8), signumapi.DEFAULT_CHEAP_FEE)
-				if err == nil {
-					user.db.Model(&newUsersExtraFaucetConfig).UpdateColumn("value_i", gorm.Expr("value_i - ?", 1))
+				var existsFaucet models.Faucet
+				err := user.db.
+					Where("account = ?", userAccount.Account).
+					Where("amount = ?", extraFaucetAmountConfig.ValueF).
+					First(&existsFaucet).Error
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					_, err = user.signumClient.SendMoney(user.logger, os.Getenv("SECRET_PHRASE"), userAccount.AccountRS, uint64(extraFaucetAmountConfig.ValueF*1e8), signumapi.DEFAULT_CHEAP_FEE)
+					if err == nil {
+						user.db.Model(&newUsersExtraFaucetConfig).UpdateColumn("value_i", gorm.Expr("value_i - ?", 1))
 
-					return fmt.Sprintf("\n\n🎁 New user bonus <b>%v SIGNA</b> has been successfully sent to the account, please wait for notification!",
-						common.FormatNumber(extraFaucetAmountConfig.ValueF, 2))
+						return fmt.Sprintf("\n\n🎁 New user bonus <b>%v SIGNA</b> has been successfully sent to the account, please wait for notification!",
+							common.FormatNumber(extraFaucetAmountConfig.ValueF, 2))
+					}
 				}
 			}
 		}
