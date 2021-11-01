@@ -113,7 +113,17 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 		amount = ordinaryFaucetAmount.ValueF
 	}
 
-	_, err := user.signumClient.SendMoney(user.logger, os.Getenv("SECRET_PHRASE"), account, uint64(amount*1e8), signumapi.DEFAULT_CHEAP_FEE)
+	var accountFaucet models.Faucet
+	err := user.db.
+		Where("account = ? OR account_rs = ?", account, account).
+		Where("amount = ?", amount).
+		Last(&accountFaucet).Error
+	if err == nil && time.Since(accountFaucet.CreatedAt) < 24*time.Hour*time.Duration(config.FAUCET_DAYS_PERIOD) {
+		user.ResetState()
+		return false, fmt.Sprintf("🚫 Sorry, you have used the faucet less than %v days ago!", config.FAUCET_DAYS_PERIOD)
+	}
+
+	_, err = user.signumClient.SendMoney(user.logger, os.Getenv("SECRET_PHRASE"), account, uint64(amount*1e8), signumapi.DEFAULT_CHEAP_FEE)
 	if err != nil {
 		user.ResetState()
 		return false, fmt.Sprintf("🚫 Bad request: %v", err)
