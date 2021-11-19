@@ -144,7 +144,7 @@ func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClie
 		err := client.DoJsonReq(logger, "GET", "/burst",
 			map[string]string{"requestType": string(RT_GET_BLOCKCHAIN_STATUS)}, nil, &client.blockchainStatus)
 		if err != nil {
-			logger.Errorf("Failed DoJsonReq: %v", err)
+			logger.Warnf("Failed DoJsonReq: %v", err)
 			continue
 		}
 		client.latency = time.Since(startTime)
@@ -178,7 +178,7 @@ func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod strin
 	for _, apiClient := range apiClients {
 		lastErr = apiClient.DoJsonReq(logger, httpMethod, method, urlParams, additionalHeaders, output)
 		if lastErr != nil {
-			logger.Errorf("AbstractApiClient.DoJsonReq error: %v", lastErr)
+			logger.Warnf("AbstractApiClient.DoJsonReq error: %v", lastErr)
 			if httpMethod == "POST" &&
 				!strings.Contains(lastErr.Error(), "connection refused") &&
 				!strings.Contains(lastErr.Error(), "host unreachable") &&
