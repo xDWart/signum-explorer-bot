@@ -1,6 +1,7 @@
 package signumapi
 
 import (
+	"errors"
 	"fmt"
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"math/rand"
@@ -168,29 +169,45 @@ func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClie
 }
 
 func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
-	var lastErr error
 	c.apiClientsPool.RLock()
 	apiClients := c.apiClientsPool.clients
 	c.apiClientsPool.RUnlock()
 
 	rand.Shuffle(len(apiClients)/2, func(i, j int) { apiClients[i], apiClients[j] = apiClients[j], apiClients[i] })
 
+	var err error
 	for _, apiClient := range apiClients {
-		lastErr = apiClient.DoJsonReq(logger, httpMethod, method, urlParams, additionalHeaders, output)
-		if lastErr != nil {
-			logger.Warnf("AbstractApiClient.DoJsonReq error: %v", lastErr)
+		err = apiClient.DoJsonReq(logger, httpMethod, method, urlParams, additionalHeaders, output)
+		if err != nil {
+			securedErrorMsg := deleteSubstr(err.Error(), "secretPhrase=", "\"")
+			err = errors.New(securedErrorMsg)
+			logger.Warnf("AbstractApiClient.DoJsonReq error: %v", err)
 			if httpMethod == "POST" &&
-				!strings.Contains(lastErr.Error(), "connection refused") &&
-				!strings.Contains(lastErr.Error(), "host unreachable") &&
-				!strings.Contains(lastErr.Error(), "TLS handshake timeout") &&
-				!strings.Contains(lastErr.Error(), "remote error") &&
-				!strings.Contains(lastErr.Error(), "StatusCode") &&
-				!strings.Contains(lastErr.Error(), "certificate has expired") {
-				return lastErr
+				!strings.Contains(err.Error(), "connection refused") &&
+				!strings.Contains(err.Error(), "host unreachable") &&
+				!strings.Contains(err.Error(), "TLS handshake timeout") &&
+				!strings.Contains(err.Error(), "remote error") &&
+				!strings.Contains(err.Error(), "StatusCode") &&
+				!strings.Contains(err.Error(), "certificate has expired") {
+				return err
 			}
 			continue
 		}
 		return nil
 	}
-	return fmt.Errorf("couldn't get %v method: %v", method, lastErr)
+	return fmt.Errorf("couldn't get %v method: %v", method, err)
+}
+
+func deleteSubstr(input, from, to string) string {
+	var start = strings.Index(input, from)
+	if start <= 0 {
+		return input
+	}
+
+	var length = strings.Index(input[start:], to)
+	if length < 0 {
+		return input[:start]
+	}
+
+	return input[:start] + input[start+length:]
 }
