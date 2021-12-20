@@ -104,7 +104,7 @@ func (user *User) GetMainMenu() *tgbotapi.ReplyKeyboardMarkup {
 	keyboardButtonRows = append(keyboardButtonRows, tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton(config.BUTTON_PRICES),
 		tgbotapi.NewKeyboardButton(config.BUTTON_CALC),
-		tgbotapi.NewKeyboardButton(config.BUTTON_CONVERT),
+		tgbotapi.NewKeyboardButton(config.BUTTON_NETWORK),
 		tgbotapi.NewKeyboardButton(config.BUTTON_INFO),
 	))
 
