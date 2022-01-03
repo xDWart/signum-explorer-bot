@@ -88,7 +88,7 @@ func (user *User) calculate(tib, commit float64) string {
 	}
 
 	entireRangeCalculation := calculator.CalculateEntireRange(&lastMiningInfo, tib)
-	result := fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB (%.2f TB) for the entire commitment range:</b>"+
+	result := fmt.Sprintf("<b>📃 Calculation of mining rewards for %.2f TiB (%.2f TB) for the entire commitment range:</b>"+
 		"\nAverage Network Commitment during the last %v days: %v SIGNA / TiB"+
 		"\n\n<b>Capacity multipliers, commitment and mining rewards:</b>", tib, tib/0.909495,
 		user.networkInfoListener.Config.AveragingDaysQuantity, common.FormatNumber(lastMiningInfo.AverageCommitment, 0))
@@ -105,7 +105,7 @@ func (user *User) calculate(tib, commit float64) string {
 		calcResult := entireRangeCalculation[multiplier]
 		var annualProfit string
 		if calcResult.Commitment > 0 {
-			annualProfit = fmt.Sprintf(" annual <i>+%.f%%</i>", calcResult.MyMonthly*12*100/calcResult.Commitment)
+			annualProfit = fmt.Sprintf(", annual <i>+%.f%%</i>", calcResult.MyMonthly*12*100/calcResult.Commitment)
 		}
 		result += fmt.Sprintf("\n<i>x%v%v</i> having <b>%v SIGNA</b> ($%v) to earn monthly <i>%v SIGNA ($%v)</i>%v",
 			multiplier, minMax,
