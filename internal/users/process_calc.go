@@ -57,7 +57,7 @@ func (user *User) calculate(tib, commit float64) string {
 		calcResult := calculator.Calculate(&lastMiningInfo, tib, commit)
 		reinvestmentCalcResult := calculator.CalculateReinvestment(&lastMiningInfo, calcResult)
 
-		return fmt.Sprintf("<b>📃 Calculation of mining rewards for %v TiB (%.2f TB) with %v SIGNA ($%v) commitment:</b>"+
+		return fmt.Sprintf("<b>📃 Calculation of mining rewards for %.2f TiB (%.2f TB) with %v SIGNA ($%v) commitment:</b>"+
 			"\nAverage Network Commitment during the last %v days: %v SIGNA / TiB"+
 			"\nYour Commitment: %v SIGNA / TiB"+
 			"\nYour Capacity Multiplier: %v"+
