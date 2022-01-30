@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 type AbstractApiClient struct {
@@ -71,12 +72,12 @@ func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method 
 	}
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("error StatusCode %v for %v. Body: %v", resp.StatusCode, c.ApiHost+method, string(body))
+		return fmt.Errorf("error StatusCode %v for %v. Body: %v", resp.StatusCode, c.ApiHost+method, strconv.Quote(string(body)))
 	}
 
 	err = json.Unmarshal(body, output)
 	if err != nil {
-		return fmt.Errorf("couldn't unmarshal body of %v: %v. Body: %v", c.ApiHost+method, err, string(body))
+		return fmt.Errorf("couldn't unmarshal body of %v: %v. Body: %v", c.ApiHost+method, err, strconv.Quote(string(body)))
 	}
 
 	return nil
