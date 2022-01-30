@@ -3,7 +3,12 @@ package signumapi
 import "github.com/xDWart/signum-explorer-bot/api/abstractapi"
 
 type RewardRecipient struct {
-	RewardRecipient string
+	RewardRecipient  string
+	ErrorDescription string `json:"errorDescription"`
+}
+
+func (rr *RewardRecipient) GetError() string {
+	return rr.ErrorDescription
 }
 
 func (c *SignumApiClient) GetRewardRecipient(logger abstractapi.LoggerI, account string) (*RewardRecipient, error) {

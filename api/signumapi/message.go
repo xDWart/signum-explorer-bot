@@ -9,6 +9,11 @@ type Message struct {
 	Message                string
 	DecryptedMessage       string
 	DecryptedMessageToSelf string
+	ErrorDescription       string `json:"errorDescription"`
+}
+
+func (m *Message) GetError() string {
+	return m.ErrorDescription
 }
 
 func (c *SignumApiClient) ReadMessage(logger abstractapi.LoggerI, secretPhrase, transactionID string) (*Message, error) {

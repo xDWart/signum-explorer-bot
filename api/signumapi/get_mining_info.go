@@ -14,6 +14,11 @@ type MiningInfo struct {
 	ActualCommitment         float64 `json:"-"`
 	AverageNetworkDifficulty float64 `json:"-"`
 	AverageCommitment        float64 `json:"-"`
+	ErrorDescription         string  `json:"errorDescription"`
+}
+
+func (mi *MiningInfo) GetError() string {
+	return mi.ErrorDescription
 }
 
 var DEFAULT_MINING_INFO = MiningInfo{

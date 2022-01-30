@@ -1,7 +1,6 @@
 package signumapi
 
 import (
-	"fmt"
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"time"
 )
@@ -30,6 +29,10 @@ type Account struct {
 	//PublicKey string `json:"publicKey"`
 }
 
+func (a *Account) GetError() string {
+	return a.ErrorDescription
+}
+
 func (c *SignumApiClient) GetAccount(logger abstractapi.LoggerI, accountS string) (*Account, error) {
 	account := &Account{}
 	err := c.doJsonReq(logger, "GET", "/burst",
@@ -37,12 +40,8 @@ func (c *SignumApiClient) GetAccount(logger abstractapi.LoggerI, accountS string
 		nil,
 		account)
 	if err == nil {
-		if account.ErrorDescription == "" {
-			c.storeAccountToCache(account.Account, account)
-			c.storeAccountToCache(account.AccountRS, account)
-		} else {
-			err = fmt.Errorf(account.ErrorDescription)
-		}
+		c.storeAccountToCache(account.Account, account)
+		c.storeAccountToCache(account.AccountRS, account)
 	}
 	return account, err
 }
@@ -53,8 +52,5 @@ func (c *SignumApiClient) GetAccountId(logger abstractapi.LoggerI, secretPhrase 
 		map[string]string{"requestType": string(RT_GET_ACCOUNT_ID), "secretPhrase": secretPhrase},
 		nil,
 		account)
-	if err == nil && account.ErrorDescription != "" {
-		err = fmt.Errorf(account.ErrorDescription)
-	}
 	return account, err
 }

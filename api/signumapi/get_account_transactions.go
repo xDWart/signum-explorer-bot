@@ -51,6 +51,10 @@ type AccountTransactions struct {
 	// RequestProcessingTime uint64    `json:"requestProcessingTime"`
 }
 
+func (at *AccountTransactions) GetError() string {
+	return at.ErrorDescription
+}
+
 func (c *SignumApiClient) getAccountTransactionsByType(logger abstractapi.LoggerI, account string, transactionType TransactionType, transactionSubType TransactionSubType) (*AccountTransactions, error) {
 	accountTransactions := &AccountTransactions{}
 
@@ -69,11 +73,7 @@ func (c *SignumApiClient) getAccountTransactionsByType(logger abstractapi.Logger
 
 	err := c.doJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
 	if err == nil {
-		if accountTransactions.ErrorDescription == "" {
-			c.storeAccountTransactionsToCache(account, transactionType, transactionSubType, accountTransactions)
-		} else {
-			err = fmt.Errorf(accountTransactions.ErrorDescription)
-		}
+		c.storeAccountTransactionsToCache(account, transactionType, transactionSubType, accountTransactions)
 	}
 	return accountTransactions, err
 }
@@ -90,9 +90,6 @@ func (c *SignumApiClient) GetAccountTransactions(logger abstractapi.LoggerI, acc
 	}
 
 	err := c.doJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
-	if err == nil && accountTransactions.ErrorDescription != "" {
-		err = fmt.Errorf(accountTransactions.ErrorDescription)
-	}
 	return accountTransactions, err
 }
 

@@ -1,7 +1,6 @@
 package signumapi
 
 import (
-	"fmt"
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"strconv"
 	"sync"
@@ -16,10 +15,18 @@ type Block struct {
 	ErrorDescription string `json:"errorDescription"`
 }
 
+func (b *Block) GetError() string {
+	return b.ErrorDescription
+}
+
 type AccountBlocks struct {
 	Blocks           []Block `json:"blocks"`
 	ErrorDescription string  `json:"errorDescription"`
 	lastUpdateTime   time.Time
+}
+
+func (ab *AccountBlocks) GetError() string {
+	return ab.ErrorDescription
 }
 
 type BlocksCache struct {
@@ -56,14 +63,10 @@ func (c *SignumApiClient) GetAccountBlocks(logger abstractapi.LoggerI, account s
 		nil,
 		accountBlocks)
 	if err == nil {
-		if accountBlocks.ErrorDescription == "" {
-			if len(accountBlocks.Blocks) > 10 {
-				accountBlocks.Blocks = accountBlocks.Blocks[:10]
-			}
-			c.storeAccountBlocksToCache(account, accountBlocks)
-		} else {
-			err = fmt.Errorf(accountBlocks.ErrorDescription)
+		if len(accountBlocks.Blocks) > 10 {
+			accountBlocks.Blocks = accountBlocks.Blocks[:10]
 		}
+		c.storeAccountBlocksToCache(account, accountBlocks)
 	}
 	return accountBlocks, err
 }
@@ -90,8 +93,5 @@ func (c *SignumApiClient) GetBlock(logger abstractapi.LoggerI, blockID string) (
 		map[string]string{"requestType": string(RT_GET_BLOCK), "block": blockID},
 		nil,
 		block)
-	if err == nil && block.ErrorDescription != "" {
-		err = fmt.Errorf(block.ErrorDescription)
-	}
 	return block, err
 }

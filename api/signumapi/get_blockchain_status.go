@@ -1,7 +1,6 @@
 package signumapi
 
 import (
-	"fmt"
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"sync"
 	"time"
@@ -22,6 +21,10 @@ type BlockchainStatus struct {
 	//RequestProcessingTime      int    `json:"requestProcessingTime"`
 	ErrorDescription string `json:"errorDescription"`
 	lastUpdateTime   time.Time
+}
+
+func (bs *BlockchainStatus) GetError() string {
+	return bs.ErrorDescription
 }
 
 type BlockchainStatusCache struct {
@@ -51,11 +54,7 @@ func (c *SignumApiClient) GetBlockchainStatus(logger abstractapi.LoggerI) (*Bloc
 	err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_GET_BLOCKCHAIN_STATUS)}, nil, blockchainStatus)
 	if err == nil {
-		if blockchainStatus.ErrorDescription == "" {
-			c.storeBlockchainStatusToCache(blockchainStatus)
-		} else {
-			err = fmt.Errorf(blockchainStatus.ErrorDescription)
-		}
+		c.storeBlockchainStatusToCache(blockchainStatus)
 	}
 	return blockchainStatus, err
 }

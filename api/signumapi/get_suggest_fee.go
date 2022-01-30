@@ -7,10 +7,15 @@ import (
 )
 
 type SuggestFee struct {
-	Minimum  uint64
-	Cheap    uint64
-	Standard uint64
-	Priority uint64
+	Minimum          uint64
+	Cheap            uint64
+	Standard         uint64
+	Priority         uint64
+	ErrorDescription string `json:"errorDescription"`
+}
+
+func (sf *SuggestFee) GetError() string {
+	return sf.ErrorDescription
 }
 
 type SuggestFeeCache struct {

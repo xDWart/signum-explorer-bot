@@ -67,6 +67,10 @@ type Config struct {
 	PreloadNamesForBigWallets bool
 }
 
+type UniversalOutput interface {
+	GetError() string
+}
+
 func NewSignumApiClient(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *SignumApiClient {
 	rand.Seed(time.Now().UnixNano())
 
@@ -168,7 +172,7 @@ func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClie
 	return clients
 }
 
-func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
+func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output UniversalOutput) error {
 	c.apiClientsPool.RLock()
 	apiClients := c.apiClientsPool.clients
 	c.apiClientsPool.RUnlock()
@@ -178,6 +182,9 @@ func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod strin
 	var err error
 	for _, apiClient := range apiClients {
 		err = apiClient.DoJsonReq(logger, httpMethod, method, urlParams, additionalHeaders, output)
+		if err == nil && output.GetError() != "" {
+			err = errors.New(output.GetError())
+		}
 		if err != nil {
 			securedErrorMsg := deleteSubstr(err.Error(), "secretPhrase=", "\"")
 			err = errors.New(securedErrorMsg)

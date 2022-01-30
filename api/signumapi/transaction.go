@@ -45,6 +45,10 @@ type Transaction struct {
 	// BlockTimestamp int64 `json:"blockTimestamp"`
 }
 
+func (t *Transaction) GetError() string {
+	return t.ErrorDescription
+}
+
 type RecipientsType []interface{}
 
 func (r *RecipientsType) foundMyAmountNQT(account string) uint64 {
@@ -135,6 +139,13 @@ type TransactionResponse struct {
 	ErrorDescription         string
 }
 
+func (tr *TransactionResponse) GetError() string {
+	if tr.Error != "" {
+		return tr.Error
+	}
+	return tr.ErrorDescription
+}
+
 func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transactionRequest *TransactionRequest) (*TransactionResponse, error) {
 	if transactionRequest.SecretPhrase == "" {
 		return nil, fmt.Errorf("TransactionRequest.SecretPhrase is not set")
@@ -180,12 +191,6 @@ func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transact
 	if err != nil {
 		return nil, fmt.Errorf("bad create transaction request: %v", err)
 	}
-	if transactionResponse.Error != "" {
-		return nil, fmt.Errorf("bad create transaction request: %v", transactionResponse.Error)
-	}
-	if transactionResponse.ErrorDescription != "" {
-		return nil, fmt.Errorf("bad create transaction request: %v", transactionResponse.ErrorDescription)
-	}
 	return transactionResponse, nil
 }
 
@@ -195,8 +200,5 @@ func (c *SignumApiClient) GetTransaction(logger abstractapi.LoggerI, transaction
 		map[string]string{"requestType": string(RT_GET_TRANSACTION), "transaction": transactionID},
 		nil,
 		transaction)
-	if err == nil && transaction.ErrorDescription != "" {
-		err = fmt.Errorf(transaction.ErrorDescription)
-	}
 	return transaction, err
 }
