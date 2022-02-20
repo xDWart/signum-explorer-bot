@@ -3,12 +3,13 @@ package signumapi
 import (
 	"errors"
 	"fmt"
-	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"math/rand"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 )
 
 const DEFAULT_DEADLINE = 1440
@@ -38,6 +39,7 @@ const (
 
 type SignumApiClient struct {
 	apiClientsPool             apiClientsPool
+	localhostApiClient         *apiClient
 	localAccountCache          AccountCache
 	localTransactionsCache     TransactionsCache
 	localBlocksCache           BlocksCache
@@ -61,6 +63,7 @@ type apiClient struct {
 
 type Config struct {
 	ApiHosts                  []string
+	LocalhostAddress          string
 	CacheTtl                  time.Duration
 	LastIndex                 uint64
 	RebuildApiClientsPeriod   time.Duration
@@ -89,6 +92,12 @@ func NewSignumApiClient(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdown
 		localBigWalletNamesCache: BigWalletNamesCache{sync.RWMutex{}, map[string]string{}},
 		shutdownChannel:          shutdownChannel,
 		config:                   config,
+	}
+
+	if config.LocalhostAddress != "" {
+		signumApiClient.localhostApiClient = &apiClient{
+			AbstractApiClient: abstractapi.NewAbstractApiClient(config.LocalhostAddress, nil),
+		}
 	}
 
 	wg.Add(1)
@@ -173,11 +182,16 @@ func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClie
 }
 
 func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output UniversalOutput) error {
+	apiClients := make([]*apiClient, len(c.apiClientsPool.clients))
 	c.apiClientsPool.RLock()
-	apiClients := c.apiClientsPool.clients
+	copy(apiClients, c.apiClientsPool.clients)
 	c.apiClientsPool.RUnlock()
 
 	rand.Shuffle(len(apiClients)/2, func(i, j int) { apiClients[i], apiClients[j] = apiClients[j], apiClients[i] })
+
+	if c.localhostApiClient != nil {
+		apiClients = append([]*apiClient{c.localhostApiClient}, apiClients...)
+	}
 
 	var err error
 	for _, apiClient := range apiClients {

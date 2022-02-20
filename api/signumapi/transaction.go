@@ -2,8 +2,9 @@ package signumapi
 
 import (
 	"fmt"
-	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"strconv"
+
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 )
 
 type Transaction struct {
