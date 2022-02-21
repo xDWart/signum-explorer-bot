@@ -39,7 +39,6 @@ const (
 
 type SignumApiClient struct {
 	apiClientsPool             apiClientsPool
-	localNodeApiClient         *apiClient
 	localAccountCache          AccountCache
 	localTransactionsCache     TransactionsCache
 	localBlocksCache           BlocksCache
@@ -63,7 +62,6 @@ type apiClient struct {
 
 type Config struct {
 	ApiHosts                  []string
-	LocalNodeAddress          string
 	CacheTtl                  time.Duration
 	LastIndex                 uint64
 	RebuildApiClientsPeriod   time.Duration
@@ -92,12 +90,6 @@ func NewSignumApiClient(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdown
 		localBigWalletNamesCache: BigWalletNamesCache{sync.RWMutex{}, map[string]string{}},
 		shutdownChannel:          shutdownChannel,
 		config:                   config,
-	}
-
-	if config.LocalNodeAddress != "" {
-		signumApiClient.localNodeApiClient = &apiClient{
-			AbstractApiClient: abstractapi.NewAbstractApiClient(config.LocalNodeAddress, nil),
-		}
 	}
 
 	wg.Add(1)
@@ -149,14 +141,6 @@ func (c *SignumApiClient) upbuildApiClients(logger abstractapi.LoggerI, apiHosts
 	logger.Infof("Start rebuild Signum API Clients")
 	startTime := time.Now()
 
-	if c.config.LocalNodeAddress != "" {
-		client, err := doRequestForHost(logger, c.config.LocalNodeAddress)
-		if err == nil {
-			logger.Debugf("Signum API Clients Rebuilder requested %v (%v) for %v",
-				client.ApiHost, client.blockchainStatus.NumberOfBlocks, client.latency)
-		}
-	}
-
 	clients := make([]*apiClient, 0, len(apiHosts))
 	for _, host := range apiHosts {
 		client, err := doRequestForHost(logger, host)
@@ -203,11 +187,13 @@ func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod strin
 	copy(apiClients, c.apiClientsPool.clients)
 	c.apiClientsPool.RUnlock()
 
-	rand.Shuffle(len(apiClients)/2, func(i, j int) { apiClients[i], apiClients[j] = apiClients[j], apiClients[i] })
-
-	if c.localNodeApiClient != nil {
-		apiClients = append([]*apiClient{c.localNodeApiClient}, apiClients...)
+	var offset int
+	if strings.Contains(apiClients[0].ApiHost, ":8125") {
+		offset = 1 // local node is first, wouldn't shuffle it
 	}
+	rand.Shuffle(len(apiClients)/2, func(i, j int) {
+		apiClients[i+offset], apiClients[j+offset] = apiClients[j+offset], apiClients[i+offset]
+	})
 
 	var err error
 	for _, apiClient := range apiClients {
