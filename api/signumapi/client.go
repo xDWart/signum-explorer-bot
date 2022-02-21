@@ -39,7 +39,7 @@ const (
 
 type SignumApiClient struct {
 	apiClientsPool             apiClientsPool
-	localhostApiClient         *apiClient
+	localNodeApiClient         *apiClient
 	localAccountCache          AccountCache
 	localTransactionsCache     TransactionsCache
 	localBlocksCache           BlocksCache
@@ -63,7 +63,7 @@ type apiClient struct {
 
 type Config struct {
 	ApiHosts                  []string
-	LocalhostAddress          string
+	LocalNodeAddress          string
 	CacheTtl                  time.Duration
 	LastIndex                 uint64
 	RebuildApiClientsPeriod   time.Duration
@@ -94,9 +94,9 @@ func NewSignumApiClient(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdown
 		config:                   config,
 	}
 
-	if config.LocalhostAddress != "" {
-		signumApiClient.localhostApiClient = &apiClient{
-			AbstractApiClient: abstractapi.NewAbstractApiClient(config.LocalhostAddress, nil),
+	if config.LocalNodeAddress != "" {
+		signumApiClient.localNodeApiClient = &apiClient{
+			AbstractApiClient: abstractapi.NewAbstractApiClient(config.LocalNodeAddress, nil),
 		}
 	}
 
@@ -113,7 +113,7 @@ func (c *SignumApiClient) Stop() {
 func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	logger.Infof("Start Signum Api Clients Rebuilder")
+	logger.Infof("Start Signum API Clients Rebuilder")
 	ticker := time.NewTicker(c.config.RebuildApiClientsPeriod)
 
 	c.rebuildApiClients(logger)
@@ -124,7 +124,7 @@ func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, w
 	for {
 		select {
 		case <-c.shutdownChannel:
-			logger.Infof("Signum Api Clients Rebuilder received shutdown signal")
+			logger.Infof("Signum API Clients Rebuilder received shutdown signal")
 			ticker.Stop()
 			return
 
@@ -135,7 +135,7 @@ func (c *SignumApiClient) startApiClientsRebuilder(logger abstractapi.LoggerI, w
 }
 
 func (c *SignumApiClient) rebuildApiClients(logger abstractapi.LoggerI) {
-	newApiClients := upbuildApiClients(logger, c.config.ApiHosts)
+	newApiClients := c.upbuildApiClients(logger, c.config.ApiHosts)
 	if len(newApiClients) > 0 {
 		c.apiClientsPool.Lock()
 		c.apiClientsPool.clients = newApiClients
@@ -145,25 +145,26 @@ func (c *SignumApiClient) rebuildApiClients(logger abstractapi.LoggerI) {
 	}
 }
 
-func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClient {
-	logger.Infof("Start rebuilding Signum Api Clients")
+func (c *SignumApiClient) upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClient {
+	logger.Infof("Start rebuild Signum API Clients")
 	startTime := time.Now()
+
+	if c.config.LocalNodeAddress != "" {
+		client, err := doRequestForHost(logger, c.config.LocalNodeAddress)
+		if err == nil {
+			logger.Debugf("Signum API Clients Rebuilder requested %v (%v) for %v",
+				client.ApiHost, client.blockchainStatus.NumberOfBlocks, client.latency)
+		}
+	}
 
 	clients := make([]*apiClient, 0, len(apiHosts))
 	for _, host := range apiHosts {
-		client := &apiClient{
-			AbstractApiClient: abstractapi.NewAbstractApiClient(host, nil),
-		}
-		startTime := time.Now()
-		err := client.DoJsonReq(logger, "GET", "/burst",
-			map[string]string{"requestType": string(RT_GET_BLOCKCHAIN_STATUS)}, nil, &client.blockchainStatus)
+		client, err := doRequestForHost(logger, host)
 		if err != nil {
-			logger.Warnf("Failed DoJsonReq: %v", err)
 			continue
 		}
-		client.latency = time.Since(startTime)
 		clients = append(clients, client)
-		logger.Debugf("Signum Api Clients Rebuilder requested %v (%v) for %v",
+		logger.Debugf("Signum API Clients Rebuilder requested %v (%v) for %v",
 			client.ApiHost, client.blockchainStatus.NumberOfBlocks, client.latency)
 	}
 	sort.Slice(clients, func(i, j int) bool {
@@ -177,8 +178,23 @@ func upbuildApiClients(logger abstractapi.LoggerI, apiHosts []string) []*apiClie
 		return clients[i].latency < clients[j].latency
 	})
 
-	logger.Infof("Signum Api Clients has been rebuilt in %v", time.Since(startTime))
+	logger.Infof("Signum API Clients has been rebuilt in %v", time.Since(startTime))
 	return clients
+}
+
+func doRequestForHost(logger abstractapi.LoggerI, host string) (*apiClient, error) {
+	client := &apiClient{
+		AbstractApiClient: abstractapi.NewAbstractApiClient(host, nil),
+	}
+	startTime := time.Now()
+	err := client.DoJsonReq(logger, "GET", "/burst",
+		map[string]string{"requestType": string(RT_GET_BLOCKCHAIN_STATUS)}, nil, &client.blockchainStatus)
+	if err != nil {
+		logger.Warnf("Failed DoJsonReq: %v", err)
+		return nil, err
+	}
+	client.latency = time.Since(startTime)
+	return client, nil
 }
 
 func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output UniversalOutput) error {
@@ -189,8 +205,8 @@ func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod strin
 
 	rand.Shuffle(len(apiClients)/2, func(i, j int) { apiClients[i], apiClients[j] = apiClients[j], apiClients[i] })
 
-	if c.localhostApiClient != nil {
-		apiClients = append([]*apiClient{c.localhostApiClient}, apiClients...)
+	if c.localNodeApiClient != nil {
+		apiClients = append([]*apiClient{c.localNodeApiClient}, apiClients...)
 	}
 
 	var err error
