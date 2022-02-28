@@ -2,6 +2,7 @@ package signumapi
 
 import (
 	"fmt"
+
 	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 )
 
@@ -27,7 +28,7 @@ func (c *SignumApiClient) ReadMessage(logger abstractapi.LoggerI, secretPhrase, 
 		urlParams["secretPhrase"] = secretPhrase
 	}
 
-	err := c.doJsonReq(logger, "POST", "/burst", urlParams, nil, message)
+	_, err := c.doJsonReq(logger, "POST", "/burst", urlParams, nil, message)
 	if err != nil {
 		return nil, fmt.Errorf("bad ReadMessage request: %v", err)
 	}

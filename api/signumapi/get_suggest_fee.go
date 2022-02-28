@@ -1,9 +1,10 @@
 package signumapi
 
 import (
-	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"sync"
 	"time"
+
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 )
 
 type SuggestFee struct {
@@ -42,7 +43,7 @@ func (c *SignumApiClient) GetSuggestFee(logger abstractapi.LoggerI) (*SuggestFee
 	}
 	c.localAccountCache.RUnlock()
 
-	err := c.doJsonReq(logger, "GET", "/burst",
+	_, err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_SUGGEST_FEE)}, nil, suggestFee)
 	suggestFee.Minimum = MINIMUM_FEE
 

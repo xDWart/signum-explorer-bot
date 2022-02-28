@@ -23,7 +23,7 @@ func NewAbstractApiClient(apiHost string, staticHeaders map[string]string) *Abst
 	}
 }
 
-func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) error {
+func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output interface{}) ([]byte, error) {
 	// protect sensitive data from logging
 	var sensitiveData = map[string]string{}
 	for _, key := range []string{"secretPhrase", "messageToEncrypt"} {
@@ -41,7 +41,7 @@ func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method 
 	// requesting
 	req, err := http.NewRequest(httpMethod, c.ApiHost+method, nil)
 	if err != nil {
-		return fmt.Errorf("error create req %v", c.ApiHost+method)
+		return nil, fmt.Errorf("error create req %v", c.ApiHost+method)
 	}
 
 	req.Header.Set("Accepts", "application/json")
@@ -62,23 +62,25 @@ func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method 
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return fmt.Errorf("error perform %v %v: %v", httpMethod, c.ApiHost+method, err)
+		return nil, fmt.Errorf("error perform %v %v: %v", httpMethod, c.ApiHost+method, err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("couldn't read body of %v: %v", c.ApiHost+method, err)
+		return nil, fmt.Errorf("couldn't read body of %v: %v", c.ApiHost+method, err)
 	}
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("error StatusCode %v for %v. Body: %v", resp.StatusCode, c.ApiHost+method, strconv.Quote(string(body)))
+		return nil, fmt.Errorf("error StatusCode %v for %v. Body: %v", resp.StatusCode, c.ApiHost+method, strconv.Quote(string(body)))
 	}
 
-	err = json.Unmarshal(body, output)
-	if err != nil {
-		return fmt.Errorf("couldn't unmarshal body of %v: %v. Body: %v", c.ApiHost+method, err, strconv.Quote(string(body)))
+	if resp.Header.Get("Content-Type") != "image/jpeg" {
+		err = json.Unmarshal(body, output)
+		if err != nil {
+			return body, fmt.Errorf("couldn't unmarshal body of %v: %v. Body: %v", c.ApiHost+method, err, strconv.Quote(string(body)))
+		}
 	}
 
-	return nil
+	return body, nil
 }

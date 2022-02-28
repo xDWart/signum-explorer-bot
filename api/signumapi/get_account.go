@@ -1,8 +1,9 @@
 package signumapi
 
 import (
-	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"time"
+
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 )
 
 type Account struct {
@@ -35,7 +36,7 @@ func (a *Account) GetError() string {
 
 func (c *SignumApiClient) GetAccount(logger abstractapi.LoggerI, accountS string) (*Account, error) {
 	account := &Account{}
-	err := c.doJsonReq(logger, "GET", "/burst",
+	_, err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_GET_ACCOUNT), "getCommittedAmount": "true", "account": accountS},
 		nil,
 		account)
@@ -48,7 +49,7 @@ func (c *SignumApiClient) GetAccount(logger abstractapi.LoggerI, accountS string
 
 func (c *SignumApiClient) GetAccountId(logger abstractapi.LoggerI, secretPhrase string) (*Account, error) {
 	account := &Account{}
-	err := c.doJsonReq(logger, "POST", "/burst",
+	_, err := c.doJsonReq(logger, "POST", "/burst",
 		map[string]string{"requestType": string(RT_GET_ACCOUNT_ID), "secretPhrase": secretPhrase},
 		nil,
 		account)

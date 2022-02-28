@@ -1,10 +1,11 @@
 package signumapi
 
 import (
-	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 )
 
 type Block struct {
@@ -53,7 +54,7 @@ func (c *SignumApiClient) storeAccountBlocksToCache(accountS string, accountBloc
 
 func (c *SignumApiClient) GetAccountBlocks(logger abstractapi.LoggerI, account string) (*AccountBlocks, error) {
 	accountBlocks := &AccountBlocks{}
-	err := c.doJsonReq(logger, "GET", "/burst",
+	_, err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{
 			"account":     account,
 			"requestType": "getAccountBlocks",
@@ -89,7 +90,7 @@ func (c *SignumApiClient) GetLastAccountBlock(logger abstractapi.LoggerI, accoun
 
 func (c *SignumApiClient) GetBlock(logger abstractapi.LoggerI, blockID string) (*Block, error) {
 	block := &Block{}
-	err := c.doJsonReq(logger, "GET", "/burst",
+	_, err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_GET_BLOCK), "block": blockID},
 		nil,
 		block)

@@ -2,9 +2,10 @@ package signumapi
 
 import (
 	"fmt"
-	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"strconv"
 	"time"
+
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 )
 
 type TransactionType int
@@ -71,7 +72,7 @@ func (c *SignumApiClient) getAccountTransactionsByType(logger abstractapi.Logger
 		urlParams["subtype"] = fmt.Sprint(transactionSubType)
 	}
 
-	err := c.doJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
+	_, err := c.doJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
 	if err == nil {
 		c.storeAccountTransactionsToCache(account, transactionType, transactionSubType, accountTransactions)
 	}
@@ -89,7 +90,7 @@ func (c *SignumApiClient) GetAccountTransactions(logger abstractapi.LoggerI, acc
 		"lastIndex":       strconv.FormatUint(c.config.LastIndex, 10),
 	}
 
-	err := c.doJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
+	_, err := c.doJsonReq(logger, "GET", "/burst", urlParams, nil, accountTransactions)
 	return accountTransactions, err
 }
 

@@ -188,7 +188,7 @@ func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transact
 	}
 
 	transactionResponse := &TransactionResponse{}
-	err := c.doJsonReq(logger, "POST", "/burst", urlParams, nil, transactionResponse)
+	_, err := c.doJsonReq(logger, "POST", "/burst", urlParams, nil, transactionResponse)
 	if err != nil {
 		return nil, fmt.Errorf("bad create transaction request: %v", err)
 	}
@@ -197,7 +197,7 @@ func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transact
 
 func (c *SignumApiClient) GetTransaction(logger abstractapi.LoggerI, transactionID string) (*Transaction, error) {
 	transaction := &Transaction{}
-	err := c.doJsonReq(logger, "GET", "/burst",
+	_, err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_GET_TRANSACTION), "transaction": transactionID},
 		nil,
 		transaction)

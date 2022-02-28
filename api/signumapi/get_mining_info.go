@@ -34,6 +34,6 @@ var DEFAULT_MINING_INFO = MiningInfo{
 
 func (c *SignumApiClient) GetMiningInfo(logger abstractapi.LoggerI) (*MiningInfo, error) {
 	var miningInfo MiningInfo
-	err := c.doJsonReq(logger, "GET", "/burst", map[string]string{"requestType": string(RT_GET_MINING_INFO)}, nil, &miningInfo)
+	_, err := c.doJsonReq(logger, "GET", "/burst", map[string]string{"requestType": string(RT_GET_MINING_INFO)}, nil, &miningInfo)
 	return &miningInfo, err
 }

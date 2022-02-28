@@ -17,24 +17,26 @@ const DEFAULT_DEADLINE = 1440
 type RequestType string
 
 const (
-	RT_SEND_MONEY               RequestType = "sendMoney"          // recipient + amountNQT
-	RT_SEND_MONEY_MULTI         RequestType = "sendMoneyMulti"     // recipients = <numid1>:<amount1>;<numid2>:<amount2>;<numidN>:<amountN>
-	RT_SEND_MONEY_MULTI_SAME    RequestType = "sendMoneyMultiSame" // recipients = <numid1>;<numid2>;<numidN> + amountNQT
-	RT_SEND_MESSAGE             RequestType = "sendMessage"
-	RT_READ_MESSAGE             RequestType = "readMessage"
-	RT_SUGGEST_FEE              RequestType = "suggestFee"
-	RT_GET_ACCOUNT              RequestType = "getAccount"
-	RT_GET_TRANSACTION          RequestType = "getTransaction"
-	RT_GET_BLOCK                RequestType = "getBlock"
-	RT_GET_ACCOUNT_ID           RequestType = "getAccountId"
-	RT_GET_ACCOUNT_TRANSACTIONS RequestType = "getAccountTransactions"
-	RT_GET_MINING_INFO          RequestType = "getMiningInfo"
-	RT_GET_BLOCKCHAIN_STATUS    RequestType = "getBlockchainStatus"
-	RT_GET_REWARD_RECIPIENT     RequestType = "getRewardRecipient"
-	RT_SET_REWARD_RECIPIENT     RequestType = "setRewardRecipient"
-	RT_ADD_COMMITMENT           RequestType = "addCommitment"
-	RT_REMOVE_COMMITMENT        RequestType = "removeCommitment"
-	RT_SET_ACCOUNT_INFO         RequestType = "setAccountInfo"
+	RT_SEND_MONEY                        RequestType = "sendMoney"          // recipient + amountNQT
+	RT_SEND_MONEY_MULTI                  RequestType = "sendMoneyMulti"     // recipients = <numid1>:<amount1>;<numid2>:<amount2>;<numidN>:<amountN>
+	RT_SEND_MONEY_MULTI_SAME             RequestType = "sendMoneyMultiSame" // recipients = <numid1>;<numid2>;<numidN> + amountNQT
+	RT_SEND_MESSAGE                      RequestType = "sendMessage"
+	RT_READ_MESSAGE                      RequestType = "readMessage"
+	RT_SUGGEST_FEE                       RequestType = "suggestFee"
+	RT_GET_ACCOUNT                       RequestType = "getAccount"
+	RT_GET_AT_DETAILS                    RequestType = "getATDetails"
+	RT_GET_TRANSACTION                   RequestType = "getTransaction"
+	RT_GET_BLOCK                         RequestType = "getBlock"
+	RT_GET_ACCOUNT_ID                    RequestType = "getAccountId"
+	RT_GET_ACCOUNT_TRANSACTIONS          RequestType = "getAccountTransactions"
+	RT_GET_MINING_INFO                   RequestType = "getMiningInfo"
+	RT_GET_BLOCKCHAIN_STATUS             RequestType = "getBlockchainStatus"
+	RT_GET_REWARD_RECIPIENT              RequestType = "getRewardRecipient"
+	RT_SET_REWARD_RECIPIENT              RequestType = "setRewardRecipient"
+	RT_ADD_COMMITMENT                    RequestType = "addCommitment"
+	RT_REMOVE_COMMITMENT                 RequestType = "removeCommitment"
+	RT_SET_ACCOUNT_INFO                  RequestType = "setAccountInfo"
+	RT_GENERATE_SEND_TRANSACTION_QR_CODE RequestType = "generateSendTransactionQRCode"
 )
 
 type SignumApiClient struct {
@@ -171,7 +173,7 @@ func doRequestForHost(logger abstractapi.LoggerI, host string) (*apiClient, erro
 		AbstractApiClient: abstractapi.NewAbstractApiClient(host, nil),
 	}
 	startTime := time.Now()
-	err := client.DoJsonReq(logger, "GET", "/burst",
+	_, err := client.DoJsonReq(logger, "GET", "/burst",
 		map[string]string{"requestType": string(RT_GET_BLOCKCHAIN_STATUS)}, nil, &client.blockchainStatus)
 	if err != nil {
 		logger.Warnf("Failed DoJsonReq: %v", err)
@@ -181,7 +183,7 @@ func doRequestForHost(logger abstractapi.LoggerI, host string) (*apiClient, erro
 	return client, nil
 }
 
-func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output UniversalOutput) error {
+func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod string, method string, urlParams map[string]string, additionalHeaders map[string]string, output UniversalOutput) ([]byte, error) {
 	apiClients := make([]*apiClient, len(c.apiClientsPool.clients))
 	c.apiClientsPool.RLock()
 	copy(apiClients, c.apiClientsPool.clients)
@@ -197,7 +199,8 @@ func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod strin
 
 	var err error
 	for _, apiClient := range apiClients {
-		err = apiClient.DoJsonReq(logger, httpMethod, method, urlParams, additionalHeaders, output)
+		var body []byte
+		body, err = apiClient.DoJsonReq(logger, httpMethod, method, urlParams, additionalHeaders, output)
 		if err == nil && output.GetError() != "" {
 			err = errors.New(output.GetError())
 		}
@@ -212,13 +215,13 @@ func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod strin
 				!strings.Contains(err.Error(), "remote error") &&
 				!strings.Contains(err.Error(), "StatusCode") &&
 				!strings.Contains(err.Error(), "certificate has expired") {
-				return err
+				return nil, err
 			}
 			continue
 		}
-		return nil
+		return body, nil
 	}
-	return fmt.Errorf("couldn't get %v method: %v", method, err)
+	return nil, fmt.Errorf("couldn't get %v method: %v", method, err)
 }
 
 func deleteSubstr(input, from, to string) string {

@@ -2,8 +2,9 @@ package cmcapi
 
 import (
 	"fmt"
-	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"time"
+
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 )
 
 // Free basic plan 10.000 req per month = 333 per day = no more than one request per 5 minutes
@@ -27,7 +28,7 @@ type quote struct {
 
 func (c *CmcClient) getListings(logger abstractapi.LoggerI, start int) (*listings, error) {
 	var listings listings
-	err := c.DoJsonReq(logger, "GET", "/cryptocurrency/listings/latest",
+	_, err := c.DoJsonReq(logger, "GET", "/cryptocurrency/listings/latest",
 		map[string]string{"start": fmt.Sprint(start), "limit": fmt.Sprint(c.config.FreeLimit), "convert": "USD", "cryptocurrency_type": "coins"},
 		nil,
 		&listings)

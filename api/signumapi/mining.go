@@ -13,7 +13,7 @@ func (rr *RewardRecipient) GetError() string {
 
 func (c *SignumApiClient) GetRewardRecipient(logger abstractapi.LoggerI, account string) (*RewardRecipient, error) {
 	var rewardRecipient = RewardRecipient{}
-	err := c.doJsonReq(logger, "GET", "/burst", map[string]string{
+	_, err := c.doJsonReq(logger, "GET", "/burst", map[string]string{
 		"requestType": string(RT_GET_REWARD_RECIPIENT),
 		"account":     account,
 	}, nil, &rewardRecipient)
