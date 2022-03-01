@@ -6,7 +6,7 @@ type ATDetails struct {
 	AT          string `json:"at"`
 	MachineData string `json:"machineData"`
 	BalanceNQT  uint64 `json:"balanceNQT,string"`
-	NextBlock   int    `json:"nextBlock"`
+	NextBlock   uint64 `json:"nextBlock"`
 	//PrevBalanceNQT        string `json:"prevBalanceNQT"`
 	//Frozen                bool   `json:"frozen"`
 	//Running               bool   `json:"running"`
