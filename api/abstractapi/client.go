@@ -75,12 +75,14 @@ func (c *AbstractApiClient) DoJsonReq(logger LoggerI, httpMethod string, method 
 		return nil, fmt.Errorf("error StatusCode %v for %v. Body: %v", resp.StatusCode, c.ApiHost+method, strconv.Quote(string(body)))
 	}
 
-	if resp.Header.Get("Content-Type") != "image/jpeg" {
-		err = json.Unmarshal(body, output)
-		if err != nil {
-			return body, fmt.Errorf("couldn't unmarshal body of %v: %v. Body: %v", c.ApiHost+method, err, strconv.Quote(string(body)))
-		}
+	if resp.Header.Get("Content-Type") == "image/jpeg" {
+		return body, nil
 	}
 
-	return body, nil
+	err = json.Unmarshal(body, output)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't unmarshal body of %v: %v. Body: %v", c.ApiHost+method, err, strconv.Quote(string(body)))
+	}
+
+	return nil, nil
 }
