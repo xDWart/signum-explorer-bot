@@ -2,8 +2,9 @@ package signumapi
 
 import (
 	"fmt"
-	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"strings"
+
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 )
 
 func (c *SignumApiClient) SendMoney(logger abstractapi.LoggerI, secretPhrase, recipient string, amountNQT uint64, feeNQT uint64) (*TransactionResponse, error) {
@@ -14,6 +15,19 @@ func (c *SignumApiClient) SendMoney(logger abstractapi.LoggerI, secretPhrase, re
 			Recipient:    recipient,
 			AmountNQT:    amountNQT,
 			FeeNQT:       feeNQT,
+		})
+}
+
+func (c *SignumApiClient) SendMoneyWithMessage(logger abstractapi.LoggerI, secretPhrase, recipient string, amountNQT uint64, message string, feeNQT uint64) (*TransactionResponse, error) {
+	return c.createTransaction(logger,
+		&TransactionRequest{
+			RequestType:   RT_SEND_MONEY,
+			SecretPhrase:  secretPhrase,
+			Recipient:     recipient,
+			AmountNQT:     amountNQT,
+			FeeNQT:        feeNQT,
+			Message:       message,
+			MessageIsText: true,
 		})
 }
 

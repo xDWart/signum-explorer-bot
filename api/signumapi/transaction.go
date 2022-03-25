@@ -124,7 +124,16 @@ type TransactionRequest struct {
 	MessageToEncryptToSelfIsText bool   // is false if the message to self-encrypt is a hex string, otherwise the message to encrypt is text (optional)
 	EncryptToSelfMessageData     string // is already encrypted data which overrides messageToEncryptToSelf if provided (optional)
 	EncryptToSelfMessageNonce    string // is a unique 32-byte number which cannot be reused (optional unless encryptToSelfMessageData is provided)
-	RecipientPublicKey           string //is the public key of the receiving account (optional, enhances the security of a new account)
+	RecipientPublicKey           string // is the public key of the receiving account (optional, enhances the security of a new account)
+
+	// ATProgram
+	Code                          string
+	Data                          string
+	Dpages                        string
+	Cspages                       string
+	Uspages                       string
+	ReferencedTransactionFullHash string
+	MinActivationAmountNQT        uint64
 }
 
 type TransactionResponse struct {
@@ -185,6 +194,27 @@ func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transact
 		urlParams["deadline"] = strconv.Itoa(DEFAULT_DEADLINE)
 	} else {
 		urlParams["deadline"] = strconv.FormatUint(transactionRequest.Deadline, 10)
+	}
+	if transactionRequest.Code != "" {
+		urlParams["code"] = transactionRequest.Code
+	}
+	if transactionRequest.Data != "" {
+		urlParams["data"] = transactionRequest.Data
+	}
+	if transactionRequest.Dpages != "" {
+		urlParams["dpages"] = transactionRequest.Dpages
+	}
+	if transactionRequest.Cspages != "" {
+		urlParams["cspages"] = transactionRequest.Cspages
+	}
+	if transactionRequest.Uspages != "" {
+		urlParams["uspages"] = transactionRequest.Uspages
+	}
+	if transactionRequest.MinActivationAmountNQT != 0 {
+		urlParams["minActivationAmountNQT"] = strconv.FormatUint(transactionRequest.MinActivationAmountNQT, 10)
+	}
+	if transactionRequest.ReferencedTransactionFullHash != "" {
+		urlParams["referencedTransactionFullHash"] = transactionRequest.ReferencedTransactionFullHash
 	}
 
 	transactionResponse := &TransactionResponse{}

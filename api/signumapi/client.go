@@ -37,6 +37,7 @@ const (
 	RT_REMOVE_COMMITMENT                 RequestType = "removeCommitment"
 	RT_SET_ACCOUNT_INFO                  RequestType = "setAccountInfo"
 	RT_GENERATE_SEND_TRANSACTION_QR_CODE RequestType = "generateSendTransactionQRCode"
+	RT_CREATE_AT_PROGRAM                 RequestType = "createATProgram"
 )
 
 type SignumApiClient struct {
