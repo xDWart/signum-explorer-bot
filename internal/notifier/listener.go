@@ -1,9 +1,10 @@
 package notifier
 
 import (
-	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"sync"
 	"time"
+
+	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 )
 
 func (n *Notifier) startListener(wg *sync.WaitGroup, shutdownChannel chan interface{}) {
@@ -36,9 +37,9 @@ func (n *Notifier) checkAccounts() {
 	var monitoredAccounts []MonitoredAccount
 
 	err := n.db.Model(&models.DbUser{}).Select("*").
-		Joins("join db_accounts on db_accounts.db_user_id = db_users.id").
-		Where("db_accounts.notify_income_transactions = true OR db_accounts.notify_outgo_transactions = true " +
-			"OR db_accounts.notify_new_blocks = true OR db_accounts.notify_other_t_xs = true").
+		Joins("join exbot_db_accounts on exbot_db_accounts.db_user_id = exbot_db_users.id").
+		Where("exbot_db_accounts.notify_income_transactions = true OR exbot_db_accounts.notify_outgo_transactions = true " +
+			"OR exbot_db_accounts.notify_new_blocks = true OR exbot_db_accounts.notify_other_t_xs = true").
 		Scan(&monitoredAccounts).Error
 	if err != nil {
 		n.logger.Errorf("Can't get monitored accounts: %v", err)

@@ -1,6 +1,8 @@
 package users
 
 import (
+	"sync"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
@@ -9,7 +11,6 @@ import (
 	"github.com/xDWart/signum-explorer-bot/internal/prices"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"sync"
 )
 
 type Manager struct {
@@ -60,7 +61,7 @@ func (um *Manager) GetUserByChatIdFromUpdate(update *tgbotapi.Update) *User {
 
 			um.db.Create(&dbUser)
 		} else {
-			um.db.Where("db_user_id = ?", dbUser.ID).Order("db_accounts.id").Find(&dbUser.Accounts)
+			um.db.Where("db_user_id = ?", dbUser.ID).Order("exbot_db_accounts.id").Find(&dbUser.Accounts)
 		}
 
 		botUser = &User{
