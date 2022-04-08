@@ -15,7 +15,7 @@ type RestAPI struct {
 	siteHandler http.Handler
 }
 
-const defPort = "8082"
+const defPort = "8083"
 
 func Init() *RestAPI {
 	port := os.Getenv("PORT")
