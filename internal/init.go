@@ -1,6 +1,12 @@
 package internal
 
 import (
+	"os"
+	"runtime"
+	"strconv"
+	"sync"
+	"time"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
@@ -11,11 +17,6 @@ import (
 	"github.com/xDWart/signum-explorer-bot/internal/users"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"os"
-	"runtime"
-	"strconv"
-	"sync"
-	"time"
 )
 
 type TelegramBot struct {
@@ -37,9 +38,9 @@ type TelegramBot struct {
 func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 	db := database.NewDatabaseConnection(logger)
 
-	token := os.Getenv("TELEGRAM_BOT_TOKEN")
+	token := os.Getenv("EXPLORER_TELEGRAM_BOT_TOKEN")
 	if token == "" {
-		logger.Fatalf("TELEGRAM_BOT_TOKEN does not set")
+		logger.Fatalf("EXPLORER_TELEGRAM_BOT_TOKEN does not set")
 	}
 
 	botApi, err := tgbotapi.NewBotAPI(token)

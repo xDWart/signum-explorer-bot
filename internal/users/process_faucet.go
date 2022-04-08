@@ -3,14 +3,15 @@ package users
 import (
 	"errors"
 	"fmt"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"gorm.io/gorm"
-	"os"
-	"strings"
-	"time"
 )
 
 func (user *User) ProcessFaucet(message string) string {
@@ -123,7 +124,7 @@ func (user *User) sendOrdinaryFaucet(account string) (bool, string) {
 		return false, fmt.Sprintf("🚫 Sorry, you have used the faucet less than %v days ago!", config.FAUCET_DAYS_PERIOD)
 	}
 
-	_, err = user.signumClient.SendMoney(user.logger, os.Getenv("SECRET_PHRASE"), account, uint64(amount*1e8), signumapi.DEFAULT_CHEAP_FEE)
+	_, err = user.signumClient.SendMoney(user.logger, os.Getenv("FAUCET_SECRET_PHRASE"), account, uint64(amount*1e8), signumapi.DEFAULT_CHEAP_FEE)
 	if err != nil {
 		user.ResetState()
 		return false, fmt.Sprintf("🚫 Bad request: %v", err)
@@ -156,7 +157,7 @@ func (user *User) sendExtraFaucetIfNeeded(userAccount *models.DbAccount) string 
 					Where("amount = ?", extraFaucetAmountConfig.ValueF).
 					First(&existsFaucet).Error
 				if errors.Is(err, gorm.ErrRecordNotFound) {
-					_, err = user.signumClient.SendMoney(user.logger, os.Getenv("SECRET_PHRASE"), userAccount.AccountRS, uint64(extraFaucetAmountConfig.ValueF*1e8), signumapi.DEFAULT_CHEAP_FEE)
+					_, err = user.signumClient.SendMoney(user.logger, os.Getenv("FAUCET_SECRET_PHRASE"), userAccount.AccountRS, uint64(extraFaucetAmountConfig.ValueF*1e8), signumapi.DEFAULT_CHEAP_FEE)
 					if err == nil {
 						user.db.Model(&newUsersExtraFaucetConfig).UpdateColumn("value_i", gorm.Expr("value_i - ?", 1))
 

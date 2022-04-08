@@ -2,7 +2,7 @@
 
 # 🚀 Signum Explorer Telegram Bot [@signum_explorer_bot](https://t.me/signum_explorer_bot)
 
-[![Build Status](https://github.com/xDWart/signum-explorer-bot/workflows/Build/badge.svg)](https://github.com/xDWart/signum-explorer-bot/actions?query=workflow%3ABuild)
+[![Build Status](https://github.com/xDWart/signum-explorer-bot/workflows/Deployment/badge.svg)](https://github.com/xDWart/signum-explorer-bot/actions?query=workflow%3ADeployment)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xDWart/signum-explorer-bot)](https://goreportcard.com/report/github.com/xDWart/signum-explorer-bot)
 [![Version](https://img.shields.io/github/go-mod/go-version/xDWart/signum-explorer-bot)](go.mod)
 [![License](https://img.shields.io/github/license/xDWart/signum-explorer-bot)](LICENSE)

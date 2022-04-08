@@ -1,0 +1,45 @@
+name: Deployment
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  deployment:
+    name: Build & Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ^1.17
+
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build docker
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          tags: bot:latest
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy docker image
+        run: docker save bot:latest | ssh -C root@${{ secrets.SSH_HOST }} docker load
+
+      - name: Deploy docker-compose file
+        run: scp ./docker-compose.yml root@${{ secrets.SSH_HOST }}:~/docker-compose-bot.yml
+
+      - name: Start docker-compose
+        run: ssh root@${{ secrets.SSH_HOST }} docker-compose -f docker-compose-bot.yml up signum-explorer-bot -d

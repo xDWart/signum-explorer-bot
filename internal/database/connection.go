@@ -3,12 +3,14 @@ package database
 import (
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"net/url"
 	"os"
 	"strings"
+
+	"go.uber.org/zap"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 func NewDatabaseConnection(logger *zap.SugaredLogger) *gorm.DB {
@@ -41,5 +43,9 @@ func NewPostgreConnection() (*gorm.DB, error) {
 		connectStr += fmt.Sprintf(" sslmode=%v", sslmode)
 	}
 
-	return gorm.Open(postgres.Open(connectStr), &gorm.Config{})
+	return gorm.Open(postgres.Open(connectStr), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			TablePrefix: os.Getenv("EXPLORER_BOT_DB_PREFIX"),
+		},
+	})
 }

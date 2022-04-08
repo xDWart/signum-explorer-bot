@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  signum-explorer-bot:
+    image: bot:latest
+    container_name: signum-explorer-bot
+    restart: always
+    environment:
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+    env_file:
+      - .env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+        tag: "{{.Name}}"
+  postgres:
+    container_name: postgres
+    restart: always
+    image: postgres:13
+    env_file:
+      - .env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+        tag: "{{.Name}}"
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
