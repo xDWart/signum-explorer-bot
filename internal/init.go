@@ -59,7 +59,6 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 	signumClient := signumapi.NewSignumApiClient(logger, wg, shutdownChannel,
 		&signumapi.Config{
 			ApiHosts: []string{
-				"http://signum-node:8125",
 				"https://europe1.signum.network",
 				"https://europe.signum.network",
 				"https://europe3.signum.network",
