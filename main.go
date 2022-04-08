@@ -1,12 +1,14 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
-	"github.com/xDWart/signum-explorer-bot/internal"
-	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/joho/godotenv"
+	"github.com/xDWart/signum-explorer-bot/internal"
+	"github.com/xDWart/signum-explorer-bot/internal/restapi"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -23,6 +25,9 @@ func main() {
 	} else {
 		logger.Infof("Using environment variables from .env file")
 	}
+
+	restApi := restapi.Init()
+	restApi.Start(logger)
 
 	bot := internal.InitTelegramBot(logger)
 

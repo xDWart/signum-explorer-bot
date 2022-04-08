@@ -14,6 +14,17 @@ services:
         max-size: 10m
         max-file: "3"
         tag: "{{.Name}}"
+    expose:
+      - 8083
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.bot-metrics.rule=Host(`bot.${DOMAIN_NAME}`) && (Path(`/metrics`) || PathPrefix(`/debug/pprof/`))"
+      - "traefik.http.routers.bot-metrics.service=bot-metrics"
+      - "traefik.http.routers.bot-metrics.tls=true"
+      - "traefik.http.routers.bot-metrics.entrypoints=https"
+      - "traefik.http.routers.bot-metrics.middlewares=admin"
+      - "traefik.http.services.bot-metrics.loadbalancer.server.port=8083"
   postgres:
     container_name: postgres
     restart: always
