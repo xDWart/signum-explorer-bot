@@ -50,6 +50,10 @@ func (t *Transaction) GetError() string {
 	return t.ErrorDescription
 }
 
+func (t *Transaction) ClearError() {
+	t.ErrorDescription = ""
+}
+
 type RecipientsType []interface{}
 
 func (r *RecipientsType) foundMyAmountNQT(account string) uint64 {
@@ -154,6 +158,11 @@ func (tr *TransactionResponse) GetError() string {
 		return tr.Error
 	}
 	return tr.ErrorDescription
+}
+
+func (tr *TransactionResponse) ClearError() {
+	tr.Error = ""
+	tr.ErrorDescription = ""
 }
 
 func (c *SignumApiClient) createTransaction(logger abstractapi.LoggerI, transactionRequest *TransactionRequest) (*TransactionResponse, error) {

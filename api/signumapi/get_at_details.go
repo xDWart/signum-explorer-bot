@@ -31,6 +31,10 @@ func (a *ATDetails) GetError() string {
 	return a.ErrorDescription
 }
 
+func (a *ATDetails) ClearError() {
+	a.ErrorDescription = ""
+}
+
 func (c *SignumApiClient) GetATDetails(logger abstractapi.LoggerI, at string) (*ATDetails, error) {
 	atDetails := &ATDetails{}
 	_, err := c.doJsonReq(logger, "GET", "/burst",

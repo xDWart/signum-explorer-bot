@@ -34,6 +34,10 @@ func (a *Account) GetError() string {
 	return a.ErrorDescription
 }
 
+func (a *Account) ClearError() {
+	a.ErrorDescription = ""
+}
+
 func (c *SignumApiClient) GetAccount(logger abstractapi.LoggerI, accountS string) (*Account, error) {
 	account := &Account{}
 	_, err := c.doJsonReq(logger, "GET", "/burst",

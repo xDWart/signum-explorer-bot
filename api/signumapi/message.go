@@ -17,6 +17,10 @@ func (m *Message) GetError() string {
 	return m.ErrorDescription
 }
 
+func (m *Message) ClearError() {
+	m.ErrorDescription = ""
+}
+
 func (c *SignumApiClient) ReadMessage(logger abstractapi.LoggerI, secretPhrase, transactionID string) (*Message, error) {
 	message := &Message{}
 

@@ -20,6 +20,10 @@ func (b *Block) GetError() string {
 	return b.ErrorDescription
 }
 
+func (b *Block) ClearError() {
+	b.ErrorDescription = ""
+}
+
 type AccountBlocks struct {
 	Blocks           []Block `json:"blocks"`
 	ErrorDescription string  `json:"errorDescription"`
@@ -28,6 +32,10 @@ type AccountBlocks struct {
 
 func (ab *AccountBlocks) GetError() string {
 	return ab.ErrorDescription
+}
+
+func (ab *AccountBlocks) ClearError() {
+	ab.ErrorDescription = ""
 }
 
 type BlocksCache struct {

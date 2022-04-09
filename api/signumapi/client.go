@@ -73,6 +73,7 @@ type Config struct {
 
 type UniversalOutput interface {
 	GetError() string
+	ClearError()
 }
 
 func NewSignumApiClient(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdownChannel chan interface{}, config *Config) *SignumApiClient {
@@ -80,9 +81,11 @@ func NewSignumApiClient(logger abstractapi.LoggerI, wg *sync.WaitGroup, shutdown
 
 	apiClients := make([]*apiClient, 0, len(config.ApiHosts))
 	for _, host := range config.ApiHosts {
-		apiClients = append(apiClients, &apiClient{
-			AbstractApiClient: abstractapi.NewAbstractApiClient(host, nil),
-		})
+		if host != "" {
+			apiClients = append(apiClients, &apiClient{
+				AbstractApiClient: abstractapi.NewAbstractApiClient(host, nil),
+			})
+		}
 	}
 
 	signumApiClient := &SignumApiClient{
@@ -198,9 +201,10 @@ func (c *SignumApiClient) doJsonReq(logger abstractapi.LoggerI, httpMethod strin
 		apiClients[i+offset], apiClients[j+offset] = apiClients[j+offset], apiClients[i+offset]
 	})
 
+	var body []byte
 	var err error
 	for _, apiClient := range apiClients {
-		var body []byte
+		output.ClearError()
 		body, err = apiClient.DoJsonReq(logger, httpMethod, method, urlParams, additionalHeaders, output)
 		if err == nil && output.GetError() != "" {
 			err = errors.New(output.GetError())

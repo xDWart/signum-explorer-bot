@@ -21,6 +21,10 @@ func (mi *MiningInfo) GetError() string {
 	return mi.ErrorDescription
 }
 
+func (mi *MiningInfo) ClearError() {
+	mi.ErrorDescription = ""
+}
+
 var DEFAULT_MINING_INFO = MiningInfo{
 	Height:                   927000,
 	BaseTarget:               280000,

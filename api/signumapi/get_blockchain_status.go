@@ -28,6 +28,10 @@ func (bs *BlockchainStatus) GetError() string {
 	return bs.ErrorDescription
 }
 
+func (bs *BlockchainStatus) ClearError() {
+	bs.ErrorDescription = ""
+}
+
 type BlockchainStatusCache struct {
 	sync.RWMutex
 	cache *BlockchainStatus

@@ -12,6 +12,8 @@ func (a *FakeType) GetError() string {
 	return ""
 }
 
+func (a *FakeType) ClearError() {}
+
 func (c *SignumApiClient) GenerateSendTransactionQRCode(logger abstractapi.LoggerI, receiverId string, amountNQT uint64) ([]byte, error) {
 	qrCode, err := c.doJsonReq(logger, "GET", "/burst",
 		map[string]string{

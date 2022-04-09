@@ -11,6 +11,10 @@ func (rr *RewardRecipient) GetError() string {
 	return rr.ErrorDescription
 }
 
+func (rr *RewardRecipient) ClearError() {
+	rr.ErrorDescription = ""
+}
+
 func (c *SignumApiClient) GetRewardRecipient(logger abstractapi.LoggerI, account string) (*RewardRecipient, error) {
 	var rewardRecipient = RewardRecipient{}
 	_, err := c.doJsonReq(logger, "GET", "/burst", map[string]string{

@@ -56,6 +56,10 @@ func (at *AccountTransactions) GetError() string {
 	return at.ErrorDescription
 }
 
+func (at *AccountTransactions) ClearError() {
+	at.ErrorDescription = ""
+}
+
 func (c *SignumApiClient) getAccountTransactionsByType(logger abstractapi.LoggerI, account string, transactionType TransactionType, transactionSubType TransactionSubType) (*AccountTransactions, error) {
 	accountTransactions := &AccountTransactions{}
 

@@ -19,6 +19,10 @@ func (sf *SuggestFee) GetError() string {
 	return sf.ErrorDescription
 }
 
+func (sf *SuggestFee) ClearError() {
+	sf.ErrorDescription = ""
+}
+
 type SuggestFeeCache struct {
 	sync.RWMutex
 	cache          *SuggestFee

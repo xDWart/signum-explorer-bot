@@ -59,6 +59,8 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 	signumClient := signumapi.NewSignumApiClient(logger, wg, shutdownChannel,
 		&signumapi.Config{
 			ApiHosts: []string{
+				os.Getenv("LOCAL_SIGNUM_NODE_ADDRESS"),
+				"https://europe2.signum.network",
 				"https://europe1.signum.network",
 				"https://europe.signum.network",
 				"https://europe3.signum.network",
@@ -67,6 +69,8 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 				"https://brazil.signum.network",
 				"https://uk.signum.network",
 				"https://wallet.burstcoin.ro",
+				"https://us-east.signum.network",
+				"https://singapore.signum.network",
 			},
 			CacheTtl:                  2 * time.Minute, // 2/3 of NotifierPeriod
 			LastIndex:                 9,
