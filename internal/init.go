@@ -52,9 +52,10 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 	shutdownChannel := make(chan interface{})
 
 	cmcClient := cmcapi.NewCmcClient(&cmcapi.Config{
+		ApiKey:    os.Getenv("EXPLORER_BOT_CMC_PRO_API_KEY"),
 		Host:      "https://pro-api.coinmarketcap.com/v1",
 		FreeLimit: 200,
-		CacheTtl:  5 * time.Minute,
+		CacheTtl:  10 * time.Minute,
 	})
 	signumClient := signumapi.NewSignumApiClient(logger, wg, shutdownChannel,
 		&signumapi.Config{

@@ -1,7 +1,6 @@
 package cmcapi
 
 import (
-	"os"
 	"sync"
 	"time"
 
@@ -17,6 +16,7 @@ type CmcClient struct {
 }
 
 type Config struct {
+	ApiKey    string
 	Host      string
 	FreeLimit int
 	CacheTtl  time.Duration
@@ -24,7 +24,7 @@ type Config struct {
 
 func NewCmcClient(config *Config) *CmcClient {
 	return &CmcClient{
-		AbstractApiClient: abstractapi.NewAbstractApiClient(config.Host, map[string]string{"X-CMC_PRO_API_KEY": os.Getenv("EXPLORER_BOT_CMC_PRO_API_KEY")}),
+		AbstractApiClient: abstractapi.NewAbstractApiClient(config.Host, map[string]string{"X-CMC_PRO_API_KEY": config.ApiKey}),
 		RWMutex:           sync.RWMutex{},
 		lastReqTimestamp:  time.Time{},
 		cachedValues: map[string]quote{
