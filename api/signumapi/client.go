@@ -29,6 +29,7 @@ const (
 	RT_GET_BLOCK                         RequestType = "getBlock"
 	RT_GET_ACCOUNT_ID                    RequestType = "getAccountId"
 	RT_GET_ACCOUNT_TRANSACTIONS          RequestType = "getAccountTransactions"
+	RT_GET_UNCONFIRMED_TRANSACTIONS      RequestType = "getUnconfirmedTransactions"
 	RT_GET_MINING_INFO                   RequestType = "getMiningInfo"
 	RT_GET_BLOCKCHAIN_STATUS             RequestType = "getBlockchainStatus"
 	RT_GET_REWARD_RECIPIENT              RequestType = "getRewardRecipient"
@@ -38,6 +39,7 @@ const (
 	RT_SET_ACCOUNT_INFO                  RequestType = "setAccountInfo"
 	RT_GENERATE_SEND_TRANSACTION_QR_CODE RequestType = "generateSendTransactionQRCode"
 	RT_CREATE_AT_PROGRAM                 RequestType = "createATProgram"
+	RT_DECRYPT_FROM                      RequestType = "decryptFrom"
 )
 
 type SignumApiClient struct {
