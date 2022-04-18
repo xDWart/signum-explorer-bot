@@ -7,6 +7,7 @@ type ATDetails struct {
 	MachineData string `json:"machineData"`
 	BalanceNQT  uint64 `json:"balanceNQT,string"`
 	NextBlock   uint64 `json:"nextBlock"`
+	Name        string `json:"name"`
 	//PrevBalanceNQT        string `json:"prevBalanceNQT"`
 	//Frozen                bool   `json:"frozen"`
 	//Running               bool   `json:"running"`
@@ -16,7 +17,6 @@ type ATDetails struct {
 	//MachineCodeHashId     string `json:"machineCodeHashId"`
 	//AtVersion             int    `json:"atVersion"`
 	//AtRS                  string `json:"atRS"`
-	//Name                  string `json:"name"`
 	//Description           string `json:"description"`
 	//Creator               string `json:"creator"`
 	//CreatorRS             string `json:"creatorRS"`

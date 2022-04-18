@@ -3,6 +3,7 @@ package notifier
 import (
 	"encoding/hex"
 	"fmt"
+
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 )
@@ -66,9 +67,10 @@ func (n *Notifier) checkATPaymentTransactions(account *MonitoredAccount) {
 			}
 
 			if incomeTransaction {
-				senderName := n.signumClient.GetCachedAccountName(n.logger, transaction.Sender)
-				if senderName != "" {
-					senderName = "\n<i>Name:</i> " + senderName
+				var senderName string
+				atDetails, _ := n.signumClient.GetATDetails(n.logger, transaction.Sender)
+				if atDetails.Name != "" {
+					senderName = "\n<i>Name:</i> " + atDetails.Name
 				}
 
 				msg += fmt.Sprintf("new AT payment received:"+accountIfAlias+
@@ -76,9 +78,10 @@ func (n *Notifier) checkATPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Amount:</i> +%v SIGNA"+message,
 					transaction.SenderRS, common.FormatNQT(transaction.GetAmountNQT()))
 			} else {
-				recipientName := n.signumClient.GetCachedAccountName(n.logger, transaction.Recipient)
-				if recipientName != "" {
-					recipientName = "\n<i>Name:</i> " + recipientName
+				var recipientName string
+				atDetails, _ := n.signumClient.GetATDetails(n.logger, transaction.Recipient)
+				if atDetails.Name != "" {
+					recipientName = "\n<i>Name:</i> " + atDetails.Name
 				}
 
 				msg += fmt.Sprintf("new AT payment sent:"+accountIfAlias+
