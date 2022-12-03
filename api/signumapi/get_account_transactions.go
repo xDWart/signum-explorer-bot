@@ -13,7 +13,7 @@ type TransactionType int
 const (
 	TT_PAYMENT                TransactionType = 0
 	TT_MESSAGING                              = 1
-	TT_COLORED_COINS                          = 2
+	TT_TOKENIZATION                           = 2
 	TT_DIGITAL_GOODS                          = 3
 	TT_ACCOUNT_CONTROL                        = 4
 	TT_BURST_MINING                           = 20
@@ -23,6 +23,7 @@ const (
 
 type TransactionSubType int
 
+// Payment
 const (
 	TST_ORDINARY_PAYMENT       TransactionSubType = 0
 	TST_MULTI_OUT_PAYMENT                         = 1
@@ -30,6 +31,7 @@ const (
 	TST_ALL_TYPES_PAYMENT                         = 3
 )
 
+// Mining
 const (
 	TST_REWARD_RECIPIENT_ASSIGNMENT TransactionSubType = 0
 	TST_ADD_COMMITMENT                                 = 1
@@ -37,12 +39,19 @@ const (
 	TST_ALL_TYPES_MINING                               = 3
 )
 
+// Messaging
 const (
 	TST_ARBITRARY_MESSAGE TransactionSubType = 0
 )
 
+// SmartContract
 const (
 	TST_AT_PAYMENT TransactionSubType = 1
+)
+
+// Tokenization
+const (
+	TST_TOKENIZATION_DISTRIBUTION_TO_HOLDER = 8
 )
 
 type AccountTransactions struct {

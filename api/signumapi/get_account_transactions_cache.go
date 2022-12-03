@@ -1,9 +1,10 @@
 package signumapi
 
 import (
-	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 	"sync"
 	"time"
+
+	"github.com/xDWart/signum-explorer-bot/api/abstractapi"
 )
 
 type TransactionsCache struct {
@@ -77,6 +78,10 @@ func (c *SignumApiClient) GetCachedAccountATPaymentTransactions(logger abstracta
 	return c.getCachedAccountTransactionsByType(logger, account, TT_AUTOMATED_TRANSACTIONS, TST_AT_PAYMENT)
 }
 
+func (c *SignumApiClient) GetCachedAccountTokenizationTransactions(logger abstractapi.LoggerI, account string) (*AccountTransactions, error) {
+	return c.getCachedAccountTransactionsByType(logger, account, TT_TOKENIZATION, TST_TOKENIZATION_DISTRIBUTION_TO_HOLDER)
+}
+
 func (c *SignumApiClient) GetLastCachedAccountPaymentTransaction(logger abstractapi.LoggerI, account string) *Transaction {
 	userTransactions, err := c.GetCachedAccountPaymentTransactions(logger, account)
 	if err == nil && userTransactions != nil && len(userTransactions.Transactions) > 0 {
@@ -113,6 +118,14 @@ func (c *SignumApiClient) GetLastCachedAccountATPaymentTransaction(logger abstra
 	atPaymentTransactions, err := c.GetCachedAccountATPaymentTransactions(logger, account)
 	if err == nil && atPaymentTransactions != nil && len(atPaymentTransactions.Transactions) > 0 {
 		return &atPaymentTransactions.Transactions[0]
+	}
+	return nil
+}
+
+func (c *SignumApiClient) GetLastCachedAccountTokenizationTransaction(logger abstractapi.LoggerI, account string) *Transaction {
+	tokenizationTransactions, err := c.GetCachedAccountTokenizationTransactions(logger, account)
+	if err == nil && tokenizationTransactions != nil && len(tokenizationTransactions.Transactions) > 0 {
+		return &tokenizationTransactions.Transactions[0]
 	}
 	return nil
 }

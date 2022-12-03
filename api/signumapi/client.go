@@ -40,6 +40,7 @@ const (
 	RT_GENERATE_SEND_TRANSACTION_QR_CODE RequestType = "generateSendTransactionQRCode"
 	RT_CREATE_AT_PROGRAM                 RequestType = "createATProgram"
 	RT_DECRYPT_FROM                      RequestType = "decryptFrom"
+	RT_GET_INDIRECT_INCOMING             RequestType = "getIndirectIncoming"
 )
 
 type SignumApiClient struct {

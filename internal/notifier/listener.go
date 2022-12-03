@@ -53,6 +53,7 @@ func (n *Notifier) checkAccounts() {
 		if account.NotifyIncomeTransactions || account.NotifyOutgoTransactions {
 			n.checkPaymentTransactions(&account)
 			n.checkATPaymentTransactions(&account)
+			n.checkTokenizationTransactions(&account)
 		}
 
 		if account.NotifyOtherTXs {
