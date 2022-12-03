@@ -72,12 +72,14 @@ func (n *Notifier) checkTokenizationTransactions(account *MonitoredAccount) {
 					continue
 				}
 
-				msg += fmt.Sprintf("new Distribution To Holders received:"+accountIfAlias+
+				msg += fmt.Sprintf("new income:"+accountIfAlias+
+					"\n<i>Payment:</i> Distribution To Holders"+
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Amount:</i> +%v SIGNA",
 					transaction.SenderRS, common.FormatNQT(distributionAmount.GetAmountNQT()))
 			} else {
-				msg += fmt.Sprintf("new Distribution To Holders sent:"+accountIfAlias+
+				msg += fmt.Sprintf("new outgo:"+accountIfAlias+
+					"\n<i>Payment:</i> Distribution To Holders"+
 					"\n<i>Amount:</i> -%v SIGNA",
 					common.FormatNQT(transaction.GetAmountNQT()))
 			}
