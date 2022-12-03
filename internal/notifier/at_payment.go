@@ -73,7 +73,8 @@ func (n *Notifier) checkATPaymentTransactions(account *MonitoredAccount) {
 					senderName = "\n<i>Name:</i> " + atDetails.Name
 				}
 
-				msg += fmt.Sprintf("new AT payment received:"+accountIfAlias+
+				msg += fmt.Sprintf("new income:"+accountIfAlias+
+					"\n<i>Payment:</i> AT payment"+
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Amount:</i> +%v SIGNA"+message,
 					transaction.SenderRS, common.FormatNQT(transaction.GetAmountNQT()))
@@ -84,7 +85,8 @@ func (n *Notifier) checkATPaymentTransactions(account *MonitoredAccount) {
 					recipientName = "\n<i>Name:</i> " + atDetails.Name
 				}
 
-				msg += fmt.Sprintf("new AT payment sent:"+accountIfAlias+
+				msg += fmt.Sprintf("new outgo:"+accountIfAlias+
+					"\n<i>Payment:</i> AT payment"+
 					"\n<i>Recipient:</i> %v"+recipientName+
 					"\n<i>Amount:</i> -%v SIGNA"+message,
 					transaction.RecipientRS, common.FormatNQT(transaction.GetAmountNQT()))
