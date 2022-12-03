@@ -5,12 +5,12 @@ import (
 )
 
 type DistributionAmount struct {
-	AmountNQT             uint64 `json:"amountNQT,string"`
-	QuantityQNT           uint64 `json:"quantityQNT,string"`
-	Height                int    `json:"height"`
-	Confirmations         int    `json:"confirmations"`
-	RequestProcessingTime int    `json:"requestProcessingTime"`
-	ErrorDescription      string `json:"errorDescription"`
+	AmountNQT        uint64 `json:"amountNQT,string"`
+	QuantityQNT      uint64 `json:"quantityQNT,string"`
+	Height           uint64 `json:"height"`
+	Confirmations    uint64 `json:"confirmations"`
+	ErrorDescription string `json:"errorDescription"`
+	//RequestProcessingTime uint64    `json:"requestProcessingTime"`
 }
 
 func (da *DistributionAmount) GetError() string {
@@ -23,6 +23,22 @@ func (da *DistributionAmount) ClearError() {
 
 func (da *DistributionAmount) GetAmountNQT() uint64 {
 	return da.AmountNQT
+}
+
+func (da *DistributionAmount) GetAmount() float64 {
+	return float64(da.GetAmountNQT()) / 1e8
+}
+
+func (da *DistributionAmount) GetQuantityQNT() uint64 {
+	return da.QuantityQNT
+}
+
+func (da *DistributionAmount) GetHeight() uint64 {
+	return da.Height
+}
+
+func (da *DistributionAmount) GetConfirmations() uint64 {
+	return da.Confirmations
 }
 
 func (c *SignumApiClient) GetDistributionAmount(logger abstractapi.LoggerI, transaction, account string) (*DistributionAmount, error) {
