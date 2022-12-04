@@ -77,7 +77,7 @@ func (n *Notifier) checkTokenizationTransactions(account *MonitoredAccount) {
 					n.logger.Errorf("%v: cant get distribution amount for transaction %v", account.Account, transaction.TransactionID)
 					continue
 				}
-				if distributionAmount.AmountNQT < signumapi.MINIMUM_FEE {
+				if distributionAmount.AmountNQT < account.NotificationThresholdNQT {
 					continue
 				}
 
@@ -87,6 +87,10 @@ func (n *Notifier) checkTokenizationTransactions(account *MonitoredAccount) {
 					"\n<i>Amount:</i> +%v SIGNA",
 					transaction.SenderRS, common.FormatNQT(distributionAmount.AmountNQT))
 			} else {
+				if transaction.AmountNQT < account.NotificationThresholdNQT {
+					continue
+				}
+
 				msg += fmt.Sprintf("new outgo:"+accountIfAlias+
 					"\n<i>Payment:</i> Distribution To Holders"+token+
 					"\n<i>Amount:</i> -%v SIGNA",

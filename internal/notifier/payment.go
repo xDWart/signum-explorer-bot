@@ -2,11 +2,12 @@ package notifier
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
-	"strings"
 )
 
 func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
@@ -39,11 +40,6 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 	for _, transaction := range userTransactions.Transactions {
 		if transaction.TransactionID == account.LastTransactionID {
 			break
-		}
-
-		// ignore RAFFLE
-		if transaction.SenderRS == "S-JM3M-MHWM-UVQ6-DSN3Q" {
-			continue
 		}
 
 		var msg, accountIfAlias string
@@ -90,6 +86,11 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		switch transaction.Subtype {
 		case signumapi.TST_ORDINARY_PAYMENT:
 			amount = transaction.GetAmount()
+
+			if transaction.GetAmountNQT() < account.NotificationThresholdNQT {
+				continue
+			}
+
 			if incomeTransaction {
 				msg += fmt.Sprintf("new income:"+accountIfAlias+
 					"\n<i>Payment:</i> Ordinary"+
@@ -114,6 +115,12 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		case signumapi.TST_MULTI_OUT_PAYMENT:
 			if incomeTransaction {
 				amount = transaction.GetMyMultiOutAmount(account.Account)
+
+				amountNQT := transaction.GetMyMultiOutAmountNQT(account.Account)
+				if amountNQT < account.NotificationThresholdNQT {
+					continue
+				}
+
 				msg += fmt.Sprintf("new income:"+accountIfAlias+
 					"\n<i>Payment:</i> Multi-out"+
 					"\n<i>Sender:</i> %v"+
@@ -121,9 +128,14 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					"\n<i>Amount:</i> +%v SIGNA"+
 					message+
 					"\n<i>Fee:</i> %v SIGNA",
-					transaction.SenderRS, common.FormatNQT(transaction.GetMyMultiOutAmountNQT(account.Account)), common.ConvertFeeNQT(transaction.FeeNQT))
+					transaction.SenderRS, common.FormatNQT(amountNQT), common.ConvertFeeNQT(transaction.FeeNQT))
 			} else {
 				amount = transaction.GetAmount()
+
+				if transaction.GetAmountNQT() < account.NotificationThresholdNQT {
+					continue
+				}
+
 				msg += fmt.Sprintf("new outgo:"+accountIfAlias+
 					"\n<i>Payment:</i> Multi-out"+
 					"\n<i>Recipients:</i> %v"+
@@ -135,6 +147,12 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		case signumapi.TST_MULTI_OUT_SAME_PAYMENT:
 			if incomeTransaction {
 				amount = transaction.GetMultiOutSameAmount()
+
+				amountNQT := transaction.GetMultiOutSameAmountNQT()
+				if amountNQT < account.NotificationThresholdNQT {
+					continue
+				}
+
 				msg += fmt.Sprintf("new income:"+accountIfAlias+
 					"\n<i>Payment:</i> Multi-out same"+
 					"\n<i>Sender:</i> %v"+
@@ -145,6 +163,11 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 					transaction.SenderRS, common.FormatNQT(transaction.GetMultiOutSameAmountNQT()), common.ConvertFeeNQT(transaction.FeeNQT))
 			} else {
 				amount = transaction.GetAmount()
+
+				if transaction.GetAmountNQT() < account.NotificationThresholdNQT {
+					continue
+				}
+				
 				msg += fmt.Sprintf("new outgo:"+accountIfAlias+
 					"\n<i>Payment:</i> Multi-out same"+
 					"\n<i>Recipients:</i> %v"+

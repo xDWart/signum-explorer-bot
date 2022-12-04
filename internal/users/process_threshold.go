@@ -12,7 +12,7 @@ func (user *User) ProcessThreshold(message string) *BotMessage {
 	if message == config.COMMAND_THRESHOLD {
 		user.state = THRESHOLD_STATE
 		return &BotMessage{
-			InlineText: "💸 Please send me a minimum <b>threshold in SIGNA</a> for ignoring notifications:",
+			InlineText: "💸 Please send me a minimum <b>threshold in SIGNA</b> for ignoring notifications:",
 		}
 	}
 
@@ -38,8 +38,8 @@ func (user *User) ProcessThreshold(message string) *BotMessage {
 }
 
 func (user *User) setThreshold(amount float64) string {
-	user.NotificationThreshold = uint64(amount)
+	user.NotificationThresholdNQT = uint64(amount * 1e8)
 	user.db.Save(&user.DbUser)
 
-	return fmt.Sprintf("✅ The minimum threshold for notifications is set to %v SIGNA", user.NotificationThreshold)
+	return fmt.Sprintf("✅ The minimum threshold for notifications is set to %v SIGNA", float64(user.NotificationThresholdNQT)/1e8)
 }

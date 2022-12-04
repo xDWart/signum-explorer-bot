@@ -1,12 +1,13 @@
 package notifier
 
 import (
+	"sync"
+	"time"
+
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"sync"
-	"time"
 )
 
 type Notifier struct {
@@ -29,8 +30,9 @@ type NotifierMessage struct {
 }
 
 type MonitoredAccount struct {
-	UserName string
-	ChatID   int64
+	UserName                 string
+	ChatID                   int64
+	NotificationThresholdNQT uint64
 	models.DbAccount
 }
 

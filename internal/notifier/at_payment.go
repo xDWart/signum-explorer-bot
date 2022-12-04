@@ -56,6 +56,10 @@ func (n *Notifier) checkATPaymentTransactions(account *MonitoredAccount) {
 			msg = fmt.Sprintf("📇 <b>%v</b> ", account.AccountRS)
 		}
 
+		if transaction.GetAmountNQT() < account.NotificationThresholdNQT {
+			continue
+		}
+
 		switch transaction.Subtype {
 		case signumapi.TST_AT_PAYMENT:
 			var message string
