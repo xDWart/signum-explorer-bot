@@ -87,7 +87,8 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 		case signumapi.TST_ORDINARY_PAYMENT:
 			amount = transaction.GetAmount()
 
-			if transaction.GetAmountNQT() < account.NotificationThresholdNQT {
+			if transaction.GetAmountNQT() < account.NotificationThresholdNQT &&
+				account.AccountRS != config.FAUCET_ACCOUNT {
 				continue
 			}
 
@@ -167,7 +168,7 @@ func (n *Notifier) checkPaymentTransactions(account *MonitoredAccount) {
 				if transaction.GetAmountNQT() < account.NotificationThresholdNQT {
 					continue
 				}
-				
+
 				msg += fmt.Sprintf("new outgo:"+accountIfAlias+
 					"\n<i>Payment:</i> Multi-out same"+
 					"\n<i>Recipients:</i> %v"+
