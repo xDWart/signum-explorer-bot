@@ -25,6 +25,7 @@ type Transaction struct {
 		Message          string         `json:"message"`
 		MessageIsText    bool           `json:"messageIsText"`
 		EncryptedMessage interface{}    `json:"encryptedMessage"`
+		Asset            string         `json:"asset"`
 		// VersionMultiOutCreation          byte           `json:"version.MultiOutCreation"`
 		// VersionCommitmentAdd             byte           `json:"version.CommitmentAdd"`
 		// VersionRewardRecipientAssignment byte           `json:"version.RewardRecipientAssignment"`

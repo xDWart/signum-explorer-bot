@@ -59,6 +59,12 @@ func (n *Notifier) checkTokenizationTransactions(account *MonitoredAccount) {
 			msg = fmt.Sprintf("📇 <b>%v</b> ", account.AccountRS)
 		}
 
+		var token string
+		asset, err := n.signumClient.GetAsset(n.logger, transaction.Attachment.Asset)
+		if err == nil {
+			token = "\n<i>Token:</i> " + asset.Name
+		}
+
 		switch transaction.Subtype {
 		case signumapi.TST_TOKENIZATION_DISTRIBUTION_TO_HOLDER:
 			if incomeTransaction {
@@ -71,15 +77,18 @@ func (n *Notifier) checkTokenizationTransactions(account *MonitoredAccount) {
 					n.logger.Errorf("%v: cant get distribution amount for transaction %v", account.Account, transaction.TransactionID)
 					continue
 				}
+				if distributionAmount.AmountNQT < signumapi.MINIMUM_FEE {
+					continue
+				}
 
 				msg += fmt.Sprintf("new income:"+accountIfAlias+
-					"\n<i>Payment:</i> Distribution To Holders"+
+					"\n<i>Payment:</i> Distribution To Holders"+token+
 					"\n<i>Sender:</i> %v"+senderName+
 					"\n<i>Amount:</i> +%v SIGNA",
-					transaction.SenderRS, common.FormatNQT(distributionAmount.GetAmountNQT()))
+					transaction.SenderRS, common.FormatNQT(distributionAmount.AmountNQT))
 			} else {
 				msg += fmt.Sprintf("new outgo:"+accountIfAlias+
-					"\n<i>Payment:</i> Distribution To Holders"+
+					"\n<i>Payment:</i> Distribution To Holders"+token+
 					"\n<i>Amount:</i> -%v SIGNA",
 					common.FormatNQT(transaction.GetAmountNQT()))
 			}

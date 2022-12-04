@@ -21,24 +21,8 @@ func (da *DistributionAmount) ClearError() {
 	da.ErrorDescription = ""
 }
 
-func (da *DistributionAmount) GetAmountNQT() uint64 {
-	return da.AmountNQT
-}
-
 func (da *DistributionAmount) GetAmount() float64 {
-	return float64(da.GetAmountNQT()) / 1e8
-}
-
-func (da *DistributionAmount) GetQuantityQNT() uint64 {
-	return da.QuantityQNT
-}
-
-func (da *DistributionAmount) GetHeight() uint64 {
-	return da.Height
-}
-
-func (da *DistributionAmount) GetConfirmations() uint64 {
-	return da.Confirmations
+	return float64(da.AmountNQT) / 1e8
 }
 
 func (c *SignumApiClient) GetDistributionAmount(logger abstractapi.LoggerI, transaction, account string) (*DistributionAmount, error) {

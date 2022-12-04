@@ -41,6 +41,7 @@ const (
 	RT_CREATE_AT_PROGRAM                 RequestType = "createATProgram"
 	RT_DECRYPT_FROM                      RequestType = "decryptFrom"
 	RT_GET_INDIRECT_INCOMING             RequestType = "getIndirectIncoming"
+	RT_GET_ASSET                         RequestType = "getAsset"
 )
 
 type SignumApiClient struct {
