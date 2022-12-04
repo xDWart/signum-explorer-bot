@@ -6,22 +6,23 @@ import (
 )
 
 const NAME = "<b>🚀 Signum Explorer Bot</b>"
-const VERSION = "<i>v.1.8.4</i>"
+const VERSION = "<i>v.1.8.5</i>"
 
 const (
-	COMMAND_START    = "/start"
-	COMMAND_ADD      = "/add"
-	COMMAND_DEL      = "/del"
-	COMMAND_PRICE    = "/price"
-	COMMAND_CALC     = "/calc"
-	COMMAND_CONVERT  = "/convert"
-	COMMAND_NETWORK  = "/network"
-	COMMAND_CROSSING = "/crossing"
-	COMMAND_FAUCET   = "/faucet"
-	COMMAND_INFO     = "/info"
-	COMMAND_P        = "/p"
-	COMMAND_C        = "/c"
-	COMMAND_PC       = "/pc"
+	COMMAND_START     = "/start"
+	COMMAND_ADD       = "/add"
+	COMMAND_DEL       = "/del"
+	COMMAND_PRICE     = "/price"
+	COMMAND_CALC      = "/calc"
+	COMMAND_CONVERT   = "/convert"
+	COMMAND_NETWORK   = "/network"
+	COMMAND_CROSSING  = "/crossing"
+	COMMAND_FAUCET    = "/faucet"
+	COMMAND_THRESHOLD = "/threshold"
+	COMMAND_INFO      = "/info"
+	COMMAND_P         = "/p"
+	COMMAND_C         = "/c"
+	COMMAND_PC        = "/pc"
 )
 
 const (
@@ -39,6 +40,7 @@ const (
 const INSTRUCTION_TEXT = `
 Send any <b>Signum Account</b> (S-XXXX-XXXX-XXXX-XXXXX or numeric ID) to explore it once.
 Send <b>` + COMMAND_ADD + ` ACCOUNT [ALIAS]</b> to constantly add an account into your main menu and <b>` + COMMAND_DEL + ` [ACCOUNT or ALIAS]</b> to remove it from there.
+Send <b>` + COMMAND_THRESHOLD + ` [AMOUNT of SIGNA]</b> to set a minimum threshold for ignoring notifications.
 Send <b>` + COMMAND_CALC + ` TiB COMMITMENT</b> (or just <b>` + COMMAND_CALC + ` TiB</b>) to calculate your expected mining rewards.
 Send <b>` + COMMAND_PRICE + `</b> to get up-to-date currency quotes.
 Send <b>` + COMMAND_CONVERT + `</b> for currency converter SIGNA / USD / BTC

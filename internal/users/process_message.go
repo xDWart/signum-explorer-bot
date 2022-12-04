@@ -67,6 +67,13 @@ func (user *User) ProcessMessage(message string) *BotMessage {
 		user.ResetState()
 		_, msg := user.sendOrdinaryFaucet(message)
 		return &BotMessage{MainText: msg}
+	case THRESHOLD_STATE:
+		user.ResetState()
+		amount, err := common.ParseNumber(message)
+		if err != nil {
+			return &BotMessage{MainText: err.Error()}
+		}
+		return &BotMessage{MainText: user.setThreshold(amount)}
 	default:
 		botMessage, err := user.getAccountInfoMessage(message)
 		if err != nil {

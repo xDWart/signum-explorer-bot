@@ -1,10 +1,11 @@
 package internal
 
 import (
-	"github.com/xDWart/signum-explorer-bot/internal/config"
-	"github.com/xDWart/signum-explorer-bot/internal/users"
 	"strings"
 	"time"
+
+	"github.com/xDWart/signum-explorer-bot/internal/config"
+	"github.com/xDWart/signum-explorer-bot/internal/users"
 )
 
 func (bot *TelegramBot) startBotListener() {
@@ -70,6 +71,9 @@ func (bot *TelegramBot) startBotListener() {
 				case strings.HasPrefix(message, config.COMMAND_CROSSING):
 					user.ResetState()
 					userAnswer.MainText = user.ProcessCrossing()
+				case strings.HasPrefix(message, config.COMMAND_THRESHOLD):
+					user.ResetState()
+					userAnswer = user.ProcessThreshold(message)
 				case strings.HasPrefix(message, config.COMMAND_INFO) || message == config.BUTTON_INFO:
 					user.ResetState()
 					userAnswer.MainText = config.NAME + " " + config.VERSION + "\n" +

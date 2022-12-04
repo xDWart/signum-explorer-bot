@@ -1,6 +1,9 @@
 package users
 
 import (
+	"sync"
+	"time"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
@@ -10,8 +13,6 @@ import (
 	"github.com/xDWart/signum-explorer-bot/internal/prices"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"sync"
-	"time"
 )
 
 type User struct {
@@ -63,6 +64,7 @@ const (
 	CROSSING_STATE
 	FAUCET_STATE
 	CONVERT_STATE
+	THRESHOLD_STATE
 )
 
 func (user *User) ResetState() {
