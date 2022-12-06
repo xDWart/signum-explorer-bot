@@ -5,7 +5,7 @@ price - Actual currency quotes of SIGNA and BTC
 convert - Currency converter for SIGNA / USD / BTC
 crossing - Check your plots crossing
 network - Show Signum Network statistic
-threshold - Set a minimum threshold for ignoring notifications /threshold [SIGNA]
+threshold - Set a lower threshold for notifications /threshold [SIGNA]
 faucet - Get some free SIGNA
 info - Information about bot
 
