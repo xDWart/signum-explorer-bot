@@ -1,9 +1,10 @@
 package prices
 
 import (
-	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"sync"
 	"time"
+
+	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 )
 
 func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan interface{}) {
@@ -25,10 +26,10 @@ func (pm *PriceManager) startListener(wg *sync.WaitGroup, shutdownChannel chan i
 			return
 
 		case <-ticker.C:
-			prices := pm.cmcClient.GetPrices(pm.logger)
+			prices := pm.geckoClient.GetPrices(pm.logger)
 			samplesForAveraging[sampleIndex] = &models.Price{
-				SignaPrice: prices["SIGNA"].Price,
-				BtcPrice:   prices["BTC"].Price,
+				SignaPrice: prices["SIGNA"].Usd,
+				BtcPrice:   prices["BTC"].Usd,
 			}
 			sampleIndex = (sampleIndex + 1) % pm.config.SmoothingFactor
 			timeToSave = (timeToSave + 1) % pm.config.SaveEveryNSamples

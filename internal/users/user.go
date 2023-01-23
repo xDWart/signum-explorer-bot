@@ -5,7 +5,7 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
+	"github.com/xDWart/signum-explorer-bot/api/geckoapi"
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
@@ -20,7 +20,7 @@ type User struct {
 	sync.Mutex
 	db                  *gorm.DB
 	logger              *zap.SugaredLogger
-	cmcClient           *cmcapi.CmcClient
+	geckoClient         *geckoapi.GeckoClient
 	signumClient        *signumapi.SignumApiClient
 	priceManager        *prices.PriceManager
 	networkInfoListener *networkinfo.NetworkInfoListener

@@ -2,10 +2,11 @@ package users
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/xDWart/signum-explorer-bot/calculator"
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
-	"strings"
 )
 
 func (user *User) ProcessCalc(message string) *BotMessage {
@@ -50,7 +51,7 @@ func (user *User) ProcessCalc(message string) *BotMessage {
 }
 
 func (user *User) calculate(tib, commit float64) string {
-	signaPrice := user.cmcClient.GetPrices(user.logger)["SIGNA"].Price
+	signaPrice := user.geckoClient.GetPrices(user.logger)["SIGNA"].Usd
 	lastMiningInfo := user.networkInfoListener.GetLastMiningInfo()
 
 	if commit > 0 {

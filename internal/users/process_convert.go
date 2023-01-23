@@ -2,9 +2,10 @@ package users
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
-	"strings"
 )
 
 func (user *User) ProcessConvert(message string) *BotMessage {
@@ -38,7 +39,7 @@ func (user *User) ProcessConvert(message string) *BotMessage {
 }
 
 func (user *User) convert(amount float64, currencySelected currencyType) string {
-	prices := user.cmcClient.GetPrices(user.logger)
+	prices := user.geckoClient.GetPrices(user.logger)
 
 	switch currencySelected {
 	case CT_SIGNA:
@@ -46,22 +47,22 @@ func (user *User) convert(amount float64, currencySelected currencyType) string 
 			"\n\t= %v USD"+
 			"\n\t= %v BTC",
 			common.FormatNumber(amount, -1),
-			common.FormatNumber(amount*prices["SIGNA"].Price, 2),
-			common.FormatNumber(amount*prices["SIGNA"].Price/prices["BTC"].Price, 8))
+			common.FormatNumber(amount*prices["SIGNA"].Usd, 2),
+			common.FormatNumber(amount*prices["SIGNA"].Usd/prices["BTC"].Usd, 8))
 	case CT_USD:
 		return fmt.Sprintf("%v USD"+
 			"\n\t= %v SIGNA"+
 			"\n\t= %v BTC",
 			common.FormatNumber(amount, -1),
-			common.FormatNumber(amount/prices["SIGNA"].Price, 0),
-			common.FormatNumber(amount/prices["BTC"].Price, 8))
+			common.FormatNumber(amount/prices["SIGNA"].Usd, 0),
+			common.FormatNumber(amount/prices["BTC"].Usd, 8))
 	case CT_BTC:
 		return fmt.Sprintf("%v BTC"+
 			"\n\t= %v SIGNA"+
 			"\n\t= %v USD",
 			common.FormatNumber(amount, -1),
-			common.FormatNumber(amount*prices["BTC"].Price/prices["SIGNA"].Price, 0),
-			common.FormatNumber(amount*prices["BTC"].Price, 2))
+			common.FormatNumber(amount*prices["BTC"].Usd/prices["SIGNA"].Usd, 0),
+			common.FormatNumber(amount*prices["BTC"].Usd, 2))
 	}
 	return ""
 }

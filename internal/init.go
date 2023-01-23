@@ -8,7 +8,7 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
+	"github.com/xDWart/signum-explorer-bot/api/geckoapi"
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/database"
 	"github.com/xDWart/signum-explorer-bot/internal/networkinfo"
@@ -51,11 +51,9 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 	wg := &sync.WaitGroup{}
 	shutdownChannel := make(chan interface{})
 
-	cmcClient := cmcapi.NewCmcClient(&cmcapi.Config{
-		ApiKey:    os.Getenv("EXPLORER_BOT_CMC_PRO_API_KEY"),
-		Host:      "https://pro-api.coinmarketcap.com/v1",
-		FreeLimit: 200,
-		CacheTtl:  10 * time.Minute,
+	geckoClient := geckoapi.NewGeckoClient(&geckoapi.Config{
+		Host:     "https://api.coingecko.com/api/v3",
+		CacheTtl: 10 * time.Minute,
 	})
 	signumClient := signumapi.NewSignumApiClient(logger, wg, shutdownChannel,
 		&signumapi.Config{
@@ -78,7 +76,7 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 			RebuildApiClientsPeriod:   30 * time.Minute,
 			PreloadNamesForBigWallets: true,
 		})
-	priceManager := prices.NewPricesManager(logger, db, cmcClient, wg, shutdownChannel,
+	priceManager := prices.NewPricesManager(logger, db, geckoClient, wg, shutdownChannel,
 		&prices.Config{
 			SamplePeriod:      20 * time.Minute,
 			SmoothingFactor:   6, // samples for averaging
@@ -107,7 +105,7 @@ func InitTelegramBot(logger *zap.SugaredLogger) *TelegramBot {
 			NotifierPeriod: 3 * time.Minute,
 		})
 
-	userManager := users.InitManager(logger, db, cmcClient, signumClient, priceManager, networkInfoListener, wg, shutdownChannel)
+	userManager := users.InitManager(logger, db, geckoClient, signumClient, priceManager, networkInfoListener, wg, shutdownChannel)
 
 	bot := &TelegramBot{
 		AbstractTelegramBot: &AbstractTelegramBot{

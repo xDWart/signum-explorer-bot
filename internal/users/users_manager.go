@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/xDWart/signum-explorer-bot/api/cmcapi"
+	"github.com/xDWart/signum-explorer-bot/api/geckoapi"
 	"github.com/xDWart/signum-explorer-bot/api/signumapi"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
 	"github.com/xDWart/signum-explorer-bot/internal/networkinfo"
@@ -18,18 +18,18 @@ type Manager struct {
 	logger              *zap.SugaredLogger
 	db                  *gorm.DB
 	users               map[int64]*User
-	cmcClient           *cmcapi.CmcClient
+	geckoClient         *geckoapi.GeckoClient
 	signumClient        *signumapi.SignumApiClient
 	priceManager        *prices.PriceManager
 	networkInfoListener *networkinfo.NetworkInfoListener
 }
 
-func InitManager(logger *zap.SugaredLogger, db *gorm.DB, cmcClient *cmcapi.CmcClient, signumClient *signumapi.SignumApiClient, priceManager *prices.PriceManager, networkInfoListener *networkinfo.NetworkInfoListener, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Manager {
+func InitManager(logger *zap.SugaredLogger, db *gorm.DB, geckoClient *geckoapi.GeckoClient, signumClient *signumapi.SignumApiClient, priceManager *prices.PriceManager, networkInfoListener *networkinfo.NetworkInfoListener, wg *sync.WaitGroup, shutdownChannel chan interface{}) *Manager {
 	return &Manager{
 		db:                  db,
 		logger:              logger,
 		users:               make(map[int64]*User),
-		cmcClient:           cmcClient,
+		geckoClient:         geckoClient,
 		signumClient:        signumClient,
 		priceManager:        priceManager,
 		networkInfoListener: networkInfoListener,
@@ -68,7 +68,7 @@ func (um *Manager) GetUserByChatIdFromUpdate(update *tgbotapi.Update) *User {
 			DbUser:              &dbUser,
 			db:                  um.db,
 			logger:              um.logger,
-			cmcClient:           um.cmcClient,
+			geckoClient:         um.geckoClient,
 			signumClient:        um.signumClient,
 			priceManager:        um.priceManager,
 			networkInfoListener: um.networkInfoListener,

@@ -2,10 +2,11 @@ package users
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/xDWart/signum-explorer-bot/internal/common"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
-	"strings"
 )
 
 func (user *User) tryFoundAccountInMenu(accountS string) (*models.DbAccount, int) {
@@ -46,9 +47,9 @@ func (user *User) getAccountInfoMessage(accountS string) (*BotMessage, error) {
 		}
 	}
 
-	prices := user.cmcClient.GetPrices(user.logger)
-	signaPrice := prices["SIGNA"].Price
-	btcPrice := prices["BTC"].Price
+	prices := user.geckoClient.GetPrices(user.logger)
+	signaPrice := prices["SIGNA"].Usd
+	btcPrice := prices["BTC"].Usd
 
 	var accountName string
 	if account.Name != "" {

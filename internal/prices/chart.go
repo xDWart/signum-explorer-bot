@@ -3,10 +3,11 @@ package prices
 import (
 	"bytes"
 	"fmt"
+	"time"
+
 	"github.com/wcharczuk/go-chart/v2"
 	"github.com/xDWart/signum-explorer-bot/internal/config"
 	"github.com/xDWart/signum-explorer-bot/internal/database/models"
-	"time"
 )
 
 func (pm *PriceManager) GetPriceChart(duration time.Duration) []byte {
@@ -87,8 +88,8 @@ func (pm *PriceManager) GetPriceChart(duration time.Duration) []byte {
 	}
 
 	var annotationColor = chart.ColorGreen
-	actualPrices := pm.cmcClient.GetPrices(pm.logger)
-	if actualPrices["SIGNA"].PercentChange24h < 0 {
+	actualPrices := pm.geckoClient.GetPrices(pm.logger)
+	if actualPrices["SIGNA"].Usd24HChange < 0 {
 		annotationColor = chart.ColorRed
 	}
 
@@ -101,13 +102,13 @@ func (pm *PriceManager) GetPriceChart(duration time.Duration) []byte {
 	}
 
 	signaChartTimeSeries.XValues = append(signaChartTimeSeries.XValues, time.Now())
-	signaChartTimeSeries.YValues = append(signaChartTimeSeries.YValues, actualPrices["SIGNA"].Price*signaMultiplier)
+	signaChartTimeSeries.YValues = append(signaChartTimeSeries.YValues, actualPrices["SIGNA"].Usd*signaMultiplier)
 	btcChartTimeSeries.XValues = append(btcChartTimeSeries.XValues, time.Now())
-	btcChartTimeSeries.YValues = append(btcChartTimeSeries.YValues, actualPrices["BTC"].Price)
+	btcChartTimeSeries.YValues = append(btcChartTimeSeries.YValues, actualPrices["BTC"].Usd)
 	annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{
 		XValue: chart.TimeToFloat64(time.Now()),
-		YValue: actualPrices["SIGNA"].Price * signaMultiplier,
-		Label:  fmt.Sprintf("%.2f", actualPrices["SIGNA"].Price*signaMultiplier),
+		YValue: actualPrices["SIGNA"].Usd * signaMultiplier,
+		Label:  fmt.Sprintf("%.2f", actualPrices["SIGNA"].Usd*signaMultiplier),
 		Style:  chart.Style{StrokeColor: annotationColor}})
 	//annotationSeries.Annotations = append(annotationSeries.Annotations, chart.Value2{
 	//	XValue: chart.TimeToFloat64(time.Now()),
